@@ -1,0 +1,79 @@
+OpenCore Engine Custom License
+版权所有 © 2026 OpenCore Contributors
+All Rights Reserved.
+
+========================================================================
+1. 概述 | Overview
+========================================================================
+
+本协议适用于 OpenCore Engine 项目（以下简称"本项目"）的所有源代码、
+文档、资源文件及相关内容。
+
+This license applies to all source code, documentation, resource files,
+and related content of the OpenCore Engine project (hereinafter referred
+to as "this Project").
+
+========================================================================
+2. 授予的权利 | Granted Rights
+========================================================================
+
+2.1 学习与参考 | Learning and Reference
+任何人可以查看、下载本项目的源代码，用于个人学习、研究或非商业用途。
+Anyone may view and download the source code of this Project for personal
+learning, research, or non-commercial purposes.
+
+2.2 非商业分发 | Non-Commercial Distribution
+允许在注明原作者及本项目出处的前提下，以非商业目的复制和分发源代码
+（需保留本协议完整副本）。
+Copying and distribution of the source code for non-commercial purposes
+is permitted, provided that the original authors and this Project are
+credited and a copy of this license is included.
+
+========================================================================
+3. 限制 | Restrictions
+========================================================================
+
+3.1 商业使用 | Commercial Use
+未经本项目作者的**明确书面许可**，禁止将本项目或其修改版本用于任何
+商业用途，包括但不限于：
+- 将本项目或其修改版本作为商业产品或服务的一部分进行销售或分发；
+- 将本项目或其修改版本用于商业项目、企业内部系统或盈利性活动；
+- 以任何形式直接或间接通过本项目获取商业利益。
+
+Any commercial use of this Project or its modified versions is **strictly
+prohibited without explicit written permission** from the authors,
+including but not limited to:
+- Selling or distributing this Project or its derivatives as part of a
+  commercial product or service;
+- Using this Project or its derivatives in commercial projects, internal
+  business systems, or for-profit activities;
+- Obtaining commercial benefits from this Project, directly or indirectly.
+
+3.2 修改与衍生 | Modification and Derivatives
+允许对源代码进行修改以用于非商业目的。修改后的衍生作品同样受本协议
+约束，商用仍需获得授权。
+Modification of the source code for non-commercial purposes is permitted.
+Derivative works are also bound by this license; commercial use still
+requires authorization.
+
+3.3 免责声明 | Disclaimer
+本程序按"原样"提供，不提供任何明示或暗示的保证，包括但不限于适销性、
+特定用途适用性和非侵权性的保证。作者在任何情况下均不对因使用本程序
+而产生的任何索赔、损害或其他责任负责。
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.
+
+========================================================================
+4. 商业授权联系 | Commercial License Contact
+========================================================================
+
+如需商业授权，请联系项目作者：
+For commercial licensing, please contact the project authors:
+
+- 花明 (Huaming):   https://github.com/naikekongwo
+- 烛常 (Zhuchang):  https://github.com/shalltyzhuchang
+- 罔极 / Brid-ht:   https://github.com/brid-ht
