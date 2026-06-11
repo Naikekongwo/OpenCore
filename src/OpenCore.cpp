@@ -1,0 +1,246 @@
+// OpenCore.cpp
+// OpenCore 的具体实现
+
+#include "OpenCore/OpenCore.hpp"
+
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_gamecontroller.h>
+#include <memory>
+
+#include "OpenCore/Core/Event/ControllerManager.hpp"
+
+// 单例
+OpenEngine &OpenEngine::getInstance()
+{
+    static OpenEngine instance;
+    return instance;
+}
+
+bool OpenEngine::Run()
+{
+    // 初始化函数
+    if (!Initialize())
+    {
+        return false;
+    }
+
+    // 主循环
+    if (!MainLoop())
+    {
+        return false;
+    }
+
+    // 生命周期结束
+    if (!CleanUp())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool OpenEngine::Initialize()
+{
+    // 引用引擎所有管理类的命名空间
+    using namespace OpenCoreManagers;
+    using namespace Gameplay;
+
+    // 初始化实体注册器
+    (void)EntityReg;
+
+    // 创建设置管理器
+    (void)SetManager;
+
+    // 创建 GFX 实例
+    (void)GFXManager;
+    // 创建事件管理器实例
+    (void)EvtManager;
+    // 创建线程管理器实例
+    (void)ThrManager;
+    // 创建资源管理器实例
+    (void)ResManager;
+    // 创建纹理元管理器
+    (void)TexMetaManager;
+    // 创建音效管理器实例
+    (void)SFXManager;
+    // 创建场景控制器实例
+    sController = std::make_unique<StageManager>();
+    // 创建计时器实例
+    timer = std::make_unique<Timer>(GAME_FRAMERATE);
+
+    // 初始化物品管理器
+    (void)ItemMgr;
+
+    // 初始化 GFX 实例 (若失败直接退出)
+    if (!GFXManager.Init())
+        return false;
+    // 初始化手柄管理器（枚举已连接的手柄）
+    ControllerManager::GetInstance().Init();
+    // 初始化线程管理器
+    ThrManager.start(2, 8);
+    // 初始化资源管理器(其初始化时需要renderer，所以必须在GFX之后初始化)
+    ResManager.Init();
+    // 初始化音效管理器
+    SFXManager.Init(&ResManager);
+
+    // 初始化WorldController
+    ServerWorldController = std::make_unique<WorldController>();
+
+    return true;
+    // 初始化成功
+}
+
+bool OpenEngine::MainLoop()
+{
+    using namespace OpenCoreManagers;
+
+    bool should_close = false;
+    bool isMinimized = false;
+    bool hasFocus = true;
+    bool needsTitleUpdate = true;
+    Event event;
+
+    SetManager.RefreshSettings();
+
+    sController->changeStage(std::move(gameInfo->entranceStage));
+
+    ServerWorldController->onEnter();
+
+    while (!should_close)
+    {
+#pragma region 事件处理
+        while (EvtManager.PollEvent(event))
+        {
+            // 缓存 SDL_Event 引用，避免多次调用 GetSDLEvent()
+            const SDL_Event &sdlEvent = event.GetSDLEvent();
+
+            switch (sdlEvent.type)
+            {
+            case SDL_QUIT:
+                should_close = true;
+                break;
+            case SDL_KEYDOWN:
+                if (sdlEvent.key.keysym.sym == SDLK_F11)
+                {
+                    Uint32 flags = SDL_GetWindowFlags(GFXManager.getWindow());
+                    if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                    {
+                        SDL_SetWindowFullscreen(GFXManager.getWindow(), 0);
+                    }
+                    else
+                    {
+                        SDL_SetWindowFullscreen(GFXManager.getWindow(),
+                                                SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    }
+                }
+                break;
+            case SDL_WINDOWEVENT:
+                switch (sdlEvent.window.event)
+                {
+                case SDL_WINDOWEVENT_RESIZED:
+                case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    needsTitleUpdate = true;
+                    break;
+                case SDL_WINDOWEVENT_MINIMIZED:
+                    isMinimized = true;
+                    break;
+                case SDL_WINDOWEVENT_RESTORED:
+                    isMinimized = false;
+                    break;
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                    hasFocus = false;
+                    break;
+                case SDL_WINDOWEVENT_FOCUS_GAINED:
+                    hasFocus = true;
+                    break;
+                default:
+                    break;
+                }
+                break;
+            default:
+                break;
+            }
+
+            // 将手柄事件交给 ControllerManager
+            // 处理（打开/关闭手柄、记录按键状态）
+            ControllerManager::GetInstance().HandleEvent(sdlEvent);
+
+            // handlEvents 需要可变指针，从 const ref 拷贝一份
+            SDL_Event evtCopy = sdlEvent;
+            sController->handlEvents(&evtCopy);
+        }
+#pragma endregion
+
+#pragma region 帧更新
+        EvtManager.EndFrame();
+
+        timer->Tick();
+        ResManager.ProcessMainThreadTasks();
+
+        sController->onUpdate();
+#pragma endregion
+
+#pragma region 渲染
+        // 只在需要时更新窗口属性（如窗口尺寸变化），避免每帧字符串拼接
+        if (needsTitleUpdate)
+        {
+            GFXManager.refreshWindowProperties();
+            needsTitleUpdate = false;
+        }
+
+        if (!isMinimized)
+        {
+            SDL_Renderer *renderer = GFXManager.getRenderer();
+            SDL_RenderClear(renderer);
+            sController->onRender();
+            SDL_RenderPresent(renderer);
+        }
+#pragma endregion
+
+#pragma region 帧率控制
+        ServerWorldController->onUpdate(timer->getTotalTime());
+
+        // 失去焦点时帧率降至 1/3
+        float frameDelay = timer->getDelayTime();
+        if (!hasFocus)
+            frameDelay *= 3.0f;
+        SDL_Delay(static_cast<Uint32>(frameDelay * 1000.0f));
+#pragma endregion
+    }
+
+    return true;
+}
+
+bool OpenEngine::CleanUp()
+{
+    using namespace OpenCoreManagers;
+
+    sController.reset();
+    timer.reset();
+
+    ControllerManager::GetInstance().Shutdown();
+    SFXManager.CleanUp();
+    ResManager.CleanUp();
+    ThrManager.shutdown();
+    GFXManager.CleanUp();
+
+    return true;
+}
+
+bool OpenEngine::GameRegistry(unique_ptr<GameInfo> gameInfo)
+{
+    if (!gameInfo->entranceStage)
+    {
+        // 空入口
+        LOG("游戏信息中未进行入口场景的注册！");
+        return false;
+    }
+
+    LOG("游戏名称: {} , 版本 {}.{}, 已经成功的注册到引擎中",
+        gameInfo->gameName.c_str(), gameInfo->version_major,
+        gameInfo->version_minor);
+
+    this->gameInfo = std::move(gameInfo);
+
+    return true;
+}
