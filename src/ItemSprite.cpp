@@ -1,6 +1,6 @@
-#include "OpenCore/Runtime/Graphics/Sprite/ItemSprite.hpp"
+#include "Runtime/Graphics/Sprite/ItemSprite.hpp"
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <memory>
 
 ItemSprite::ItemSprite()

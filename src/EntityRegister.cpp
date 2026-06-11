@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <memory>
 
 bool EntityRegister::registerEntity(const EntityInfo &eInfo)

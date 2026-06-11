@@ -1,11 +1,11 @@
-#include "OpenCore/Runtime/Graphics/UI/ItemContainer.hpp"
+#include "Runtime/Graphics/UI/ItemContainer.hpp"
 
-#include "OpenCore/Core/Math/OpenCore_Rect.hpp"
-#include "OpenCore/OpenCore.hpp"
-#include "OpenCore/Runtime/Animation/IAnimation.hpp"
-#include "OpenCore/Runtime/Gameplay/Backpack/Backpack.hpp"
-#include "OpenCore/Runtime/Gameplay/Backpack/ItemManager.hpp"
-#include "OpenCore/Runtime/Graphics/Sprite/ItemSprite.hpp"
+#include "Core/Math/OpenCore_Rect.hpp"
+#include "OpenCore.hpp"
+#include "Runtime/Animation/IAnimation.hpp"
+#include "Runtime/Gameplay/Backpack/Backpack.hpp"
+#include "Runtime/Gameplay/Backpack/ItemManager.hpp"
+#include "Runtime/Graphics/Sprite/ItemSprite.hpp"
 #include <cstdint>
 #include <optional>
 #include <stdexcept>

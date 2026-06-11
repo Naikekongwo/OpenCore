@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 FrameCounter::FrameCounter(const std::string &id, uint8_t layer,
                            Texture *texture)

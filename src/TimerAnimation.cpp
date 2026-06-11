@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 TimerAnimation::TimerAnimation(float duration)
 {

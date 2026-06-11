@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 void TextureDeleter::operator()(SDL_Texture *texture) const
 {

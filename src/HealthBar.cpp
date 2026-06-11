@@ -1,5 +1,5 @@
-#include "OpenCore/Runtime/Graphics/Sprite/HealthBar.hpp"
-#include "OpenCore/OpenCore.hpp"
+#include "Runtime/Graphics/Sprite/HealthBar.hpp"
+#include "OpenCore.hpp"
 #include <cmath>
 #include <memory>
 

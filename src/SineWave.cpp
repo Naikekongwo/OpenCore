@@ -1,4 +1,4 @@
-#include "OpenCore/Core/Math/SineWave.hpp"
+#include "Core/Math/SineWave.hpp"
 #include <cmath>
 
 SineWave::SineWave(float A, float wL, float fre, float pha, float vX, float vY)

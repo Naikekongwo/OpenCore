@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <memory>
 
 Scrollbar::Scrollbar(const string &id, short layer, short backTexID,
@@ -20,12 +20,11 @@ void Scrollbar::onEnter()
 {
     if (status == ScrollStatus::Creating)
     {
-        
+
         baseBack =
             UI<BaseBackground>("background", 1, backgroundTexture, NULL, NULL);
         slideBar = UI<ImageBoard>("slideimg", 1, buttonTexture, 1, 1);
 
-        
         slideBar->Configure()
             .Anchor(AnchorPoint::Center)
             .Parent(this)
@@ -74,13 +73,13 @@ void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
 {
     if (baseBack)
         baseBack->handlEvents(event, totalTime);
-    
+
     SDL_Point mousePos{};
     SDL_Rect bounds = getPhysicalBounds();
 
     switch (event.type)
     {
-        
+
     case SDL_MOUSEMOTION:
     {
         mousePos = {event.motion.x, event.motion.y};
@@ -90,7 +89,7 @@ void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
         }
 
         if (status == ScrollStatus::Following)
-       
+
         {
             *value = (mousePos.x - bounds.x) / static_cast<float>(bounds.w);
             UpdateBar();
@@ -105,7 +104,7 @@ void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
 
             if (SDL_PointInRect(&mousePos, &bounds))
             {
-                
+
                 status = ScrollStatus::Following;
             }
         }

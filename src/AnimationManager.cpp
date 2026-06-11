@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <algorithm>
 
 void AnimationManager::onUpdate(float totalTime, VisualState &state)

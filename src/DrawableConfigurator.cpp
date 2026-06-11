@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 DrawableConfigurator &DrawableConfigurator::Scale(float w, float h)
 {

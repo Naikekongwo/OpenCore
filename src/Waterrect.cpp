@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <algorithm>
 
 Waterrect::Waterrect(const string &id, short layer, unique_ptr<Texture> texture)

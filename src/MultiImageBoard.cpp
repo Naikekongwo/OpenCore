@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 bool MultiImageBoard::onDestroy()
 {

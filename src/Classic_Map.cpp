@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 // 地图的入口/又称加载的函数,其返回值代表是否初始化成功
 bool ClassicMap::onEnter()

@@ -1,16 +1,22 @@
-#include "OpenCore/Runtime/Graphics/IDrawableObject/Texture.hpp"
-#include "OpenCore/OpenCore.hpp"
+#include "Runtime/Graphics/IDrawableObject/Texture.hpp"
+#include "OpenCore.hpp"
 #include <memory>
 
 Texture::Texture(size_t x, size_t y, shared_ptr<SDL_Texture> tex)
     : xCount(x), yCount(y), texture(tex)
 {
-    int W, H;
+    int W = 1, H = 1;
 
     if (!texture)
+    {
         LOG("Texture::Texture() encountered empty texture in the "
-            "initialization.");
+            "initialization, using fallback size.");
+        width = static_cast<uint16_t>(W);
+        height = static_cast<uint16_t>(H);
+        return;
+    }
 
+    SDL_SetTextureBlendMode(texture.get(), SDL_BLENDMODE_BLEND);
     SDL_QueryTexture(texture.get(), NULL, NULL, &W, &H);
 
     width = static_cast<uint16_t>(W);
@@ -140,13 +146,12 @@ Rect Texture::getSubRect(size_t startIndex, uint8_t cols, uint8_t rows)
 
     if (row + rows > yCount)
     {
-        LOG("Texture::getSubRect() rows exceed texture rows: {} + {} > {}",
-            row, rows, yCount);
+        LOG("Texture::getSubRect() rows exceed texture rows: {} + {} > {}", row,
+            rows, yCount);
         rows = yCount - row;
     }
 
-    return Rect{static_cast<float>(col * width),
-                static_cast<float>(row * height),
-                static_cast<float>(cols * width),
-                static_cast<float>(rows * height)};
+    return Rect{
+        static_cast<float>(col * width), static_cast<float>(row * height),
+        static_cast<float>(cols * width), static_cast<float>(rows * height)};
 }

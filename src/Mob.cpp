@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <memory>
 
 Mob::Mob(short TextureID, uint8_t gridCols, uint8_t gridRows)
@@ -46,7 +46,8 @@ void Mob::Draw()
 
             Rect srcRect =
                 (tileWidth > 1 || tileHeight > 1)
-                    ? texture->getSubRect(VState->getFrameIndex(), tileWidth, tileHeight)
+                    ? texture->getSubRect(VState->getFrameIndex(), tileWidth,
+                                          tileHeight)
                     : Rect{texture->getSubRect(VState->getFrameIndex())};
             GFX.Draw(texture->get(), &srcRect, &dstRect, 0.0f, nullptr);
         }

@@ -1,8 +1,8 @@
-#include "OpenCore/Runtime/Gameplay/Backpack/Item.hpp"
-#include "OpenCore/Core/Math/OpenCore_Vec3.hpp"
-#include "OpenCore/OpenCore.hpp"
-#include "OpenCore/Runtime/Gameplay/Entity/Entity.hpp"
-#include "OpenCore/Runtime/Graphics/Sprite/ItemSprite.hpp"
+#include "Runtime/Gameplay/Backpack/Item.hpp"
+#include "Core/Math/OpenCore_Vec3.hpp"
+#include "OpenCore.hpp"
+#include "Runtime/Gameplay/Entity/Entity.hpp"
+#include "Runtime/Graphics/Sprite/ItemSprite.hpp"
 #include <cmath>
 
 Item::Item(const ItemInfo &itemInfo)

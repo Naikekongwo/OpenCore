@@ -1,8 +1,8 @@
 
-#include "OpenCore/OpenCore.hpp"
-#include "OpenCore/Runtime/Animation/AnimationPipeline.hpp"
+#include "OpenCore.hpp"
+#include "Runtime/Animation/AnimationPipeline.hpp"
 
-#include "OpenCore/Core/Math/OpenCore_Rect.hpp"
+#include "Core/Math/OpenCore_Rect.hpp"
 
 Button::Button(const std::string &id, uint8_t layer,
                unique_ptr<Texture> texture)

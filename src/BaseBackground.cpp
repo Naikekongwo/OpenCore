@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
 #include <cstddef>

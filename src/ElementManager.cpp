@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <algorithm>
 
 IDrawableObject *ElementManager::find(const std::string &id) const

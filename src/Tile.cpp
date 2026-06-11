@@ -1,5 +1,5 @@
-#include "OpenCore/OpenCore.hpp"
-#include "OpenCore/Runtime/Graphics/IDrawableObject/Texture.hpp"
+#include "OpenCore.hpp"
+#include "Runtime/Graphics/IDrawableObject/Texture.hpp"
 #include <memory>
 
 Tile::Tile()

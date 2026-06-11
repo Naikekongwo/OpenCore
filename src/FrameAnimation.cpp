@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 FrameAnimation::FrameAnimation(uint8_t totalFrames, uint8_t FPS, bool isLooping)
 {

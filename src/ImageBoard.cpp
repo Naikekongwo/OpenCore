@@ -1,7 +1,7 @@
 
-#include "OpenCore/Runtime/Graphics/UI/ImageBoard.hpp"
-#include "OpenCore/OpenCore.hpp"
-#include "OpenCore/Runtime/Animation/AnimationPipeline.hpp"
+#include "Runtime/Graphics/UI/ImageBoard.hpp"
+#include "OpenCore.hpp"
+#include "Runtime/Animation/AnimationPipeline.hpp"
 
 ImageBoard::ImageBoard(const std::string &id, uint8_t layer,
                        unique_ptr<Texture> texture)

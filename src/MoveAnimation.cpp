@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 // 构造函数实现
 MoveAnimation::MoveAnimation(int16_t startX, int16_t startY, int16_t endX,

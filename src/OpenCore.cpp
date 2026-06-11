@@ -1,13 +1,13 @@
 // OpenCore.cpp
 // OpenCore 的具体实现
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_gamecontroller.h>
 #include <memory>
 
-#include "OpenCore/Core/Event/ControllerManager.hpp"
+#include "Core/Event/ControllerManager.hpp"
 
 // 单例
 OpenEngine &OpenEngine::getInstance()

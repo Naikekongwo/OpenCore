@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <string>
 
 bool Stage::transferElementFrom(Stage *srcStage, const std::string &id)

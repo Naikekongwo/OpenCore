@@ -1,5 +1,5 @@
-#include "OpenCore/Runtime/Graphics/Manager/TextureMeta.hpp"
-#include "OpenCore/OpenCore.hpp"
+#include "Runtime/Graphics/Manager/TextureMeta.hpp"
+#include "OpenCore.hpp"
 #include <memory>
 #include <optional>
 

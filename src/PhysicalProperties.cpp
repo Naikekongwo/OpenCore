@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <cmath>
 
 std::vector<std::pair<int, int>> PhysicalProperties::getOccupiedTiles() const
@@ -20,8 +20,10 @@ std::vector<std::pair<int, int>> PhysicalProperties::getOccupiedTiles() const
 
     if (tileWidth > 1 || tileHeight > 1)
     {
-        LOG("[getOccupiedTiles] pos({:.2f},{:.2f}) tw={} th={} effH={} scale={:.2f} halfW={} baseX={} baseY={} -> {} tiles",
-            Position.x, Position.y, tileWidth, tileHeight, effH, collisionHeightScale, halfW, baseX, baseY, tiles.size());
+        LOG("[getOccupiedTiles] pos({:.2f},{:.2f}) tw={} th={} effH={} "
+            "scale={:.2f} halfW={} baseX={} baseY={} -> {} tiles",
+            Position.x, Position.y, tileWidth, tileHeight, effH,
+            collisionHeightScale, halfW, baseX, baseY, tiles.size());
     }
 
     return tiles;
@@ -30,15 +32,19 @@ std::vector<std::pair<int, int>> PhysicalProperties::getOccupiedTiles() const
 void PhysicalProperties::onUpdate(float totalTime)
 {
     float deltaTime = totalTime - lastTime;
-    if (deltaTime <= 0.0f) {
+    if (deltaTime <= 0.0f)
+    {
         lastTime = totalTime;
         return;
     }
-    if (deltaTime > 0.1f) deltaTime = 0.1f; // 防止长时间暂停后物理爆炸
+    if (deltaTime > 0.1f)
+        deltaTime = 0.1f; // 防止长时间暂停后物理爆炸
 
     // 逐轴独立处理：有输入 → 加速，无输入 → 平滑靠拢整数坐标
-    auto processAxis = [&](float &speed, float &pos, float desired) {
-        if (desired != 0.0f) {
+    auto processAxis = [&](float &speed, float &pos, float desired)
+    {
+        if (desired != 0.0f)
+        {
             // ---- 加速到目标速度 ----
             float diff = desired - speed;
             float ideal = accelGain * diff;
@@ -50,12 +56,15 @@ void PhysicalProperties::onUpdate(float totalTime)
                 delta = std::max(delta, diff);
             speed += delta;
             pos += speed * deltaTime;
-        } else if (speed != 0.0f) {
+        }
+        else if (speed != 0.0f)
+        {
             // ---- 平滑靠拢到运动方向上的整数坐标 ----
             float target = (speed > 0.0f) ? std::ceil(pos) : std::floor(pos);
             float remaining = target - pos;
 
-            if (std::abs(remaining) < 0.001f) {
+            if (std::abs(remaining) < 0.001f)
+            {
                 pos = target;
                 speed = 0.0f;
                 return;
@@ -63,7 +72,8 @@ void PhysicalProperties::onUpdate(float totalTime)
 
             // a = -v² / (2d) : 恰好停在 target 所需的恒定加速度
             float required = -(speed * speed) / (2.0f * remaining);
-            float accel = std::clamp(required, -stopSmoothFactor, stopSmoothFactor);
+            float accel =
+                std::clamp(required, -stopSmoothFactor, stopSmoothFactor);
 
             float prevSpeed = speed;
             speed += accel * deltaTime;
@@ -77,7 +87,8 @@ void PhysicalProperties::onUpdate(float totalTime)
 
             // 防止离散积分导致的位置越过目标
             if ((prevSpeed > 0.0f && pos > target) ||
-                (prevSpeed < 0.0f && pos < target)) {
+                (prevSpeed < 0.0f && pos < target))
+            {
                 pos = target;
                 speed = 0.0f;
             }
@@ -91,10 +102,14 @@ void PhysicalProperties::onUpdate(float totalTime)
     parseVerticalMovement(Speed.z, Position.z, deltaTime);
 
     // 更新朝向
-    if (Speed.x > 0.1f) direction = Direction::Right;
-    else if (Speed.x < -0.1f) direction = Direction::Left;
-    else if (Speed.y > 0.1f) direction = Direction::Down;
-    else if (Speed.y < -0.1f) direction = Direction::Up;
+    if (Speed.x > 0.1f)
+        direction = Direction::Right;
+    else if (Speed.x < -0.1f)
+        direction = Direction::Left;
+    else if (Speed.y > 0.1f)
+        direction = Direction::Down;
+    else if (Speed.y < -0.1f)
+        direction = Direction::Up;
 
     lastTime = totalTime;
 }
@@ -152,4 +167,3 @@ void PhysicalProperties::parseVerticalMovement(float &Speed, float &Pos,
         Pos = 0.0f;
     }
 }
-

@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 // 构造函数实现
 ScaleAnimation::ScaleAnimation(float startScale, float endScale, float duration,

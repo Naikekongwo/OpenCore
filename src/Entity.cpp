@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <SDL2/SDL_ttf.h>
 #include <memory>
 

@@ -1,6 +1,6 @@
 
-#include "OpenCore/Runtime/Graphics/IDrawableObject/IDrawableObject.hpp"
-#include "OpenCore/OpenCore.hpp"
+#include "Runtime/Graphics/IDrawableObject/IDrawableObject.hpp"
+#include "OpenCore.hpp"
 #include <cstdint>
 #include <optional>
 

@@ -1,7 +1,7 @@
-#include "OpenCore/Runtime/Gameplay/Backpack/ItemManager.hpp"
-#include "OpenCore/OpenCore.hpp"                           // LOG 宏等
-#include "OpenCore/Runtime/Gameplay/Backpack/Backpack.hpp" // 需要 Backpack 的完整定义以调用 pushItem
-#include "OpenCore/Runtime/Gameplay/Entity/Entity.hpp" // Entity 前向声明或完整定义
+#include "Runtime/Gameplay/Backpack/ItemManager.hpp"
+#include "OpenCore.hpp"                           // LOG 宏等
+#include "Runtime/Gameplay/Backpack/Backpack.hpp" // 需要 Backpack 的完整定义以调用 pushItem
+#include "Runtime/Gameplay/Entity/Entity.hpp" // Entity 前向声明或完整定义
 #include <optional>
 
 uint8_t ItemManager::getMaxStackSize(short typeID) const

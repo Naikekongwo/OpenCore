@@ -1,8 +1,8 @@
-#include "OpenCore/Asset/ResourceManager.hpp"
-#include "OpenCore/Core/Helpers/Debugger.hpp"
-#include "OpenCore/OpenCore.hpp"
-#include "OpenCore/Runtime/Animation/IAnimation.hpp"
-#include "OpenCore/Runtime/Graphics/IDrawableObject/Texture.hpp"
+#include "Asset/ResourceManager.hpp"
+#include "Core/Helpers/Debugger.hpp"
+#include "OpenCore.hpp"
+#include "Runtime/Animation/IAnimation.hpp"
+#include "Runtime/Graphics/IDrawableObject/Texture.hpp"
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_ttf.h>

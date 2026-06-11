@@ -1,8 +1,8 @@
 // GfxCoe.cpp
 // 负责 GFX_CORE 的方法实现
 
-#include "OpenCore/OpenCore.hpp"
-#include <SDL2/SDL_log.h>
+#include "OpenCore.hpp"
+#include <SDL2/SDL_Log.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>

@@ -1,6 +1,6 @@
-#include "OpenCore/OpenCore.hpp"
-#include "OpenCore/Runtime/Graphics/Manager/ElementManager.hpp"
-#include "OpenCore/World/Stage/Stage.hpp"
+#include "OpenCore.hpp"
+#include "Runtime/Graphics/Manager/ElementManager.hpp"
+#include "World/Stage/Stage.hpp"
 
 bool ScriptStage::handlEvents(SDL_Event *event)
 {

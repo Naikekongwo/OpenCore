@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <cstddef>
 
 void StageManager::changeStage(unique_ptr<Stage> newStage)

@@ -1,4 +1,4 @@
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 
 void SoundDeleter::operator()(Mix_Music *music) const
 {

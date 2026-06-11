@@ -1,5 +1,5 @@
-#include "OpenCore/Runtime/Gameplay/Backpack/Backpack.hpp"
-#include "OpenCore/OpenCore.hpp"
+#include "Runtime/Gameplay/Backpack/Backpack.hpp"
+#include "OpenCore.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <optional>

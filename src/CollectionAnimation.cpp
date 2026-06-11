@@ -1,5 +1,5 @@
 
-#include "OpenCore/OpenCore.hpp"
+#include "OpenCore.hpp"
 #include <memory>
 
 CollectionAnimation::CollectionAnimation(AnimationPipeline *parentPipeline,

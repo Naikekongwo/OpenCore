@@ -1,9 +1,9 @@
-#include "OpenCore/Runtime/Graphics/UI/Symbol.hpp"
-#include "OpenCore/OpenCore.hpp"
-#include "OpenCore/Runtime/Animation/IAnimation.hpp"
-#include "OpenCore/Runtime/Animation/Manager/AnimationManager.hpp"
-#include "OpenCore/Runtime/Graphics/IDrawableObject/IDrawableObject.hpp"
-#include "OpenCore/Runtime/Graphics/IDrawableObject/UIElement.hpp"
+#include "Runtime/Graphics/UI/Symbol.hpp"
+#include "OpenCore.hpp"
+#include "Runtime/Animation/IAnimation.hpp"
+#include "Runtime/Animation/Manager/AnimationManager.hpp"
+#include "Runtime/Graphics/IDrawableObject/IDrawableObject.hpp"
+#include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 #include <SDL2/SDL_render.h>
 
 Symbol::Symbol(std::string_view id, short layer, short texMetaID)
