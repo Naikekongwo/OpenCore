@@ -13,8 +13,6 @@
 
 using std::string;
 
-class ItemContainer;
-
 /**
  * @enum BaseBackgroundStatus
  * @brief 背景资源准备状态。

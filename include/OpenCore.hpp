@@ -12,18 +12,16 @@
 #ifndef _OPENCORE_H_
 #define _OPENCORE_H_
 
-#include "Runtime/Gameplay/Entity/EntityRegister.hpp"
 enum DebugFlags
 {
     DEBUG_OFF = 0,
     DEBUG_WATERWAVE = 1 << 0,  // 0x01
-    DEBUG_MAP = 1 << 1,        // 0x02
-    DEBUG_MAIN = 1 << 2,       // 0x04
-    DEBUG_PASS_VIDEO = 1 << 3, // 0x08
-    DEBUG_COPYRIGHT = 1 << 4
+    DEBUG_MAIN = 1 << 1,       // 0x02
+    DEBUG_PASS_VIDEO = 1 << 2, // 0x04
+    DEBUG_COPYRIGHT = 1 << 3
 };
 
-constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN | DEBUG_MAP;
+constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN;
 
 #include "Core/Macros.hpp"
 #include "Core/Timer.hpp"
@@ -35,8 +33,6 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN | DEBUG_MAP;
 #include "Core/Math/OpenCore_Wave.hpp"
 
 #include "Runtime/Config/SettingsManager.hpp"
-#include "Runtime/Gameplay/Entity/EntityRegister.hpp"
-#include "Runtime/Gameplay/WorldController/WorldController.hpp"
 #include "Runtime/Graphics/Manager/GraphicsManager.hpp"
 #include "Runtime/Graphics/Manager/TextureMeta.hpp"
 
@@ -46,7 +42,6 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN | DEBUG_MAP;
 
 #include "Core/Thread/ThreadManager.hpp"
 #include "World/Helpers/SequentialPipeline.hpp"
-#include "World/Map/Manager/MapManager.hpp"
 
 /**
  * @brief 负责内核部分的单例管理器类
@@ -63,15 +58,6 @@ inline SettingsManager &SetManager = SettingsManager::getInstance();
 inline TextureMetaManager &TexMetaManager = TextureMetaManager::getInstance();
 } // namespace OpenCoreManagers
 
-/**
- * @brief 游戏运行时的其他控制类
- *
- */
-namespace Gameplay
-{
-inline EntityRegister &EntityReg = EntityRegister::getInstance();
-inline ItemManager &ItemMgr = ItemManager::getInstance();
-} // namespace Gameplay
 #include "Runtime/Animation/AnimationPipeline.hpp"
 #include "Runtime/Animation/Manager/AnimationManager.hpp"
 #include "Runtime/Graphics/Configurator/DrawableConfigurator.hpp"
@@ -131,22 +117,11 @@ class OpenEngine final
     }
 
     GameInfo *getGameInfo() { return gameInfo.get(); }
-    EntityRegister &getEntityRegister() { return Gameplay::EntityReg; }
-    WorldController *getServerWorldController()
-    {
-        return ServerWorldController.get();
-    }
 
   private:
     unique_ptr<GameInfo> gameInfo = std::make_unique<GameInfo>();
     unique_ptr<StageManager> sController;
     unique_ptr<Timer> timer;
-
-    /**
-     * @brief 本地游戏世界控制器
-     *
-     */
-    unique_ptr<WorldController> ServerWorldController;
 };
 
 #endif //_OPENCORE_H_

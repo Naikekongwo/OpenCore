@@ -19,17 +19,10 @@
 #include "Runtime/Graphics/UI/CheckBox.hpp"
 #include "Runtime/Graphics/UI/FrameCounter.hpp"
 #include "Runtime/Graphics/UI/ImageBoard.hpp"
-#include "Runtime/Graphics/UI/ItemContainer.hpp"
-#include "Runtime/Graphics/UI/MultiImageBoard.hpp"
 #include "Runtime/Graphics/UI/Scrollbar.hpp"
 #include "Runtime/Graphics/UI/Symbol.hpp"
 #include "Runtime/Graphics/UI/TextArea.hpp"
 #include "Runtime/Graphics/UI/TypeWriter.hpp"
-
-#include "Runtime/Graphics/Sprite/HealthBar.hpp"
-#include "Runtime/Graphics/Sprite/ItemSprite.hpp"
-#include "Runtime/Graphics/Sprite/Tile.h"
-#include "Runtime/Graphics/Sprite/Waterrect.hpp"
 
 #include "Runtime/Animation/Manager/AnimationManager.hpp"
 #include "Runtime/Graphics/IDrawableObject/Sprite.hpp"

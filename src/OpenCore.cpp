@@ -43,10 +43,6 @@ bool OpenEngine::Initialize()
 {
     // 引用引擎所有管理类的命名空间
     using namespace OpenCoreManagers;
-    using namespace Gameplay;
-
-    // 初始化实体注册器
-    (void)EntityReg;
 
     // 创建设置管理器
     (void)SetManager;
@@ -66,9 +62,6 @@ bool OpenEngine::Initialize()
     // 创建计时器实例
     timer = std::make_unique<Timer>(GAME_FRAMERATE);
 
-    // 初始化物品管理器
-    (void)ItemMgr;
-
     // 初始化 GFX 实例 (若失败直接退出)
     if (!GFXManager.Init())
         return false;
@@ -78,8 +71,6 @@ bool OpenEngine::Initialize()
     ThrManager.start(2, 8);
     // 初始化资源管理器(其初始化时需要renderer，所以必须在GFX之后初始化)
     ResManager.Init();
-    // 初始化WorldController
-    ServerWorldController = std::make_unique<WorldController>();
 
     return true;
     // 初始化成功
@@ -98,8 +89,6 @@ bool OpenEngine::MainLoop()
     SetManager.RefreshSettings();
 
     sController->changeStage(std::move(gameInfo->entranceStage));
-
-    ServerWorldController->onEnter();
 
     while (!should_close)
     {
@@ -183,7 +172,6 @@ bool OpenEngine::MainLoop()
 #pragma endregion
 
 #pragma region 帧率控制
-        ServerWorldController->onUpdate(timer->getTotalTime());
 
         // 失去焦点时帧率降至 1/3
         float frameDelay = timer->getDelayTime();
@@ -204,7 +192,7 @@ bool OpenEngine::CleanUp()
     timer.reset();
 
     ControllerManager::GetInstance().Shutdown();
-ResManager.CleanUp();
+    ResManager.CleanUp();
     ThrManager.shutdown();
     GFXManager.CleanUp();
 

@@ -26,8 +26,6 @@
 #include "rapidjson/error/en.h"
 #include "rapidjson/filereadstream.h"
 
-#include "Asset/MapLoader.hpp"
-
 #include "Asset/TextureLoader.hpp"
 #include "Core/Thread/ThreadManager.hpp"
 
