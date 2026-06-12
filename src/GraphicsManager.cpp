@@ -33,8 +33,8 @@ bool GraphicsManager::Init()
     }
 
     // 其他平台的初始化方法
-    if (!SDL_CreateWindowAndRenderer("OpenCore Window", 1280, 720, 0,
-                                    &window, &renderer))
+    if (!SDL_CreateWindowAndRenderer("OpenCore Window", 1280, 720, 0, &window,
+                                     &renderer))
     {
         return false;
     }
@@ -72,14 +72,16 @@ void GraphicsManager::refreshWindowProperties()
     SDL_SetWindowTitle(window, title.c_str());
 
     OpenCoreManagers::SetManager.setTargetWidth(
-        gameInfo->TargetResolutionWidth, gameInfo->TargetResolutionHeight);
+        gameInfo->_graphicsInfo.resolutionWidth,
+        gameInfo->_graphicsInfo.resolutionHeight);
 
-    SDL_SetRenderLogicalPresentation(renderer, gameInfo->TargetResolutionWidth,
-                                     gameInfo->TargetResolutionHeight,
+    SDL_SetRenderLogicalPresentation(renderer,
+                                     gameInfo->_graphicsInfo.resolutionWidth,
+                                     gameInfo->_graphicsInfo.resolutionHeight,
                                      SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
-    TargetWindowWidth = gameInfo->TargetResolutionWidth;
-    TargetWindowHeight = gameInfo->TargetResolutionHeight;
+    TargetWindowWidth = gameInfo->_graphicsInfo.resolutionWidth;
+    TargetWindowHeight = gameInfo->_graphicsInfo.resolutionHeight;
 }
 
 void GraphicsManager::CleanUp()
@@ -128,15 +130,17 @@ int GraphicsManager::Draw(SDL_Texture *texture, const Rect *srcRect,
 
     SDL_FRect srcF, dstF;
     SDL_FPoint centerF;
-    if (srcRect) srcF = *srcRect;
-    if (dstRect) dstF = *dstRect;
-    if (center) centerF = *center;
+    if (srcRect)
+        srcF = *srcRect;
+    if (dstRect)
+        dstF = *dstRect;
+    if (center)
+        centerF = *center;
 
-    return SDL_RenderTextureRotated(renderer, texture,
-                                    (srcRect) ? &srcF : nullptr,
-                                    (dstRect) ? &dstF : nullptr, angle,
-                                    (center) ? &centerF : nullptr,
-                                    SDL_FLIP_NONE);
+    return SDL_RenderTextureRotated(
+        renderer, texture, (srcRect) ? &srcF : nullptr,
+        (dstRect) ? &dstF : nullptr, angle, (center) ? &centerF : nullptr,
+        SDL_FLIP_NONE);
 }
 
 int GraphicsManager::DrawSDLGeometry(SDL_Texture *texture,

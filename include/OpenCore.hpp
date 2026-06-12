@@ -29,7 +29,7 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN | DEBUG_MAP;
 #include "Core/Timer.hpp"
 
 #include "Asset/ResourceManager.hpp"
-#include "Core/GameInfo.hpp"
+#include "Core/Info/GameInfo.hpp"
 #include "Core/Math/OpenCore_Spiral.hpp"
 #include "Core/Math/OpenCore_Vec3.hpp"
 #include "Core/Math/OpenCore_Wave.hpp"
@@ -45,8 +45,8 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN | DEBUG_MAP;
 #include "Core/Event/EventManager.hpp"
 
 #include "Core/Thread/ThreadManager.hpp"
-#include "World/Map/Manager/MapManager.hpp"
 #include "World/Helpers/SequentialPipeline.hpp"
+#include "World/Map/Manager/MapManager.hpp"
 
 /**
  * @brief 负责内核部分的单例管理器类

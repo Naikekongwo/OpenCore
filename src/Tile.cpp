@@ -27,8 +27,9 @@ void Tile::Draw()
     auto info = OpenEngine::getInstance().getGameInfo();
 
     Rect dstRect = getLogicalBounds();
-    Rect windowRect{0, 0, static_cast<float>(info->TargetResolutionWidth),
-                    static_cast<float>(info->TargetResolutionHeight)};
+    Rect windowRect{0, 0,
+                    static_cast<float>(info->_graphicsInfo.resolutionWidth),
+                    static_cast<float>(info->_graphicsInfo.resolutionHeight)};
 
     if (visible(dstRect, windowRect) && VState->getAlpha() > 0.0f)
     {

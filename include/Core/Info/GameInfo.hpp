@@ -3,6 +3,7 @@
 // GameInfo.hpp
 // 游戏的元数据
 
+#include "GraphicsInfo.hpp"
 #include <memory>
 #include <string>
 
@@ -14,13 +15,12 @@ class Stage;
 struct GameInfo
 {
     string gameName = "openengine-game";
+
     uint8_t version_major = 1;
     uint8_t version_minor = 0;
     bool beta = false;
+
+    GraphicsInfo _graphicsInfo;
+
     unique_ptr<Stage> entranceStage;
-
-    int TargetResolutionWidth = 1920;
-    int TargetResolutionHeight = 1080;
-
-    bool nearestScaling = true;
 };

@@ -24,8 +24,9 @@ void Mob::Draw()
         Rect dstRect = getLogicalBounds();
         Rect shadowRect = {dstRect.x, dstRect.y + 0.5f * (dstRect.h), dstRect.w,
                            dstRect.h * 0.5f};
-        Rect windowRect{0, 0, static_cast<float>(info->TargetResolutionWidth),
-                        static_cast<float>(info->TargetResolutionHeight)};
+        Rect windowRect{
+            0, 0, static_cast<float>(info->_graphicsInfo.resolutionWidth),
+            static_cast<float>(info->_graphicsInfo.resolutionHeight)};
 
         if (visible(dstRect, windowRect) && VState->getAlpha() > 0.0f)
         {
