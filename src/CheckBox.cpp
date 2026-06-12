@@ -1,6 +1,6 @@
 
 #include "OpenCore.hpp"
-#include <SDL2/SDL_events.h>
+#include <SDL3/SDL_events.h>
 
 CheckBox::CheckBox(const string &id, short layer, unique_ptr<Texture> texture)
     : UIElement(id, layer, std::move(texture))
@@ -38,11 +38,11 @@ void CheckBox::handlEvents(SDL_Event &event, float totalTime)
         switch (event.type)
         {
 
-        case SDL_MOUSEBUTTONDOWN:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
         {
             if (event.button.button == SDL_BUTTON_LEFT)
             {
-                mousePos = {event.button.x, event.button.y};
+                mousePos = {static_cast<int>(event.button.x), static_cast<int>(event.button.y)};
 
                 if (SDL_PointInRect(&mousePos, &bounds) &&
                     status == CheckBoxStatus::Ready)
@@ -54,7 +54,7 @@ void CheckBox::handlEvents(SDL_Event &event, float totalTime)
             break;
         }
 
-        case SDL_MOUSEBUTTONUP:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
         {
             if (event.button.button == SDL_BUTTON_LEFT)
             {

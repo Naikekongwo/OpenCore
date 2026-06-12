@@ -3,9 +3,9 @@
 #include "OpenCore.hpp"
 #include "Runtime/Animation/IAnimation.hpp"
 #include "Runtime/Graphics/IDrawableObject/Texture.hpp"
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_surface.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <memory>
 #include <string>
 
@@ -110,12 +110,12 @@ void TextArea::refreshTextureCache()
 
     uint8_t textAlpha = VState->getAlpha();
 
-    SDL_Surface *text = TTF_RenderUTF8_Blended(
-        font, m_textContent.c_str(), {m_colorR, m_colorG, m_colorB, textAlpha});
+    SDL_Surface *text = TTF_RenderText_Blended(
+        font, m_textContent.c_str(), m_textContent.length(), {m_colorR, m_colorG, m_colorB, textAlpha});
     SDL_Texture *textBuffer =
         SDL_CreateTextureFromSurface(GFX.getRenderer(), text);
 
-    SDL_FreeSurface(text);
+    SDL_DestroySurface(text);
 
     if (!textBuffer)
     {
@@ -125,11 +125,11 @@ void TextArea::refreshTextureCache()
         return;
     }
 
-    int texW, texH;
+    float texW, texH;
 
-    SDL_QueryTexture(textBuffer, nullptr, nullptr, &texW, &texH);
+    SDL_GetTextureSize(textBuffer, &texW, &texH);
 
-    Rect dstRect = {0, 0, m_fontSize * (texW * 1.0f / texH), m_fontSize * 1.0f};
+    Rect dstRect = {0, 0, m_fontSize * (texW / texH), m_fontSize * 1.0f};
 
     if (m_aligncenter)
     {
@@ -140,8 +140,8 @@ void TextArea::refreshTextureCache()
     if (m_shadowEnable)
     {
         uint8_t shadowAlpha = VState->getAlpha() * transparency;
-        SDL_Surface *shadowSurface = TTF_RenderUTF8_Blended(
-            font, m_textContent.c_str(), {0, 0, 0, shadowAlpha});
+        SDL_Surface *shadowSurface = TTF_RenderText_Blended(
+            font, m_textContent.c_str(), m_textContent.length(), {0, 0, 0, shadowAlpha});
 
         SDL_Texture *shadowBuffer =
             SDL_CreateTextureFromSurface(GFX.getRenderer(), shadowSurface);
@@ -152,7 +152,7 @@ void TextArea::refreshTextureCache()
 
         GFX.Draw(shadowBuffer, nullptr, &shadowRect, 0.0f, nullptr);
 
-        SDL_FreeSurface(shadowSurface);
+        SDL_DestroySurface(shadowSurface);
         SDL_DestroyTexture(shadowBuffer);
     }
 
@@ -171,12 +171,9 @@ void TextArea::handlEvents(SDL_Event &event, float totalTime)
 {
     switch (event.type)
     {
-    case SDL_WINDOWEVENT:
+    case SDL_EVENT_WINDOW_RESIZED:
     {
-        if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-        {
-            m_valid = false;
-        }
+        m_valid = false;
     }
     default:
         break;

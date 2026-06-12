@@ -80,9 +80,9 @@ void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
     switch (event.type)
     {
 
-    case SDL_MOUSEMOTION:
+    case SDL_EVENT_MOUSE_MOTION:
     {
-        mousePos = {event.motion.x, event.motion.y};
+        mousePos = {static_cast<int>(event.motion.x), static_cast<int>(event.motion.y)};
         if (!SDL_PointInRect(&mousePos, &bounds))
         {
             status = ScrollStatus::Ready;
@@ -96,11 +96,11 @@ void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
         }
     }
 
-    case SDL_MOUSEBUTTONDOWN:
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
     {
         if (event.button.button == SDL_BUTTON_LEFT)
         {
-            mousePos = {event.button.x, event.button.y};
+            mousePos = {static_cast<int>(event.button.x), static_cast<int>(event.button.y)};
 
             if (SDL_PointInRect(&mousePos, &bounds))
             {
@@ -111,7 +111,7 @@ void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
         break;
     }
 
-    case SDL_MOUSEBUTTONUP:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
     {
         if (event.button.button == SDL_BUTTON_LEFT)
         {

@@ -13,16 +13,17 @@ ControllerManager &ControllerManager::GetInstance()
 void ControllerManager::Init()
 {
     std::unique_lock<std::shared_mutex> lock(rw_mutex_);
-    int numJoysticks = SDL_NumJoysticks();
+    int numJoysticks;
+    SDL_JoystickID *joysticks = SDL_GetJoysticks(&numJoysticks);
     for (int i = 0; i < numJoysticks; ++i)
     {
-        if (SDL_IsGameController(i))
+        if (SDL_IsGamepad(joysticks[i]))
         {
-            SDL_GameController *controller = SDL_GameControllerOpen(i);
+            SDL_Gamepad *controller = SDL_OpenGamepad(joysticks[i]);
             if (controller)
             {
-                SDL_JoystickID id = SDL_JoystickInstanceID(
-                    SDL_GameControllerGetJoystick(controller));
+                SDL_JoystickID id = SDL_GetJoystickID(
+                    SDL_GetGamepadJoystick(controller));
                 int playerIndex = FindFreePlayerIndex();
                 ControllerInfo info;
                 info.controller = controller;
@@ -43,7 +44,7 @@ void ControllerManager::Shutdown()
     {
         if (pair.second.controller)
         {
-            SDL_GameControllerClose(pair.second.controller);
+            SDL_CloseGamepad(pair.second.controller);
         }
     }
     m_players.clear();
@@ -56,14 +57,14 @@ void ControllerManager::HandleEvent(const SDL_Event &event)
 
     switch (event.type)
     {
-    case SDL_CONTROLLERDEVICEADDED:
+    case SDL_EVENT_GAMEPAD_ADDED:
     {
-        int deviceIndex = event.cdevice.which;
-        SDL_GameController *controller = SDL_GameControllerOpen(deviceIndex);
+        SDL_JoystickID instanceId = event.gdevice.which;
+        SDL_Gamepad *controller = SDL_OpenGamepad(instanceId);
         if (controller)
         {
-            SDL_JoystickID id = SDL_JoystickInstanceID(
-                SDL_GameControllerGetJoystick(controller));
+            SDL_JoystickID id = SDL_GetJoystickID(
+                SDL_GetGamepadJoystick(controller));
             int playerIndex = FindFreePlayerIndex();
             ControllerInfo info;
             info.controller = controller;
@@ -75,9 +76,9 @@ void ControllerManager::HandleEvent(const SDL_Event &event)
         }
         break;
     }
-    case SDL_CONTROLLERDEVICEREMOVED:
+    case SDL_EVENT_GAMEPAD_REMOVED:
     {
-        SDL_JoystickID id = event.cdevice.which;
+        SDL_JoystickID id = event.gdevice.which;
         auto it = m_instanceToPlayer.find(id);
         if (it != m_instanceToPlayer.end())
         {
@@ -85,41 +86,41 @@ void ControllerManager::HandleEvent(const SDL_Event &event)
             auto playerIt = m_players.find(player);
             if (playerIt != m_players.end())
             {
-                SDL_GameControllerClose(playerIt->second.controller);
+                SDL_CloseGamepad(playerIt->second.controller);
                 m_players.erase(playerIt);
             }
             m_instanceToPlayer.erase(it);
         }
         break;
     }
-    case SDL_CONTROLLERBUTTONDOWN:
-    case SDL_CONTROLLERBUTTONUP:
+    case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+    case SDL_EVENT_GAMEPAD_BUTTON_UP:
     {
-        SDL_JoystickID id = event.cbutton.which;
+        SDL_JoystickID id = event.gbutton.which;
         auto it = m_instanceToPlayer.find(id);
         if (it != m_instanceToPlayer.end())
         {
             int player = it->second;
             auto &info = m_players[player];
-            if (event.cbutton.button < SDL_CONTROLLER_BUTTON_MAX)
+            if (event.gbutton.button < SDL_GAMEPAD_BUTTON_COUNT)
             {
-                info.buttonState[event.cbutton.button] =
-                    (event.type == SDL_CONTROLLERBUTTONDOWN) ? 1 : 0;
+                info.buttonState[event.gbutton.button] =
+                    (event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN) ? 1 : 0;
             }
         }
         break;
     }
-    case SDL_CONTROLLERAXISMOTION:
+    case SDL_EVENT_GAMEPAD_AXIS_MOTION:
     {
-        SDL_JoystickID id = event.caxis.which;
+        SDL_JoystickID id = event.gaxis.which;
         auto it = m_instanceToPlayer.find(id);
         if (it != m_instanceToPlayer.end())
         {
             int player = it->second;
             auto &info = m_players[player];
-            if (event.caxis.axis < SDL_CONTROLLER_AXIS_MAX)
+            if (event.gaxis.axis < SDL_GAMEPAD_AXIS_COUNT)
             {
-                info.axisState[event.caxis.axis] = event.caxis.value;
+                info.axisState[event.gaxis.axis] = event.gaxis.value;
             }
         }
         break;
@@ -128,11 +129,11 @@ void ControllerManager::HandleEvent(const SDL_Event &event)
 }
 
 bool ControllerManager::IsButtonPressed(int playerIndex,
-                                        SDL_GameControllerButton button) const
+                                        SDL_GamepadButton button) const
 {
     std::shared_lock<std::shared_mutex> lock(rw_mutex_);
     auto it = m_players.find(playerIndex);
-    if (it != m_players.end() && button < SDL_CONTROLLER_BUTTON_MAX)
+    if (it != m_players.end() && button < SDL_GAMEPAD_BUTTON_COUNT)
     {
         return it->second.buttonState[button] != 0;
     }
@@ -140,11 +141,11 @@ bool ControllerManager::IsButtonPressed(int playerIndex,
 }
 
 Uint8 ControllerManager::GetButton(int playerIndex,
-                                   SDL_GameControllerButton button) const
+                                   SDL_GamepadButton button) const
 {
     std::shared_lock<std::shared_mutex> lock(rw_mutex_);
     auto it = m_players.find(playerIndex);
-    if (it != m_players.end() && button < SDL_CONTROLLER_BUTTON_MAX)
+    if (it != m_players.end() && button < SDL_GAMEPAD_BUTTON_COUNT)
     {
         return it->second.buttonState[button];
     }
@@ -152,18 +153,18 @@ Uint8 ControllerManager::GetButton(int playerIndex,
 }
 
 Sint16 ControllerManager::GetAxis(int playerIndex,
-                                  SDL_GameControllerAxis axis) const
+                                  SDL_GamepadAxis axis) const
 {
     std::shared_lock<std::shared_mutex> lock(rw_mutex_);
     auto it = m_players.find(playerIndex);
-    if (it != m_players.end() && axis < SDL_CONTROLLER_AXIS_MAX)
+    if (it != m_players.end() && axis < SDL_GAMEPAD_AXIS_COUNT)
     {
         return it->second.axisState[axis];
     }
     return 0;
 }
 
-SDL_GameController *
+SDL_Gamepad *
 ControllerManager::GetControllerForPlayer(int playerIndex) const
 {
     std::shared_lock<std::shared_mutex> lock(rw_mutex_);
@@ -182,11 +183,16 @@ int ControllerManager::GetPlayerIndexFromInstanceID(
 void ControllerManager::RumblePlayer(int playerIndex, Uint16 lowFreq,
                                      Uint16 highFreq, Uint32 durationMs)
 {
-    // 直接在调用线程（主线程）执行震动，SDL_GameControllerRumble 是轻量非阻塞的
-    SDL_GameController *controller = GetControllerForPlayer(playerIndex);
-    if (controller && SDL_GameControllerHasRumble(controller))
+    // 直接在调用线程（主线程）执行震动，SDL_RumbleGamepad 是轻量非阻塞的
+    SDL_Gamepad *controller = GetControllerForPlayer(playerIndex);
+    if (controller)
     {
-        SDL_GameControllerRumble(controller, lowFreq, highFreq, durationMs);
+        SDL_PropertiesID props = SDL_GetGamepadProperties(controller);
+        bool hasRumble = SDL_GetBooleanProperty(props, SDL_PROP_GAMEPAD_CAP_RUMBLE_BOOLEAN, false);
+        if (hasRumble)
+        {
+            SDL_RumbleGamepad(controller, lowFreq, highFreq, durationMs);
+        }
     }
 }
 

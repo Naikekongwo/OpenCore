@@ -1,7 +1,7 @@
 
 #include "OpenCore.hpp"
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_video.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
 #include <cstddef>
 #include <memory>
 
@@ -84,19 +84,16 @@ void BaseBackground::handlEvents(SDL_Event &event, float totalTime)
 {
     switch (event.type)
     {
-    case SDL_WINDOWEVENT:
+    case SDL_EVENT_WINDOW_RESIZED:
     {
-        if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+        auto &GFX = OpenCoreManagers::GFXManager;
+        SDL_Rect bounds = getLogicalBounds();
+        if (TextureCache)
         {
-            auto &GFX = OpenCoreManagers::GFXManager;
-            SDL_Rect bounds = getLogicalBounds();
-            if (TextureCache)
-            {
-                SDL_DestroyTexture(TextureCache);
-            }
-            TextureCache = GFX.createTexture(bounds.w, bounds.h);
-            generateTexture(TextureCache);
+            SDL_DestroyTexture(TextureCache);
         }
+        TextureCache = GFX.createTexture(bounds.w, bounds.h);
+        generateTexture(TextureCache);
     }
     default:
         break;
@@ -111,14 +108,14 @@ bool BaseBackground::generateTexture(SDL_Texture *target)
 
     GFX.setRenderTarget(target);
 
-    int texW, texH;
-    SDL_QueryTexture(texture->get(), nullptr, nullptr, &texW, &texH);
+    float texW, texH;
+    SDL_GetTextureSize(texture->get(), &texW, &texH);
 
     Rect srcRect{};
     Rect dstRect{};
 
-    int targetW, targetH;
-    SDL_QueryTexture(target, nullptr, nullptr, &targetW, &targetH);
+    float targetW, targetH;
+    SDL_GetTextureSize(target, &targetW, &targetH);
 
     for (int row = 0; row < 3; row++)
     {

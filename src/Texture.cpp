@@ -17,7 +17,10 @@ Texture::Texture(size_t x, size_t y, shared_ptr<SDL_Texture> tex)
     }
 
     SDL_SetTextureBlendMode(texture.get(), SDL_BLENDMODE_BLEND);
-    SDL_QueryTexture(texture.get(), NULL, NULL, &W, &H);
+    float W_f, H_f;
+    SDL_GetTextureSize(texture.get(), &W_f, &H_f);
+    W = static_cast<int>(W_f);
+    H = static_cast<int>(H_f);
 
     width = static_cast<uint16_t>(W);
     height = static_cast<uint16_t>(H);
@@ -47,14 +50,15 @@ bool Texture::configure(size_t rows, size_t cols,
     if (texture == nullptr)
         return false;
 
-    int W, H;
-
     if (!texture)
         LOG("部署时候遇到空的纹理，该方法不应该传入空纹理");
 
     this->texture = texture;
 
-    SDL_QueryTexture(texture.get(), NULL, NULL, &W, &H);
+    float W_f, H_f;
+    SDL_GetTextureSize(texture.get(), &W_f, &H_f);
+    int W = static_cast<int>(W_f);
+    int H = static_cast<int>(H_f);
 
     width = static_cast<uint16_t>(W);
     height = static_cast<uint16_t>(H);

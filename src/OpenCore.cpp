@@ -3,8 +3,8 @@
 
 #include "OpenCore.hpp"
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_gamecontroller.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_gamepad.h>
 #include <memory>
 
 #include "Core/Event/ControllerManager.hpp"
@@ -61,8 +61,6 @@ bool OpenEngine::Initialize()
     (void)ResManager;
     // 创建纹理元管理器
     (void)TexMetaManager;
-    // 创建音效管理器实例
-    (void)SFXManager;
     // 创建场景控制器实例
     sController = std::make_unique<StageManager>();
     // 创建计时器实例
@@ -80,9 +78,6 @@ bool OpenEngine::Initialize()
     ThrManager.start(2, 8);
     // 初始化资源管理器(其初始化时需要renderer，所以必须在GFX之后初始化)
     ResManager.Init();
-    // 初始化音效管理器
-    SFXManager.Init(&ResManager);
-
     // 初始化WorldController
     ServerWorldController = std::make_unique<WorldController>();
 
@@ -116,46 +111,38 @@ bool OpenEngine::MainLoop()
 
             switch (sdlEvent.type)
             {
-            case SDL_QUIT:
+            case SDL_EVENT_QUIT:
                 should_close = true;
                 break;
-            case SDL_KEYDOWN:
-                if (sdlEvent.key.keysym.sym == SDLK_F11)
+            case SDL_EVENT_KEY_DOWN:
+                if (sdlEvent.key.key == SDLK_F11)
                 {
                     Uint32 flags = SDL_GetWindowFlags(GFXManager.getWindow());
-                    if (flags & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                    if (flags & SDL_WINDOW_FULLSCREEN)
                     {
-                        SDL_SetWindowFullscreen(GFXManager.getWindow(), 0);
+                        SDL_SetWindowFullscreen(GFXManager.getWindow(), false);
                     }
                     else
                     {
-                        SDL_SetWindowFullscreen(GFXManager.getWindow(),
-                                                SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        SDL_SetWindowFullscreen(GFXManager.getWindow(), true);
                     }
                 }
                 break;
-            case SDL_WINDOWEVENT:
-                switch (sdlEvent.window.event)
-                {
-                case SDL_WINDOWEVENT_RESIZED:
-                case SDL_WINDOWEVENT_SIZE_CHANGED:
-                    needsTitleUpdate = true;
-                    break;
-                case SDL_WINDOWEVENT_MINIMIZED:
-                    isMinimized = true;
-                    break;
-                case SDL_WINDOWEVENT_RESTORED:
-                    isMinimized = false;
-                    break;
-                case SDL_WINDOWEVENT_FOCUS_LOST:
-                    hasFocus = false;
-                    break;
-                case SDL_WINDOWEVENT_FOCUS_GAINED:
-                    hasFocus = true;
-                    break;
-                default:
-                    break;
-                }
+            case SDL_EVENT_WINDOW_RESIZED:
+            case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+                needsTitleUpdate = true;
+                break;
+            case SDL_EVENT_WINDOW_MINIMIZED:
+                isMinimized = true;
+                break;
+            case SDL_EVENT_WINDOW_RESTORED:
+                isMinimized = false;
+                break;
+            case SDL_EVENT_WINDOW_FOCUS_LOST:
+                hasFocus = false;
+                break;
+            case SDL_EVENT_WINDOW_FOCUS_GAINED:
+                hasFocus = true;
                 break;
             default:
                 break;
@@ -219,8 +206,7 @@ bool OpenEngine::CleanUp()
     timer.reset();
 
     ControllerManager::GetInstance().Shutdown();
-    SFXManager.CleanUp();
-    ResManager.CleanUp();
+ResManager.CleanUp();
     ThrManager.shutdown();
     GFXManager.CleanUp();
 

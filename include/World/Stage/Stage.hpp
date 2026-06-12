@@ -4,14 +4,13 @@
 // Stage.hpp
 // 场景的基类
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 #include "Runtime/Graphics/Manager/ElementManager.hpp"
 
 #include <memory>
 
 class ResourceManager;
-class SoundEffectManager;
 class Timer;
 class StageManager;
 class Event;

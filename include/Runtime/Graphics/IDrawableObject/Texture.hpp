@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Math/OpenCore_Rect.hpp"
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <memory>
 using std::shared_ptr;
 

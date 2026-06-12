@@ -8,7 +8,7 @@
 #ifndef _IDRAWABLE_H_
 #define _IDRAWABLE_H_
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <memory>
 #include <string>
 

@@ -2,10 +2,10 @@
 // 负责 GFX_CORE 的方法实现
 
 #include "OpenCore.hpp"
-#include <SDL2/SDL_Log.h>
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_video.h>
+#include <SDL3/SDL_Log.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_video.h>
 #include <cstddef>
 
 GraphicsManager &GraphicsManager::getInstance()
@@ -21,27 +21,25 @@ bool GraphicsManager::Init()
     // 图形核心的初始化方法
 
     // 初始化SDL 失败即返回假
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
     {
         return false;
     }
 
-    if (TTF_Init() == -1)
+    if (!TTF_Init())
     {
-        LOG("TTF_Init Error: {}", TTF_GetError());
-        return -1;
+        LOG("TTF_Init Error: {}", SDL_GetError());
+        return false;
     }
 
     // 其他平台的初始化方法
-    if (SDL_CreateWindowAndRenderer(1280, 720, SDL_RENDERER_ACCELERATED,
-                                    &window, &renderer) != 0)
+    if (!SDL_CreateWindowAndRenderer("OpenCore Window", 1280, 720, 0,
+                                    &window, &renderer))
     {
         return false;
     }
 
-    SDL_SetWindowTitle(window, "OpenCore Window");
-
-    SDL_SetWindowResizable(window, SDL_TRUE);
+    SDL_SetWindowResizable(window, true);
 
     // 初始化成功
     return true;
@@ -73,17 +71,12 @@ void GraphicsManager::refreshWindowProperties()
 
     SDL_SetWindowTitle(window, title.c_str());
 
-    // 预计在 OpenCore 27.1解决该问题
-    if (gameInfo->nearestScaling)
-    {
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-    }
-
     OpenCoreManagers::SetManager.setTargetWidth(
         gameInfo->TargetResolutionWidth, gameInfo->TargetResolutionHeight);
 
-    SDL_RenderSetLogicalSize(renderer, gameInfo->TargetResolutionWidth,
-                             gameInfo->TargetResolutionHeight);
+    SDL_SetRenderLogicalPresentation(renderer, gameInfo->TargetResolutionWidth,
+                                     gameInfo->TargetResolutionHeight,
+                                     SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
     TargetWindowWidth = gameInfo->TargetResolutionWidth;
     TargetWindowHeight = gameInfo->TargetResolutionHeight;
@@ -133,9 +126,17 @@ int GraphicsManager::Draw(SDL_Texture *texture, const Rect *srcRect,
         point = *center;
     }
 
-    return SDL_RenderCopyEx(renderer, texture, (srcRect) ? &source : nullptr,
-                            (dstRect) ? &destination : nullptr, angle,
-                            (center) ? &point : nullptr, SDL_FLIP_NONE);
+    SDL_FRect srcF, dstF;
+    SDL_FPoint centerF;
+    if (srcRect) srcF = *srcRect;
+    if (dstRect) dstF = *dstRect;
+    if (center) centerF = *center;
+
+    return SDL_RenderTextureRotated(renderer, texture,
+                                    (srcRect) ? &srcF : nullptr,
+                                    (dstRect) ? &dstF : nullptr, angle,
+                                    (center) ? &centerF : nullptr,
+                                    SDL_FLIP_NONE);
 }
 
 int GraphicsManager::DrawSDLGeometry(SDL_Texture *texture,

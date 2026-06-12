@@ -1,5 +1,5 @@
 #include "Core/Event/EventManager.hpp"
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 // 单例实现
 EventManager &EventManager::GetInstance()
@@ -70,16 +70,16 @@ void EventManager::UpdateInputMode(const Event &event)
         return;
     }
     Uint32 type = event.GetType();
-    if (type == SDL_CONTROLLERAXISMOTION || type == SDL_CONTROLLERBUTTONDOWN ||
-        type == SDL_CONTROLLERBUTTONUP || type == SDL_CONTROLLERDEVICEADDED ||
-        type == SDL_CONTROLLERDEVICEREMOVED ||
-        type == SDL_CONTROLLERDEVICEREMAPPED)
+    if (type == SDL_EVENT_GAMEPAD_AXIS_MOTION || type == SDL_EVENT_GAMEPAD_BUTTON_DOWN ||
+        type == SDL_EVENT_GAMEPAD_BUTTON_UP || type == SDL_EVENT_GAMEPAD_ADDED ||
+        type == SDL_EVENT_GAMEPAD_REMOVED ||
+        type == SDL_EVENT_GAMEPAD_REMAPPED)
     {
         m_hasGamepadEvent = true;
     }
-    else if (type == SDL_KEYDOWN || type == SDL_KEYUP ||
-             type == SDL_MOUSEMOTION || type == SDL_MOUSEBUTTONDOWN ||
-             type == SDL_MOUSEBUTTONUP || type == SDL_MOUSEWHEEL)
+    else if (type == SDL_EVENT_KEY_DOWN || type == SDL_EVENT_KEY_UP ||
+             type == SDL_EVENT_MOUSE_MOTION || type == SDL_EVENT_MOUSE_BUTTON_DOWN ||
+             type == SDL_EVENT_MOUSE_BUTTON_UP || type == SDL_EVENT_MOUSE_WHEEL)
     {
         m_hasKMEvent = true;
     }

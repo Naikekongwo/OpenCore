@@ -17,10 +17,10 @@ void Button::handlEvents(SDL_Event &event, float totalTime)
 
     switch (event.type)
     {
-    case SDL_MOUSEMOTION:
+    case SDL_EVENT_MOUSE_MOTION:
     {
-        mousePos.x = event.motion.x;
-        mousePos.y = event.motion.y;
+        mousePos.x = static_cast<int>(event.motion.x);
+        mousePos.y = static_cast<int>(event.motion.y);
 
         if (!PointInRect(mousePos, bounds))
             State = ButtonState::Normal;
@@ -30,28 +30,27 @@ void Button::handlEvents(SDL_Event &event, float totalTime)
         break;
     }
 
-    case SDL_MOUSEBUTTONDOWN:
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
     {
         if (event.button.button == SDL_BUTTON_LEFT)
         {
-            mousePos.x = event.button.x;
-            mousePos.y = event.button.y;
+            mousePos.x = static_cast<int>(event.button.x);
+            mousePos.y = static_cast<int>(event.button.y);
 
             if (PointInRect(mousePos, bounds))
             {
-                // OpenCoreManagers::SFXManager.playSE(1002);
                 State = ButtonState::Pressed;
             }
         }
         break;
     }
 
-    case SDL_MOUSEBUTTONUP:
+    case SDL_EVENT_MOUSE_BUTTON_UP:
     {
         if (event.button.button == SDL_BUTTON_LEFT)
         {
-            mousePos.x = event.button.x;
-            mousePos.y = event.button.y;
+            mousePos.x = static_cast<int>(event.button.x);
+            mousePos.y = static_cast<int>(event.button.y);
 
             if (PointInRect(mousePos, bounds) && State == ButtonState::Pressed)
             {

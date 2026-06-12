@@ -1,7 +1,6 @@
 #include "OpenCore.hpp"
 
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 bool ResourceManager::Init()
 {
@@ -14,31 +13,13 @@ bool ResourceManager::Init()
         return false;
     }
 
-    int result = Mix_Init(MIX_INIT_MP3 | MIX_INIT_OGG);
-    if (!result)
-    {
-        LOG("初始化SDL_Mix失败，错误代码： {}", Mix_GetError());
-        return false;
-    }
-
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 2048) <
-        0)
-    {
-        LOG("无法打开音频设备，错误代码:{}", Mix_GetError());
-        return false;
-    }
-
-    LOG("SDL_Mixer音频模块初始化成功");
-
+    LOG("资源管理器初始化成功");
     return true;
 }
 
 void ResourceManager::CleanUp()
 {
     ClearAll();
-    Mix_HaltMusic();
-    Mix_CloseAudio();
-    Mix_Quit();
     renderer = nullptr;
 }
 
@@ -46,69 +27,6 @@ ResourceManager &ResourceManager::getInstance()
 {
     static ResourceManager instance;
     return instance;
-}
-
-void ResourceManager::LoadMusic(short id, const std::string &path)
-{
-    std::lock_guard<std::mutex> lock(musicMutex_);
-    if (musicCache_.count(id))
-        return;
-
-    MusicPtr music = LoadMusicFromFile(path);
-    if (!music)
-    {
-        LOG("音乐加载失败，路径: {}, 错误代码: {}", path.c_str(),
-            Mix_GetError());
-        return;
-    }
-
-    LOG("音乐加载成功，ID:{}", id);
-    musicCache_[id] = std::move(music);
-}
-
-Mix_Music *ResourceManager::GetMusic(short id)
-{
-    std::lock_guard<std::mutex> lock(musicMutex_);
-    auto it = musicCache_.find(id);
-
-    if (it == musicCache_.end())
-    {
-        LOG("无法找到音乐对象，ID: {}", id);
-        return nullptr;
-    }
-    return it->second.get();
-}
-
-void ResourceManager::LoadSound(short id, const std::string &path)
-{
-    std::lock_guard<std::mutex> lock(soundMutex_);
-    if (soundCache_.count(id))
-        return;
-
-    SoundPtr sound = std::move(LoadSoundFromFile(path));
-    if (!sound)
-    {
-        LOG("加载音效文件时失败，路径: {}，错误代码:{}", path.c_str(),
-            Mix_GetError());
-        return;
-    }
-
-    LOG("ResourceManager::LoadSound sound id {} loaded successfully.", id);
-
-    soundCache_[id] = std::move(sound);
-}
-
-Mix_Chunk *ResourceManager::GetSound(short id)
-{
-    std::lock_guard<std::mutex> lock(soundMutex_);
-    auto it = soundCache_.find(id);
-
-    if (it == soundCache_.end())
-    {
-        LOG("ResourceManager::GetSound failed to get sound id {}", id);
-        return nullptr;
-    }
-    return it->second.get();
 }
 
 void ResourceManager::LoadTexture(short id, const std::string &path)
@@ -146,18 +64,6 @@ shared_ptr<SDL_Texture> ResourceManager::GetTexture(short id)
         [](SDL_Texture *) { /* do nothing, managed by unique_ptr */ });
 }
 
-std::future<void> ResourceManager::LoadMusicAsync(short id,
-                                                  const std::string &path)
-{
-    return EnqueueTask([this, id, path] { LoadMusic(id, path); });
-}
-
-std::future<void> ResourceManager::LoadSoundAsync(short id,
-                                                  const std::string &path)
-{
-    return EnqueueTask([this, id, path] { LoadSound(id, path); });
-}
-
 void ResourceManager::LoadFont(short id, const std::string &path, int size)
 {
     std::lock_guard<std::mutex> lock(fontMutex_);
@@ -167,7 +73,7 @@ void ResourceManager::LoadFont(short id, const std::string &path, int size)
     FontPtr font(TTF_OpenFont(path.c_str(), size));
     if (!font)
     {
-        LOG("TTF_OpenFont failed: {}", TTF_GetError());
+        LOG("TTF_OpenFont failed: {}", SDL_GetError());
         return;
     }
 
@@ -242,23 +148,9 @@ void ResourceManager::ClearAll()
     LOG("ResourceManager::ClearAll() started");
 
     ThreadManager::getInstance().wait_for_all_tasks();
-
     ThreadManager::getInstance().process_main_thread_tasks();
 
     LOG("ResourceManager::ClearAll() stopped task queue successfully");
-
-    {
-        std::lock_guard<std::mutex> lock(musicMutex_);
-        LOG("ResourceManager::ClearAll() clearing music cache, count={}",
-            static_cast<int>(musicCache_.size()));
-        musicCache_.clear();
-        LOG("ResourceManager::ClearAll() cleared music cache");
-    }
-
-    {
-        std::lock_guard<std::mutex> lock(soundMutex_);
-        soundCache_.clear();
-    }
 
     {
         std::lock_guard<std::mutex> lock(textureMutex_);
@@ -360,11 +252,11 @@ std::future<void> ResourceManager::LoadResourcesFromJson(short id)
 
         if (category == "music")
         {
-            futures.push_back(LoadMusicAsync(resourceId, path));
+            // 音频已移除
         }
         else if (category == "sound")
         {
-            futures.push_back(LoadSoundAsync(resourceId, path));
+            // 音频已移除
         }
         else if (category == "texture")
         {
@@ -402,24 +294,6 @@ std::future<void> ResourceManager::LoadResourcesFromJson(short id)
                       });
 }
 
-void ResourceManager::FreeMusic(short id)
-{
-    std::lock_guard<std::mutex> lock(musicMutex_);
-    if (musicCache_.count(id))
-    {
-        musicCache_.erase(id);
-    }
-}
-
-void ResourceManager::FreeSound(short id)
-{
-    std::lock_guard<std::mutex> lock(soundMutex_);
-    if (soundCache_.count(id))
-    {
-        soundCache_.erase(id);
-    }
-}
-
 void ResourceManager::FreeTexture(short id)
 {
     std::lock_guard<std::mutex> lock(textureMutex_);
@@ -437,11 +311,6 @@ void ResourceManager::FreeFont(short id)
     }
 }
 
-std::future<void> ResourceManager::FreeMusicAsync(short id)
-{
-    return EnqueueTask([this, id] { FreeMusic(id); });
-}
-
 std::future<void> ResourceManager::FreeTextureAsync(short id)
 {
     return EnqueueTask([this, id] { FreeTexture(id); });
@@ -450,9 +319,4 @@ std::future<void> ResourceManager::FreeTextureAsync(short id)
 std::future<void> ResourceManager::FreeFontAsync(short id)
 {
     return EnqueueTask([this, id] { FreeFont(id); });
-}
-
-std::future<void> ResourceManager::FreeSoundAsync(short id)
-{
-    return EnqueueTask([this, id] { FreeSound(id); });
 }

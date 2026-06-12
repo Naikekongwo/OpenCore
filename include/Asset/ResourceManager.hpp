@@ -27,9 +27,9 @@
 #include "rapidjson/filereadstream.h"
 
 #include "Asset/MapLoader.hpp"
-#include "Asset/SoundLoader.hpp"
+
 #include "Asset/TextureLoader.hpp"
-#include "Core/Thread/ThreadManager.hpp" // 新增
+#include "Core/Thread/ThreadManager.hpp"
 
 using std::shared_ptr;
 using std::unique_ptr;
@@ -38,7 +38,7 @@ using std::unique_ptr;
  * @class ResourceManager
  * @brief 资源管理单例类，提供资源加载、缓存、异步操作和释放功能。
  *
- * 该类管理四种资源类型：音乐(Mix_Music*)、音效(Mix_Chunk*)、纹理(SDL_Texture*)、字体(TTF_Font*)。
+ * 该类管理两种资源类型：纹理(SDL_Texture*)、字体(TTF_Font*)。
  * 所有资源通过 short 类型的唯一标识符进行存取。支持同步和异步加载/释放，
  * 异步任务通过 ThreadManager 提交到工作线程，并返回 std::future 以便同步。
  * 资源内部使用智能指针封装，自动管理生命周期，但提供了显式的释放接口。
@@ -61,30 +61,7 @@ class ResourceManager
      * @brief 清理资源管理器，释放所有已加载的资源。
      */
     void CleanUp();
-    /**
-     * @brief 同步加载音乐资源。
-     * @param id 资源的唯一标识符。
-     * @param path 音乐文件的路径。
-     */
-    void LoadMusic(short id, const std::string &path);
-    /**
-     * @brief 获取已加载的音乐资源。
-     * @param id 资源的标识符。
-     * @return Mix_Music* 指针，若未加载则返回 nullptr。
-     */
-    Mix_Music *GetMusic(short id);
-    /**
-     * @brief 同步加载音效资源。
-     * @param id 资源的唯一标识符。
-     * @param path 音效文件的路径。
-     */
-    void LoadSound(short id, const std::string &path);
-    /**
-     * @brief 获取已加载的音效资源。
-     * @param id 资源的标识符。
-     * @return Mix_Chunk* 指针，若未加载则返回 nullptr。
-     */
-    Mix_Chunk *GetSound(short id);
+
     /**
      * @brief 同步加载纹理资源。
      * @param id 资源的唯一标识符。
@@ -112,13 +89,6 @@ class ResourceManager
     TTF_Font *GetFont(short id);
 
     /**
-     * @brief 异步加载音乐资源。
-     * @param id 资源的唯一标识符。
-     * @param path 音乐文件的路径。
-     * @return std::future<void> 可用于等待加载完成。
-     */
-    std::future<void> LoadMusicAsync(short id, const std::string &path);
-    /**
      * @brief 异步加载纹理资源。
      * @param id 资源的唯一标识符。
      * @param path 纹理文件的路径。
@@ -134,13 +104,6 @@ class ResourceManager
      */
     std::future<void> LoadFontAsync(short id, const std::string &path,
                                     int size);
-    /**
-     * @brief 异步加载音效资源。
-     * @param id 资源的唯一标识符。
-     * @param path 音效文件的路径。
-     * @return std::future<void> 可用于等待加载完成。
-     */
-    std::future<void> LoadSoundAsync(short id, const std::string &path);
     /**
      * @brief 清除所有已加载的资源（清空所有缓存）。
      */
@@ -158,11 +121,6 @@ class ResourceManager
     std::future<void> LoadResourcesFromJson(short id);
 
     /**
-     * @brief 释放指定标识符的音乐资源。
-     * @param id 资源的标识符。
-     */
-    void FreeMusic(short id);
-    /**
      * @brief 释放指定标识符的纹理资源。
      * @param id 资源的标识符。
      */
@@ -172,18 +130,7 @@ class ResourceManager
      * @param id 资源的标识符。
      */
     void FreeFont(short id);
-    /**
-     * @brief 释放指定标识符的音效资源。
-     * @param id 资源的标识符。
-     */
-    void FreeSound(short id);
 
-    /**
-     * @brief 异步释放音乐资源。
-     * @param id 资源的标识符。
-     * @return std::future<void> 可用于等待释放完成。
-     */
-    std::future<void> FreeMusicAsync(short id);
     /**
      * @brief 异步释放纹理资源。
      * @param id 资源的标识符。
@@ -196,12 +143,6 @@ class ResourceManager
      * @return std::future<void> 可用于等待释放完成。
      */
     std::future<void> FreeFontAsync(short id);
-    /**
-     * @brief 异步释放音效资源。
-     * @param id 资源的标识符。
-     * @return std::future<void> 可用于等待释放完成。
-     */
-    std::future<void> FreeSoundAsync(short id);
 
   private:
     SDL_Renderer *renderer = nullptr; ///< SDL 渲染器指针，用于纹理转换
@@ -222,12 +163,6 @@ class ResourceManager
     void ConvertToTexture(short id, SDL_Surface *surface);
 
     // 资源缓存
-    std::mutex musicMutex_;                          ///< 音乐缓存互斥锁
-    std::unordered_map<short, MusicPtr> musicCache_; ///< 音乐缓存
-
-    std::mutex soundMutex_;                          ///< 音效缓存互斥锁
-    std::unordered_map<short, SoundPtr> soundCache_; ///< 音效缓存
-
     std::mutex textureMutex_;                            ///< 纹理缓存互斥锁
     std::unordered_map<short, TexturePtr> textureCache_; ///< 纹理缓存
 

@@ -9,7 +9,7 @@
  *
  */
 #pragma once
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <shared_mutex>
 #include <unordered_map>
 
@@ -26,12 +26,12 @@ class ControllerManager
 
     // 玩家输入查询（玩家索引从 0 开始，若玩家未连接返回默认值）
     bool IsButtonPressed(int playerIndex,
-                         SDL_GameControllerButton button) const;
-    Uint8 GetButton(int playerIndex, SDL_GameControllerButton button) const;
-    Sint16 GetAxis(int playerIndex, SDL_GameControllerAxis axis) const;
+                         SDL_GamepadButton button) const;
+    Uint8 GetButton(int playerIndex, SDL_GamepadButton button) const;
+    Sint16 GetAxis(int playerIndex, SDL_GamepadAxis axis) const;
 
     // 获取玩家对应的控制器指针（用于高级操作，如震动）
-    SDL_GameController *GetControllerForPlayer(int playerIndex) const;
+    SDL_Gamepad *GetControllerForPlayer(int playerIndex) const;
 
     // 根据设备实例 ID 获取玩家索引，未找到返回 -1
     int GetPlayerIndexFromInstanceID(SDL_JoystickID instanceId) const;
@@ -51,10 +51,10 @@ class ControllerManager
 
     struct ControllerInfo
     {
-        SDL_GameController *controller;
+        SDL_Gamepad *controller;
         SDL_JoystickID instanceId;
-        Uint8 buttonState[SDL_CONTROLLER_BUTTON_MAX];
-        Sint16 axisState[SDL_CONTROLLER_AXIS_MAX];
+        Uint8 buttonState[SDL_GAMEPAD_BUTTON_COUNT];
+        Sint16 axisState[SDL_GAMEPAD_AXIS_COUNT];
     };
 
     mutable std::shared_mutex rw_mutex_; // 保护 m_players 和 m_instanceToPlayer

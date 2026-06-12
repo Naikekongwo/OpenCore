@@ -3,7 +3,7 @@
 // OpenCore_Rect
 // OpenCore 的点和矩形类（内部 float，输出直接 round）
 
-#include "SDL2/SDL.h"
+#include "SDL3/SDL.h"
 #include <cmath>
 
 struct OpenCore_Rect
@@ -45,6 +45,16 @@ struct OpenCore_Rect
 
         return rect;
     }
+
+    operator SDL_FRect() const
+    {
+        SDL_FRect rect;
+        rect.x = x;
+        rect.y = y;
+        rect.w = w;
+        rect.h = h;
+        return rect;
+    }
 };
 
 struct OpenCore_Point
@@ -67,6 +77,14 @@ struct OpenCore_Point
         SDL_Point point;
         point.x = static_cast<int>(std::round(x));
         point.y = static_cast<int>(std::round(y));
+        return point;
+    }
+
+    operator SDL_FPoint() const
+    {
+        SDL_FPoint point;
+        point.x = x;
+        point.y = y;
         return point;
     }
 };

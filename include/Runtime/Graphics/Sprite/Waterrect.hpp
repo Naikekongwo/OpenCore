@@ -6,7 +6,7 @@
 
 #include "Runtime/Graphics/IDrawableObject/Sprite.hpp"
 
-#include <SDL2/SDL_rect.h>
+#include <SDL3/SDL_rect.h>
 #include <array>
 #include <memory>
 #include <string>

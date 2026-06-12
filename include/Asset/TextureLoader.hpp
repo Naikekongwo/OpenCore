@@ -7,10 +7,10 @@
  */
 #pragma once
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3/SDL_surface.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "Core/Helpers/Debugger.hpp"
 
@@ -44,7 +44,7 @@ using FontPtr = unique_ptr<TTF_Font, TextureDeleter>;
  *
  * @param path 图像文件的路径。
  * @return SDL_Surface* 转换后的表面指针，失败时返回 nullptr。
- *         调用者负责在不再需要时调用 SDL_FreeSurface 释放。
+ *         调用者负责在不再需要时调用 SDL_DestroySurface 释放。
  *
  * @note 若加载或转换失败，会通过 Log 输出错误信息。
  */
@@ -54,15 +54,14 @@ inline SDL_Surface *LoadSurface(const string &path)
 
     if (!surface)
     {
-        LOG("表面加载失败 {}", IMG_GetError());
+        LOG("表面加载失败 {}", SDL_GetError());
         return nullptr;
     }
     SDL_Surface *convertedSurface =
-        SDL_ConvertSurfaceFormat(surface,
-                                 SDL_PIXELFORMAT_ABGR8888, // 或其他需要的格式
-                                 0);
+        SDL_ConvertSurface(surface,
+                           SDL_PIXELFORMAT_ABGR8888);
 
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
 
     if (!convertedSurface)
     {
@@ -92,13 +91,13 @@ inline TexturePtr ConvertSurfaceToTexture(SDL_Renderer *renderer,
     if (!renderer)
     {
         LOG("渲染器为空，无法转换表面");
-        SDL_FreeSurface(surface);
+        SDL_DestroySurface(surface);
         return nullptr;
     }
 
     // 创建纹理
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
 
     if (!texture)
     {

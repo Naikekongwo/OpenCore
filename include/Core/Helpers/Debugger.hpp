@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <SDL2/SDL_Log.h>
+#include <SDL3/SDL_Log.h>
 #include <format>
 #include <source_location>
 #include <string>

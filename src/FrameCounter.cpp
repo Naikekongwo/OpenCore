@@ -22,7 +22,7 @@ void FrameCounter::Draw() // 这个帧数应该是常态显示的吧，所以未
     SDL_Color color = {255, 255, 255, 255};
 
     SDL_Surface *textSurface =
-        TTF_RenderText_Blended(font, fpsText.c_str(), color);
+        TTF_RenderText_Blended(font, fpsText.c_str(), fpsText.length(), color);
     if (!textSurface)
         return;
 
@@ -31,7 +31,7 @@ void FrameCounter::Draw() // 这个帧数应该是常态显示的吧，所以未
         SDL_CreateTextureFromSurface(GFX.getRenderer(), textSurface);
     if (!textTexture)
     {
-        SDL_FreeSurface(textSurface);
+        SDL_DestroySurface(textSurface);
         return;
     }
 
@@ -40,7 +40,7 @@ void FrameCounter::Draw() // 这个帧数应该是常态显示的吧，所以未
     dstRect.h = textSurface->h;
     GFX.Draw(textTexture, nullptr, &dstRect, 0.0, nullptr);
     SDL_DestroyTexture(textTexture);
-    SDL_FreeSurface(textSurface);
+    SDL_DestroySurface(textSurface);
 }
 void FrameCounter::onUpdate(float totalTime)
 {

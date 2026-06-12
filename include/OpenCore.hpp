@@ -33,7 +33,7 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN | DEBUG_MAP;
 #include "Core/Math/OpenCore_Spiral.hpp"
 #include "Core/Math/OpenCore_Vec3.hpp"
 #include "Core/Math/OpenCore_Wave.hpp"
-#include "Runtime/Audio/SoundEffectManager.hpp"
+
 #include "Runtime/Config/SettingsManager.hpp"
 #include "Runtime/Gameplay/Entity/EntityRegister.hpp"
 #include "Runtime/Gameplay/WorldController/WorldController.hpp"
@@ -57,7 +57,7 @@ inline ThreadManager &ThrManager = ThreadManager::getInstance();
 inline ResourceManager &ResManager = ResourceManager::getInstance();
 inline EventManager &EvtManager = EventManager::GetInstance();
 inline GraphicsManager &GFXManager = GraphicsManager::getInstance();
-inline SoundEffectManager &SFXManager = SoundEffectManager::getInstance();
+
 inline SettingsManager &SetManager = SettingsManager::getInstance();
 inline TextureMetaManager &TexMetaManager = TextureMetaManager::getInstance();
 } // namespace OpenCoreManagers

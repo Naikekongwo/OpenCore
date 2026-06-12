@@ -40,7 +40,7 @@ void ItemContainer::setBackpack(shared_ptr<Backpack> backpack)
 void ItemContainer::handlEvents(SDL_Event &event, float totalTime)
 {
     // 处理事件
-    if (event.type == SDL_MOUSEBUTTONDOWN)
+    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
     {
         auto backpack = m_backpack.lock();
         if (!backpack)

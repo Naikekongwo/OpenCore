@@ -12,8 +12,8 @@
 #ifndef _GFXCORE_H_
 #define _GFXCORE_H_
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_Log.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_Log.h>
 
 #include "Core/Math/OpenCore_Rect.hpp"
 #include <string>

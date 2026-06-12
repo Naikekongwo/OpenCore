@@ -4,7 +4,7 @@
 #include "Runtime/Animation/Manager/AnimationManager.hpp"
 #include "Runtime/Graphics/IDrawableObject/IDrawableObject.hpp"
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
-#include <SDL2/SDL_render.h>
+#include <SDL3/SDL_render.h>
 
 Symbol::Symbol(std::string_view id, short layer, short texMetaID)
     : UIElement(id.data(), layer, nullptr)

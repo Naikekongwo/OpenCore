@@ -242,7 +242,7 @@ SDL_Rect IDrawableObject::magnetRect(const SDL_Rect &srcRect) const
     int centerX = winW / 2;
     int centerY = winH / 2;
 
-    int mouseX, mouseY;
+    float mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
 
     float normX = (mouseX - centerX) / static_cast<float>(centerX);

@@ -1,5 +1,5 @@
 #include "OpenCore.hpp"
-#include <SDL2/SDL_ttf.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <memory>
 
 void Entity::Configure(const EntityInfo &eInfo)

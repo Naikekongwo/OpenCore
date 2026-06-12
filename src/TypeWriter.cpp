@@ -5,9 +5,9 @@
 #include "Runtime/Animation/Manager/AnimationManager.hpp"
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 #include "Runtime/Graphics/UI/BaseBackground.hpp"
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL_render.h>
+#include <SDL3/SDL_surface.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <cstdint>
 #include <memory>
 
@@ -67,12 +67,9 @@ void TypeWriter::handlEvents(SDL_Event &event, float totalTime)
 {
     switch (event.type)
     {
-    case SDL_WINDOWEVENT:
+    case SDL_EVENT_WINDOW_RESIZED:
     {
-        if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-        {
-            m_textureValid = false;
-        }
+        m_textureValid = false;
     }
     default:
         break;
@@ -176,8 +173,8 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
 
     auto measure = [&](const std::string &s) -> float
     {
-        SDL_Surface *surf = TTF_RenderUTF8_Blended(
-            font, s.c_str(),
+        SDL_Surface *surf = TTF_RenderText_Blended(
+            font, s.c_str(), s.length(),
             {255, 255, 255, static_cast<uint8_t>(VState->getAlpha())});
         if (!surf)
             return 0;
@@ -185,7 +182,7 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
         float scale = m_fontSize * 1.0f / surf->h;
         float w = surf->w * scale;
 
-        SDL_FreeSurface(surf);
+        SDL_DestroySurface(surf);
         return w;
     };
 
@@ -229,7 +226,7 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
     for (auto &l : m_parsedLines)
     {
         SDL_Surface *surf =
-            TTF_RenderUTF8_Blended(font, l.c_str(), {255, 255, 255, 255});
+            TTF_RenderText_Blended(font, l.c_str(), l.length(), {255, 255, 255, 255});
 
         if (!surf)
         {
@@ -242,7 +239,7 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
 
         if (!tex)
         {
-            SDL_FreeSurface(surf);
+            SDL_DestroySurface(surf);
             GFX.setRenderTarget(nullptr);
             return false;
         }
@@ -258,7 +255,7 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
         if (y + dst.h > container.h)
         {
             SDL_DestroyTexture(tex);
-            SDL_FreeSurface(surf);
+            SDL_DestroySurface(surf);
             break;
         }
 
@@ -279,7 +276,7 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
         GFX.Draw(tex, nullptr, &dst, 0.0f, nullptr);
 
         SDL_DestroyTexture(tex);
-        SDL_FreeSurface(surf);
+        SDL_DestroySurface(surf);
 
         y += m_fontSize + lineGap;
     }
