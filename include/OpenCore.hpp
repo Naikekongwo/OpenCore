@@ -46,6 +46,7 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN | DEBUG_MAP;
 
 #include "Core/Thread/ThreadManager.hpp"
 #include "World/Map/Manager/MapManager.hpp"
+#include "World/Helpers/SequentialPipeline.hpp"
 
 /**
  * @brief 负责内核部分的单例管理器类

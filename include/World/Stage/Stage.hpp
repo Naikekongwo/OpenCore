@@ -7,6 +7,7 @@
 #include <SDL3/SDL.h>
 
 #include "Runtime/Graphics/Manager/ElementManager.hpp"
+#include "World/Helpers/SequentialPipeline.hpp"
 
 #include <memory>
 
@@ -81,6 +82,8 @@ class Stage
     StageType stageType = unregistered;
     // 元素管理器
     unique_ptr<ElementManager> Elements;
+    // 顺序任务管道
+    SequentialPipeline pipeline;
 };
 
 #endif //_STAGE_H_
