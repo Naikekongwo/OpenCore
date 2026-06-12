@@ -48,7 +48,7 @@ class ElementManager
 
     // 基础方法
 
-    void handlEvents(SDL_Event &event, float totalTime);
+    void parseEvents(Event *event, float totalTime);
 
     void onUpdate(float totalTime);
 

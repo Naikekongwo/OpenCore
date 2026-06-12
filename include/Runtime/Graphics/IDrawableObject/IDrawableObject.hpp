@@ -17,6 +17,8 @@ using std::string;
 using std::string_view;
 using std::unique_ptr;
 
+class Event;
+
 class AnimationManager;
 class AnimationPipeline;
 class AnimationPipeline;
@@ -49,11 +51,11 @@ class IDrawableObject
     virtual ~IDrawableObject() = default;
 
     /**
-     * @brief 处理 SDL 事件。
-     * @param event SDL 事件引用。
+     * @brief 处理事件。
+     * @param event OpenCore 事件指针。
      * @param totalTime 从应用启动至今的总时间（毫秒）。
      */
-    virtual void handlEvents(SDL_Event &event, float totalTime);
+    virtual void parseEvents(Event *event, float totalTime);
     /**
      * @brief 每帧更新逻辑（例如动画、状态机）。
      * @param totalTime 从应用启动至今的总时间。

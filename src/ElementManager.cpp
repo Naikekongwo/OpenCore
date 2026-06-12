@@ -46,11 +46,11 @@ void ElementManager::onUpdate(float totalTime)
     }
 }
 
-void ElementManager::handlEvents(SDL_Event &event, float totalTime)
+void ElementManager::parseEvents(Event *event, float totalTime)
 {
     for (auto &element : Elements)
     {
-        element->handlEvents(event, totalTime);
+        element->parseEvents(event, totalTime);
     }
 }
 

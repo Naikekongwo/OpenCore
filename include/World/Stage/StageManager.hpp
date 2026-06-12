@@ -48,16 +48,6 @@ class StageManager
     void removeStage(StageType sType);
 
     /**
-     * @brief 处理事件的公共接口
-     * @deprecated 旧的SDL_Event
-     * @todo 该接口依赖于旧的SDL_Event，应当删除
-     * @param event
-     * @return true
-     * @return false
-     */
-    bool handlEvents(SDL_Event *event);
-
-    /**
      * @brief OpenCore的事件处理方法
      *
      * @param event

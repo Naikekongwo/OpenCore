@@ -37,10 +37,11 @@ void ItemContainer::setBackpack(shared_ptr<Backpack> backpack)
     m_backpack = backpack;
 }
 
-void ItemContainer::handlEvents(SDL_Event &event, float totalTime)
+void ItemContainer::parseEvents(Event *event, float totalTime)
 {
     // 处理事件
-    if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
+    const SDL_Event &sdlEvent = event->GetSDLEvent();
+    if (sdlEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN)
     {
         auto backpack = m_backpack.lock();
         if (!backpack)
@@ -50,8 +51,8 @@ void ItemContainer::handlEvents(SDL_Event &event, float totalTime)
         }
 
         Rect bounds = getLogicalBounds();
-        float mouseX = static_cast<float>(event.button.x);
-        float mouseY = static_cast<float>(event.button.y);
+        float mouseX = static_cast<float>(sdlEvent.button.x);
+        float mouseY = static_cast<float>(sdlEvent.button.y);
 
         // 判断鼠标是否在物品栏区域内
         if (mouseX < bounds.x || mouseX >= bounds.x + bounds.w ||

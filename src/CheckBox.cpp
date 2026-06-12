@@ -24,7 +24,7 @@ void CheckBox::Draw()
     }
 }
 
-void CheckBox::handlEvents(SDL_Event &event, float totalTime)
+void CheckBox::parseEvents(Event *event, float totalTime)
 {
     if (status == CheckBoxStatus::Creating)
     {
@@ -32,17 +32,18 @@ void CheckBox::handlEvents(SDL_Event &event, float totalTime)
     }
     else
     {
+        const SDL_Event &sdlEvent = event->GetSDLEvent();
         SDL_Point mousePos{};
         SDL_Rect bounds = getPhysicalBounds();
 
-        switch (event.type)
+        switch (sdlEvent.type)
         {
 
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         {
-            if (event.button.button == SDL_BUTTON_LEFT)
+            if (sdlEvent.button.button == SDL_BUTTON_LEFT)
             {
-                mousePos = {static_cast<int>(event.button.x), static_cast<int>(event.button.y)};
+                mousePos = {static_cast<int>(sdlEvent.button.x), static_cast<int>(sdlEvent.button.y)};
 
                 if (SDL_PointInRect(&mousePos, &bounds) &&
                     status == CheckBoxStatus::Ready)
@@ -56,7 +57,7 @@ void CheckBox::handlEvents(SDL_Event &event, float totalTime)
 
         case SDL_EVENT_MOUSE_BUTTON_UP:
         {
-            if (event.button.button == SDL_BUTTON_LEFT)
+            if (sdlEvent.button.button == SDL_BUTTON_LEFT)
             {
                 if (status == CheckBoxStatus::Checking)
                 {

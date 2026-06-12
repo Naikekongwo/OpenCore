@@ -43,7 +43,7 @@ class CheckBox : public UIElement
      * @param texture 纹理（应包含两帧：帧0 = 未勾选，帧1 = 勾选）。
      */
     CheckBox(const string &id, short layer, unique_ptr<Texture> texture);
-    void handlEvents(SDL_Event &event, float totalTime) override;
+    void parseEvents(Event *event, float totalTime) override;
     // void onUpdate(float totalTime) override;   // 未使用，注释保留
     void Draw() override;
     bool onDestroy() override;

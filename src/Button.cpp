@@ -10,17 +10,18 @@ Button::Button(const std::string &id, uint8_t layer,
 {
 }
 
-void Button::handlEvents(SDL_Event &event, float totalTime)
+void Button::parseEvents(Event *event, float totalTime)
 {
+    const SDL_Event &sdlEvent = event->GetSDLEvent();
     Point mousePos{};
     Rect bounds = getPhysicalBounds();
 
-    switch (event.type)
+    switch (sdlEvent.type)
     {
     case SDL_EVENT_MOUSE_MOTION:
     {
-        mousePos.x = static_cast<int>(event.motion.x);
-        mousePos.y = static_cast<int>(event.motion.y);
+        mousePos.x = static_cast<int>(sdlEvent.motion.x);
+        mousePos.y = static_cast<int>(sdlEvent.motion.y);
 
         if (!PointInRect(mousePos, bounds))
             State = ButtonState::Normal;
@@ -32,10 +33,10 @@ void Button::handlEvents(SDL_Event &event, float totalTime)
 
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
     {
-        if (event.button.button == SDL_BUTTON_LEFT)
+        if (sdlEvent.button.button == SDL_BUTTON_LEFT)
         {
-            mousePos.x = static_cast<int>(event.button.x);
-            mousePos.y = static_cast<int>(event.button.y);
+            mousePos.x = static_cast<int>(sdlEvent.button.x);
+            mousePos.y = static_cast<int>(sdlEvent.button.y);
 
             if (PointInRect(mousePos, bounds))
             {
@@ -47,10 +48,10 @@ void Button::handlEvents(SDL_Event &event, float totalTime)
 
     case SDL_EVENT_MOUSE_BUTTON_UP:
     {
-        if (event.button.button == SDL_BUTTON_LEFT)
+        if (sdlEvent.button.button == SDL_BUTTON_LEFT)
         {
-            mousePos.x = static_cast<int>(event.button.x);
-            mousePos.y = static_cast<int>(event.button.y);
+            mousePos.x = static_cast<int>(sdlEvent.button.x);
+            mousePos.y = static_cast<int>(sdlEvent.button.y);
 
             if (PointInRect(mousePos, bounds) && State == ButtonState::Pressed)
             {
@@ -75,6 +76,12 @@ void Button::handlEvents(SDL_Event &event, float totalTime)
 
 void Button::onUpdate(float totalTime)
 {
+    // 先更新动画（移动、淡入淡出等），确保位置和透明度正确
+    if (!isAnimeFinished())
+    {
+        AnimeManager->onUpdate(totalTime, *VState);
+    }
+
     if (!texture)
         return;
     int maxFrame = texture->Size();

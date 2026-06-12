@@ -46,7 +46,7 @@ class Scrollbar : public UIElement
      * @param buttTexID  滑块纹理的资源 ID。
      */
     Scrollbar(const string &id, short layer, short backTexID, short buttTexID);
-    void handlEvents(SDL_Event &event, float totalTime) override;
+    void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;
     void Draw() override;
     bool onDestroy() override;

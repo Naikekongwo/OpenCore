@@ -17,7 +17,7 @@ class Symbol : public UIElement
 
     void SetSymbolType(SymbolType type) { m_symbolType = type; }
 
-    void handlEvents(SDL_Event &event, float totalTime) override;
+    void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;
 
     void Draw() override;

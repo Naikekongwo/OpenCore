@@ -9,7 +9,7 @@ FrameCounter::FrameCounter(const std::string &id, uint8_t layer,
     this->AnimeManager = std::make_unique<AnimationManager>();
 }
 
-void FrameCounter::handlEvents(SDL_Event &event, float totalTime) {}
+void FrameCounter::parseEvents(Event *event, float totalTime) {}
 
 void FrameCounter::Draw() // 这个帧数应该是常态显示的吧，所以未添加可见判断
 {

@@ -63,9 +63,10 @@ void TypeWriter::Draw()
     // <真正的绘制逻辑>
 }
 
-void TypeWriter::handlEvents(SDL_Event &event, float totalTime)
+void TypeWriter::parseEvents(Event *event, float totalTime)
 {
-    switch (event.type)
+    const SDL_Event &sdlEvent = event->GetSDLEvent();
+    switch (sdlEvent.type)
     {
     case SDL_EVENT_WINDOW_RESIZED:
     {
@@ -78,7 +79,7 @@ void TypeWriter::handlEvents(SDL_Event &event, float totalTime)
     if (status != TypeWriterStatus::Creating)
     {
         if (m_baseBackground)
-            m_baseBackground->handlEvents(event, totalTime);
+            m_baseBackground->parseEvents(event, totalTime);
     }
 }
 

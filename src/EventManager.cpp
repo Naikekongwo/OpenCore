@@ -1,4 +1,5 @@
 #include "Core/Event/EventManager.hpp"
+#include "Runtime/Graphics/Manager/GraphicsManager.hpp"
 #include <SDL3/SDL.h>
 
 // 单例实现
@@ -26,6 +27,13 @@ bool EventManager::PollEvent(Event &event)
     {
         event = Event(sdlEvent);
         UpdateInputMode(event);
+
+        // 将鼠标/触控/笔事件坐标从窗口物理像素转换到渲染逻辑坐标空间，
+        // 以匹配 getPhysicalBounds() / getLogicalBounds() 使用的坐标系
+        SDL_Event &rawEvent = event.GetSDLEvent();
+        SDL_ConvertEventToRenderCoordinates(
+            GraphicsManager::getInstance().getRenderer(), &rawEvent);
+
         return true;
     }
     return false;
@@ -38,6 +46,12 @@ bool EventManager::WaitEvent(Event &event)
     {
         event = Event(sdlEvent);
         UpdateInputMode(event);
+
+        // 同上，转换事件坐标到渲染逻辑空间
+        SDL_Event &rawEvent = event.GetSDLEvent();
+        SDL_ConvertEventToRenderCoordinates(
+            GraphicsManager::getInstance().getRenderer(), &rawEvent);
+
         return true;
     }
     return false;

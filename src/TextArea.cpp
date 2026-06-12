@@ -167,9 +167,10 @@ void TextArea::refreshTextureCache()
     m_textureCache = target;
 }
 
-void TextArea::handlEvents(SDL_Event &event, float totalTime)
+void TextArea::parseEvents(Event *event, float totalTime)
 {
-    switch (event.type)
+    const SDL_Event &sdlEvent = event->GetSDLEvent();
+    switch (sdlEvent.type)
     {
     case SDL_EVENT_WINDOW_RESIZED:
     {

@@ -7,7 +7,6 @@
 class ScriptStage : public OverlayStage
 {
     ScriptStage(Timer *timer, StageManager *sController);
-    bool handlEvents(SDL_Event *event) override;
     bool parseEvents(Event *event) override;
 
     void onEnter() override;

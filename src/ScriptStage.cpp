@@ -2,13 +2,6 @@
 #include "Runtime/Graphics/Manager/ElementManager.hpp"
 #include "World/Stage/Stage.hpp"
 
-bool ScriptStage::handlEvents(SDL_Event *event)
-{
-    shared_ptr<Event> neo_event = std::make_shared<Event>(*event);
-    parseEvents(neo_event.get());
-    return true;
-}
-
 bool ScriptStage::parseEvents(Event *event)
 {
 

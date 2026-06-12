@@ -69,20 +69,21 @@ void Scrollbar::onUpdate(float totalTime)
 
 void Scrollbar::UpdateBar() { slideBar->setPosition(*value, 0.5f); }
 
-void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
+void Scrollbar::parseEvents(Event *event, float totalTime)
 {
     if (baseBack)
-        baseBack->handlEvents(event, totalTime);
+        baseBack->parseEvents(event, totalTime);
 
+    const SDL_Event &sdlEvent = event->GetSDLEvent();
     SDL_Point mousePos{};
     SDL_Rect bounds = getPhysicalBounds();
 
-    switch (event.type)
+    switch (sdlEvent.type)
     {
 
     case SDL_EVENT_MOUSE_MOTION:
     {
-        mousePos = {static_cast<int>(event.motion.x), static_cast<int>(event.motion.y)};
+        mousePos = {static_cast<int>(sdlEvent.motion.x), static_cast<int>(sdlEvent.motion.y)};
         if (!SDL_PointInRect(&mousePos, &bounds))
         {
             status = ScrollStatus::Ready;
@@ -98,9 +99,9 @@ void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
 
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
     {
-        if (event.button.button == SDL_BUTTON_LEFT)
+        if (sdlEvent.button.button == SDL_BUTTON_LEFT)
         {
-            mousePos = {static_cast<int>(event.button.x), static_cast<int>(event.button.y)};
+            mousePos = {static_cast<int>(sdlEvent.button.x), static_cast<int>(sdlEvent.button.y)};
 
             if (SDL_PointInRect(&mousePos, &bounds))
             {
@@ -113,7 +114,7 @@ void Scrollbar::handlEvents(SDL_Event &event, float totalTime)
 
     case SDL_EVENT_MOUSE_BUTTON_UP:
     {
-        if (event.button.button == SDL_BUTTON_LEFT)
+        if (sdlEvent.button.button == SDL_BUTTON_LEFT)
         {
             if (status == ScrollStatus::Following)
             {

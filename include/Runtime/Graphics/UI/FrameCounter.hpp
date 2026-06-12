@@ -26,7 +26,7 @@ class FrameCounter : public UIElement
      * @param texture 用于显示文本的纹理。
      */
     FrameCounter(const std::string &id, uint8_t layer, Texture *texture);
-    void handlEvents(SDL_Event &event, float totalTime) override;
+    void parseEvents(Event *event, float totalTime) override;
     void Draw() override;
     void onUpdate(float totalTime) override;
 

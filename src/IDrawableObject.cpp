@@ -14,7 +14,7 @@ void IDrawableObject::onUpdate(float totalTime)
     AnimeManager->onUpdate(totalTime, *VState);
 }
 
-void IDrawableObject::handlEvents(SDL_Event &event, float totalTime)
+void IDrawableObject::parseEvents(Event *event, float totalTime)
 {
     // 空置
 }

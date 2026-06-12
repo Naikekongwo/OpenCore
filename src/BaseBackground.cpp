@@ -80,9 +80,10 @@ void BaseBackground::Draw()
 
 void BaseBackground::setNativeScale(uint8_t scale) { nativeScale = scale; }
 
-void BaseBackground::handlEvents(SDL_Event &event, float totalTime)
+void BaseBackground::parseEvents(Event *event, float totalTime)
 {
-    switch (event.type)
+    const SDL_Event &sdlEvent = event->GetSDLEvent();
+    switch (sdlEvent.type)
     {
     case SDL_EVENT_WINDOW_RESIZED:
     {

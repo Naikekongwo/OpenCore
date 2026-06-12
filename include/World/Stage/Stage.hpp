@@ -37,23 +37,12 @@ class Stage
     virtual ~Stage() = default;
 
     /**
-     * @brief Stage处理公共事件的方法
-     * @deprecated 旧的，应该淘汰，因为直接引用SDL库
-     * @todo 应该被删除
-     * @param event
-     * @return true
-     * @return false
-     */
-    virtual bool handlEvents(SDL_Event *event) = 0;
-
-    /**
      * @brief OpenCore处理事件的方法
      *
      * @param event
      * @return true
      * @return false
      */
-
     virtual bool parseEvents(Event *event) = 0;
 
     virtual void onEnter() {};

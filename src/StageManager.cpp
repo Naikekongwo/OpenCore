@@ -106,19 +106,6 @@ void StageManager::onRender()
     }
 }
 
-bool StageManager::handlEvents(SDL_Event *event)
-{
-    for (auto it = stageContainer.rbegin(); it != stageContainer.rend(); ++it)
-    {
-        if (*it)
-        {
-            if ((*it)->handlEvents(event))
-                break;
-        }
-    }
-    return true;
-}
-
 bool StageManager::parseEvent(Event *event)
 {
     if (!event)

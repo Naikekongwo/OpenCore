@@ -25,7 +25,7 @@ Symbol::Symbol(std::string_view id, short layer, short texMetaID)
     neo_texture = texOpt.value();
 }
 
-void Symbol::handlEvents(SDL_Event &event, float totalTime) {}
+void Symbol::parseEvents(Event *event, float totalTime) {}
 
 void Symbol::onUpdate(float totalTime)
 {

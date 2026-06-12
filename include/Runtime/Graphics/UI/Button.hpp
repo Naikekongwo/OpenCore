@@ -44,7 +44,7 @@ class Button : public UIElement
      */
     Button(const std::string &id, uint8_t layer, unique_ptr<Texture> texture);
 
-    void handlEvents(SDL_Event &event, float totalTime) override;
+    void parseEvents(Event *event, float totalTime) override;
     void Draw() override;
     void onUpdate(float totalTime) override;
 

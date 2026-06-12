@@ -152,9 +152,7 @@ bool OpenEngine::MainLoop()
             // 处理（打开/关闭手柄、记录按键状态）
             ControllerManager::GetInstance().HandleEvent(sdlEvent);
 
-            // handlEvents 需要可变指针，从 const ref 拷贝一份
-            SDL_Event evtCopy = sdlEvent;
-            sController->handlEvents(&evtCopy);
+            sController->parseEvent(&event);
         }
 #pragma endregion
 
