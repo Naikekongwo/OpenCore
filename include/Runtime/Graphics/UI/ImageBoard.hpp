@@ -32,7 +32,6 @@ class ImageBoard : public UIElement
                unique_ptr<Texture> texture);
 
     void Draw() override;
-    void onUpdate(float totalTime) override;
 };
 
 #endif //_IMAGEBOARD_H_

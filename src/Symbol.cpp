@@ -27,26 +27,22 @@ Symbol::Symbol(std::string_view id, short layer, short texMetaID)
 
 void Symbol::parseEvents(Event *event, float totalTime) {}
 
-void Symbol::onUpdate(float totalTime)
-{
-
-    AnimeManager->onUpdate(totalTime, *VState);
-}
+void Symbol::onUpdate(float totalTime) { UIElement::onUpdate(totalTime); }
 
 void Symbol::Draw()
 {
-    if (VState->transparency == 0)
-        return;
-
     if (!neo_texture)
         return;
 
+    Rect dstRect = getLogicalBounds();
     auto &GFX = OpenCoreManagers::GFXManager.getInstance();
+    Rect VRect = GFX.getSccissorRect();
+    if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
+        return;
 
     // 应用透明度效果
     SDL_SetTextureAlphaMod(neo_texture->get(), VState->getAlpha());
 
-    Rect dstRect = getLogicalBounds();
     Rect srcRect = neo_texture->getSubRect(static_cast<int>(m_symbolType));
 
     GFX.Draw(neo_texture->get(), &srcRect, &dstRect, VState->angle, nullptr);

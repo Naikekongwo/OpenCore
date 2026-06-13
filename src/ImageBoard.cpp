@@ -12,12 +12,14 @@ ImageBoard::ImageBoard(const std::string &id, uint8_t layer,
 
 void ImageBoard::Draw()
 {
-    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
-
-    Rect VRect = GFX.getSccissorRect();
     Rect dstRect = getLogicalBounds();
+    if (!texture->get())
+        return;
+
+    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
+    Rect VRect = GFX.getSccissorRect();
     ///< 在此处不需要进行PhysicalBounds的判断，如果其逻辑位置在屏幕之外，那就没有必要渲染。
-    if (VState->getAlpha() > 0.0f && texture->get() && visible(dstRect, VRect))
+    if (VState->getAlpha() > 0.0f && visible(dstRect, VRect))
     {
         uint8_t alpha = VState->getAlpha();
         SDL_SetTextureAlphaMod(texture->get(), alpha);
@@ -27,13 +29,5 @@ void ImageBoard::Draw()
         dstRect = magnetRect(dstRect);
 
         GFX.Draw(texture->get(), &srcRect, &dstRect, VState->getAngle(), NULL);
-    }
-}
-
-void ImageBoard::onUpdate(float totalTime)
-{
-    if (!isAnimeFinished())
-    {
-        AnimeManager->onUpdate(totalTime, *VState.get());
     }
 }

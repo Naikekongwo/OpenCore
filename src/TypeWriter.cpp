@@ -19,38 +19,21 @@ TypeWriter::TypeWriter(string_view id, uint8_t layer, short fontID)
     LOG("初始化成功，ID {}, 字体ID {}", id.data(), fontID);
 }
 
-TypeWriter::~TypeWriter()
-{
-    if (m_textureCache)
-        SDL_DestroyTexture(m_textureCache);
-}
-
-bool TypeWriter::onDestroy()
-{
-    if (m_textureCache)
-    {
-        SDL_DestroyTexture(m_textureCache);
-        m_textureCache = nullptr;
-    }
-    return UIElement::onDestroy();
-}
-
 void TypeWriter::Draw()
 {
-    if (VState->getAlpha() <= 0.0f)
-        return;
-
-    if (!m_textureCache || m_textureValid == false)
+    if (!m_textureCache || m_textureDirty)
         return;
 
     if (status < TypeWriterStatus::Ready)
         return;
 
-    // <真正的绘制逻辑>
-
-    auto &GFX = OpenCoreManagers::GFXManager;
-
     Rect dstRect = getLogicalBounds();
+    auto &GFX = OpenCoreManagers::GFXManager;
+    Rect VRect = GFX.getSccissorRect();
+    if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
+        return;
+
+    // <真正的绘制逻辑>
 
     if (status != TypeWriterStatus::Creating && (m_baseBackground != nullptr))
     {
@@ -65,16 +48,8 @@ void TypeWriter::Draw()
 
 void TypeWriter::parseEvents(Event *event, float totalTime)
 {
-    const SDL_Event &sdlEvent = event->GetSDLEvent();
-    switch (sdlEvent.type)
-    {
-    case SDL_EVENT_WINDOW_RESIZED:
-    {
-        m_textureValid = false;
-    }
-    default:
-        break;
-    }
+    UIElement::parseEvents(event, totalTime);
+    // m_textureDirty 已在基类 parseEvents 中由 WINDOW_RESIZED 设置
 
     if (status != TypeWriterStatus::Creating)
     {
@@ -87,18 +62,18 @@ void TypeWriter::setText(string_view textContent)
 {
     // 设置对应的文字
     m_textContent = textContent;
-    m_textureValid = false;
+    m_textureDirty = true;
 }
 
 void TypeWriter::setFontSize(short fontSize)
 {
     m_fontSize = fontSize;
-    m_textureValid = false;
+    m_textureDirty = true;
 }
 
 void TypeWriter::onUpdate(float totalTime)
 {
-    this->AnimeManager->onUpdate(totalTime, *VState.get());
+    UIElement::onUpdate(totalTime);
     if (status == TypeWriterStatus::Creating)
     {
         if (m_enableBackground)
@@ -116,10 +91,10 @@ void TypeWriter::onUpdate(float totalTime)
 
         status = TypeWriterStatus::Ready;
     }
-    if (!m_textureValid)
+    if (m_textureDirty)
     {
         if (generateTexture(nullptr))
-            m_textureValid = true;
+            m_textureDirty = false;
     }
 
     if (m_baseBackground)
@@ -132,7 +107,7 @@ void TypeWriter::setShadow(bool enableTag, int shadowOffset)
 {
     m_shadowEnable = enableTag;
     m_shadowOffset = shadowOffset;
-    m_textureValid = false;
+    m_textureDirty = true;
 }
 
 bool TypeWriter::generateTexture(SDL_Texture *texture)
@@ -226,8 +201,8 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
 
     for (auto &l : m_parsedLines)
     {
-        SDL_Surface *surf =
-            TTF_RenderText_Blended(font, l.c_str(), l.length(), {255, 255, 255, 255});
+        SDL_Surface *surf = TTF_RenderText_Blended(font, l.c_str(), l.length(),
+                                                   {255, 255, 255, 255});
 
         if (!surf)
         {

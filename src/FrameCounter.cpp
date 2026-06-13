@@ -50,5 +50,5 @@ void FrameCounter::onUpdate(float totalTime)
         lastTime = totalTime;
     }
 
-    AnimeManager->onUpdate(totalTime, *VState.get());
+    UIElement::onUpdate(totalTime);
 }

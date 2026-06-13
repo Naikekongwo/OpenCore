@@ -47,10 +47,8 @@ class TypeWriter : public UIElement
 {
   public:
     TypeWriter(string_view id, uint8_t layer, short fontID);
-    ~TypeWriter() override;
 
     void parseEvents(Event *event, float totalTime) override;
-    bool onDestroy() override;
 
     void Draw() override;
     /**
@@ -99,14 +97,13 @@ class TypeWriter : public UIElement
 
     SDL_Color fontColor{255, 255, 255, 255};
 
-    bool m_textureValid = false;
+    // bool m_textureValid = false; — 已提升到基类 m_textureDirty
     bool m_shadowEnable = true;
     bool m_aligncenter = false;
 
     uint8_t m_shadowOffset = 2;
     uint8_t transparency = 176;
 
-    SDL_Texture *m_textureCache;
     string m_textContent;
 
     vector<string> m_parsedLines;

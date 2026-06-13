@@ -13,61 +13,43 @@ TextArea::TextArea(const string &id, uint8_t layer, short fontID)
     : UIElement(id, layer, nullptr)
 {
     this->fontID = fontID;
+    m_textureDirty = false; // 初始无文本，无需刷新
     LOG("文本框创建，字体代号:{}", fontID);
-}
-
-TextArea::~TextArea()
-{
-    if (m_textureCache)
-        SDL_DestroyTexture(m_textureCache);
-}
-
-bool TextArea::onDestroy()
-{
-    if (m_textureCache)
-    {
-        SDL_DestroyTexture(m_textureCache);
-        m_textureCache = nullptr;
-    }
-    return UIElement::onDestroy();
 }
 
 void TextArea::onUpdate(float totalTime)
 {
+    UIElement::onUpdate(totalTime);
+
     if (!isAnimeFinished())
     {
-        AnimeManager->onUpdate(totalTime, *VState.get());
         refreshTextureCache();
     }
 }
 
 void TextArea::Draw()
 {
-    if (!m_valid)
+    if (m_textureDirty)
     {
-        refreshTextureCache();
+        if (!m_textContent.empty())
+            refreshTextureCache();
+        m_textureDirty = false;
     }
     // 检查是否需要显示
     if (m_textContent.empty())
     {
         return;
     }
-    // 检查缓存
-    if (!m_textContent.empty() && m_textureCache == nullptr)
+
+    Rect dstRect = getLogicalBounds();
+    auto GFX = OpenCoreManagers::GFXManager.getInstance();
+    Rect VRect = GFX.getSccissorRect();
+    if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
     {
-        m_valid = false;
-    }
-    if (VState->getAlpha() <= 0.0f)
-    {
-        // 透明的元素无需渲染
         return;
     }
 
     // <渲染逻辑>
-
-    auto GFX = OpenCoreManagers::GFXManager.getInstance();
-
-    Rect dstRect = getLogicalBounds();
 
     GFX.Draw(m_textureCache, nullptr, &dstRect, 0.0f, nullptr);
     // <渲染逻辑>
@@ -77,14 +59,14 @@ void TextArea::setText(string_view textContent)
 {
     // 设置后刷新缓存
     m_textContent = textContent;
-    m_valid = false;
+    m_textureDirty = true;
 }
 
 void TextArea::setFontSize(short fontSize)
 {
     // 设置字号后刷新缓存
     m_fontSize = fontSize;
-    m_valid = false;
+    m_textureDirty = true;
 }
 
 void TextArea::refreshTextureCache()
@@ -111,7 +93,8 @@ void TextArea::refreshTextureCache()
     uint8_t textAlpha = VState->getAlpha();
 
     SDL_Surface *text = TTF_RenderText_Blended(
-        font, m_textContent.c_str(), m_textContent.length(), {m_colorR, m_colorG, m_colorB, textAlpha});
+        font, m_textContent.c_str(), m_textContent.length(),
+        {m_colorR, m_colorG, m_colorB, textAlpha});
     SDL_Texture *textBuffer =
         SDL_CreateTextureFromSurface(GFX.getRenderer(), text);
 
@@ -141,7 +124,8 @@ void TextArea::refreshTextureCache()
     {
         uint8_t shadowAlpha = VState->getAlpha() * transparency;
         SDL_Surface *shadowSurface = TTF_RenderText_Blended(
-            font, m_textContent.c_str(), m_textContent.length(), {0, 0, 0, shadowAlpha});
+            font, m_textContent.c_str(), m_textContent.length(),
+            {0, 0, 0, shadowAlpha});
 
         SDL_Texture *shadowBuffer =
             SDL_CreateTextureFromSurface(GFX.getRenderer(), shadowSurface);
@@ -169,16 +153,8 @@ void TextArea::refreshTextureCache()
 
 void TextArea::parseEvents(Event *event, float totalTime)
 {
-    const SDL_Event &sdlEvent = event->GetSDLEvent();
-    switch (sdlEvent.type)
-    {
-    case SDL_EVENT_WINDOW_RESIZED:
-    {
-        m_valid = false;
-    }
-    default:
-        break;
-    }
+    UIElement::parseEvents(event, totalTime);
+    // m_textureDirty 已在基类 parseEvents 中由 WINDOW_RESIZED 设置
 }
 
 void TextArea::setShadow(bool enableTag, int shadowOffset)

@@ -76,11 +76,7 @@ void Button::parseEvents(Event *event, float totalTime)
 
 void Button::onUpdate(float totalTime)
 {
-    // 先更新动画（移动、淡入淡出等），确保位置和透明度正确
-    if (!isAnimeFinished())
-    {
-        AnimeManager->onUpdate(totalTime, *VState);
-    }
+    UIElement::onUpdate(totalTime);
 
     if (!texture)
         return;
@@ -96,21 +92,22 @@ void Button::onUpdate(float totalTime)
 
 void Button::Draw()
 {
-    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
-
-    Rect VRect = GFX.getSccissorRect();
     Rect dstRect = getLogicalBounds();
+    if (!texture->get())
+        return;
 
-    if (texture->get() && visible(dstRect, VRect) && VState->getAlpha() > 0.0f)
-    {
-        SDL_SetTextureAlphaMod(texture->get(), VState->getAlpha());
+    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
+    Rect VRect = GFX.getSccissorRect();
+    if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
+        return;
 
-        auto frameIndex = (VState->getFrameIndex() > texture->Size())
-                              ? 0
-                              : VState->getFrameIndex();
+    SDL_SetTextureAlphaMod(texture->get(), VState->getAlpha());
 
-        Rect srcRect = texture->getSubRect(frameIndex);
+    auto frameIndex = (VState->getFrameIndex() > texture->Size())
+                          ? 0
+                          : VState->getFrameIndex();
 
-        GFX.Draw(texture->get(), &srcRect, &dstRect, VState->getAngle(), NULL);
-    }
+    Rect srcRect = texture->getSubRect(frameIndex);
+
+    GFX.Draw(texture->get(), &srcRect, &dstRect, VState->getAngle(), NULL);
 }

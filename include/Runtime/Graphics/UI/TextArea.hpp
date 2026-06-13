@@ -29,10 +29,8 @@ class TextArea : public UIElement
 {
   public:
     TextArea(const string &id, uint8_t layer, short fontID);
-    ~TextArea() override;
 
     void parseEvents(Event *event, float totalTime) override;
-    bool onDestroy() override;
 
     void Draw() override;
     /**
@@ -58,7 +56,7 @@ class TextArea : public UIElement
         m_colorR = r;
         m_colorG = g;
         m_colorB = b;
-        m_valid = false;
+        m_textureDirty = true;
     }
 
   private:
@@ -72,11 +70,10 @@ class TextArea : public UIElement
     bool m_shadowEnable = true;
     bool m_aligncenter = false;
 
-    bool m_valid = true;
+    // bool m_valid = true; — 已提升到基类 m_textureDirty
     uint8_t m_shadowOffset = 2;
     uint8_t transparency = 176;
 
-    SDL_Texture *m_textureCache;
     string m_textContent;
 
     /**

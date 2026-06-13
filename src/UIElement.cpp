@@ -61,10 +61,42 @@ SDL_Rect UIElement::getLogicalBounds()
 
 SDL_Rect UIElement::getPhysicalBounds() { return getLogicalBounds(); }
 
+UIElement::~UIElement()
+{
+    if (m_textureCache)
+    {
+        SDL_DestroyTexture(m_textureCache);
+        m_textureCache = nullptr;
+    }
+}
+
 bool UIElement::onDestroy()
 {
+    if (m_textureCache)
+    {
+        SDL_DestroyTexture(m_textureCache);
+        m_textureCache = nullptr;
+    }
     IDrawableObject::onDestroy();
     return true;
+}
+
+void UIElement::onUpdate(float totalTime)
+{
+    if (!isAnimeFinished())
+    {
+        IDrawableObject::onUpdate(totalTime);
+    }
+}
+
+void UIElement::parseEvents(Event *event, float totalTime)
+{
+    const SDL_Event &sdlEvent = event->GetSDLEvent();
+    // 窗口缩放 — 标记所有派生类的纹理缓存为脏污
+    if (sdlEvent.type == SDL_EVENT_WINDOW_RESIZED)
+    {
+        m_textureDirty = true;
+    }
 }
 
 UIElement::UIElement(const string &id, short layer, unique_ptr<Texture> texture)

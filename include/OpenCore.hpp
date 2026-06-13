@@ -64,17 +64,6 @@ inline TextureMetaManager &TexMetaManager = TextureMetaManager::getInstance();
 #include "Runtime/Graphics/Manager/ElementManager.hpp"
 #include "World/Stage/StageManager.hpp"
 
-/**
- * @brief 创建材质的模板
- *
- * @tparam T
- * @param id
- * @param layer
- * @param texID
- * @param frameX
- * @param frameY
- * @return unique_ptr<T>
- */
 template <typename T>
 unique_ptr<T> UI(const std::string &id, uint8_t layer, short texID,
                  short frameX, short frameY);

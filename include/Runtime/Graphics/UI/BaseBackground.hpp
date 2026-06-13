@@ -41,13 +41,11 @@ class BaseBackground : public UIElement
      */
     BaseBackground(const string &id, uint8_t layer,
                    unique_ptr<Texture> texture);
-    ~BaseBackground() override;
     bool generateTexture(SDL_Texture *texture) override;
     void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;
     void onEnter() override;
     void onExit() override;
-    bool onDestroy() override;
     void Draw() override;
 
     /**
@@ -59,5 +57,4 @@ class BaseBackground : public UIElement
   private:
     uint8_t nativeScale = 60; ///< 九宫格边角缩放基数（像素）
     BaseBackgroundStatus status = BaseBackgroundStatus::empty; ///< 当前状态
-    SDL_Texture *TextureCache = nullptr; ///< 离屏缓存纹理指针
 };

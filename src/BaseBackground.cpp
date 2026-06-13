@@ -9,37 +9,19 @@ BaseBackground::BaseBackground(const std::string &id, uint8_t layer,
                                unique_ptr<Texture> texture)
     : UIElement(id, layer, std::move(texture))
 {
-    // id、layer、texture 均已在 UIElement 初始化列表中正确设置
-    this->id = id;
-    this->layer = layer;
-
-    if (!texture)
-    {
-        LOG("纹理非法！");
-        return;
-    }
-
-    this->texture = std::move(texture);
-}
-
-BaseBackground::~BaseBackground()
-{
-    if (TextureCache)
-        SDL_DestroyTexture(TextureCache);
-}
-
-bool BaseBackground::onDestroy()
-{
-    if (TextureCache)
-    {
-        SDL_DestroyTexture(TextureCache);
-        TextureCache = nullptr;
-    }
-    return UIElement::onDestroy();
+    // UIElement 构造器已处理 id、layer、texture 的初始化
 }
 
 void BaseBackground::onUpdate(float totalTime)
 {
+    if (m_textureDirty)
+    {
+        if (m_textureCache)
+            SDL_DestroyTexture(m_textureCache);
+        m_textureCache = nullptr;
+        onEnter();
+        m_textureDirty = false;
+    }
     if (status != BaseBackgroundStatus::ready)
     {
         onEnter();
@@ -49,32 +31,34 @@ void BaseBackground::onEnter()
 {
     auto &GFX = OpenCoreManagers::GFXManager;
     SDL_Rect bounds = getLogicalBounds();
-    TextureCache = GFX.createTexture(bounds.w, bounds.h);
-    generateTexture(TextureCache);
+    m_textureCache = GFX.createTexture(bounds.w, bounds.h);
+    generateTexture(m_textureCache);
 }
 
 void BaseBackground::onExit()
 {
-    if (TextureCache)
+    if (m_textureCache)
     {
-        SDL_DestroyTexture(TextureCache);
-        TextureCache = nullptr;
+        SDL_DestroyTexture(m_textureCache);
+        m_textureCache = nullptr;
     }
 }
 
 void BaseBackground::Draw()
 {
-    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
+    if (!m_textureCache)
+        return;
 
     Rect logiRect = getLogicalBounds();
+    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
     Rect VRect = GFX.getSccissorRect();
 
-    if (TextureCache && visible(logiRect, VRect) && VState->getAlpha() > 0.0f)
+    if (VState->getAlpha() > 0.0f && visible(logiRect, VRect))
     {
         Rect dstRect = getPhysicalBounds();
 
-        SDL_SetTextureAlphaMod(TextureCache, VState->getAlpha());
-        GFX.Draw(TextureCache, NULL, &dstRect, 0, 0);
+        SDL_SetTextureAlphaMod(m_textureCache, VState->getAlpha());
+        GFX.Draw(m_textureCache, NULL, &dstRect, 0, 0);
     }
 }
 
@@ -82,23 +66,7 @@ void BaseBackground::setNativeScale(uint8_t scale) { nativeScale = scale; }
 
 void BaseBackground::parseEvents(Event *event, float totalTime)
 {
-    const SDL_Event &sdlEvent = event->GetSDLEvent();
-    switch (sdlEvent.type)
-    {
-    case SDL_EVENT_WINDOW_RESIZED:
-    {
-        auto &GFX = OpenCoreManagers::GFXManager;
-        SDL_Rect bounds = getLogicalBounds();
-        if (TextureCache)
-        {
-            SDL_DestroyTexture(TextureCache);
-        }
-        TextureCache = GFX.createTexture(bounds.w, bounds.h);
-        generateTexture(TextureCache);
-    }
-    default:
-        break;
-    }
+    UIElement::parseEvents(event, totalTime);
 }
 
 bool BaseBackground::generateTexture(SDL_Texture *target)
