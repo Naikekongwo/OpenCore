@@ -120,6 +120,13 @@ class GraphicsManager
     int DrawSDLGeometry(SDL_Texture *texture, const SDL_Vertex *vertices,
                         int num_vertices, const int *indices, int num_indices);
 
+    /**
+     * @brief 用指定颜色填充一个矩形区域
+     * @param rect  目标矩形（逻辑坐标）
+     * @param color 填充颜色（含 Alpha）
+     */
+    void FillRect(const Rect &rect, const SDL_Color &color);
+
   private:
     SDL_Window *window;
     SDL_Renderer *renderer;

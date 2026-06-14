@@ -178,3 +178,10 @@ int GraphicsManager::setRenderTarget(SDL_Texture *texture)
 
     return 0;
 }
+
+void GraphicsManager::FillRect(const Rect &rect, const SDL_Color &color)
+{
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_FRect fRect = rect;
+    SDL_RenderFillRect(renderer, &fRect);
+}

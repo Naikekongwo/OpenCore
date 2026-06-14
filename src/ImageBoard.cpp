@@ -2,6 +2,7 @@
 #include "Runtime/Graphics/UI/ImageBoard.hpp"
 #include "OpenCore.hpp"
 #include "Runtime/Animation/AnimationPipeline.hpp"
+#include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
 ImageBoard::ImageBoard(const std::string &id, uint8_t layer,
                        unique_ptr<Texture> texture)
@@ -12,6 +13,7 @@ ImageBoard::ImageBoard(const std::string &id, uint8_t layer,
 
 void ImageBoard::Draw()
 {
+    UIElement::Draw();
     Rect dstRect = getLogicalBounds();
     if (!texture->get())
         return;

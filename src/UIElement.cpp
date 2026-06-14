@@ -115,3 +115,12 @@ UIElement::UIElement(const string &id, short layer, unique_ptr<Texture> texture)
         this->texture = std::move(texture);
     }
 }
+
+void UIElement::Draw()
+{
+    if (color.a != 0)
+    {
+        SDL_Rect bounds = getLogicalBounds();
+        GraphicsManager::getInstance().FillRect(bounds, color);
+    }
+}

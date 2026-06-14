@@ -33,8 +33,11 @@ class UIElement : public IDrawableObject
     virtual SDL_Rect getLogicalBounds() override;
     virtual SDL_Rect getPhysicalBounds() override;
 
+    void setBackgroundColor(SDL_Color color) { this->color = color; }
+
     void onUpdate(float totalTime) override;
     void parseEvents(Event *event, float totalTime) override;
+    void Draw() override;
 
     /**
      * @brief 生成或更新 UI 元素的底层 SDL 纹理。
@@ -51,6 +54,8 @@ class UIElement : public IDrawableObject
         true; ///< 纹理缓存脏污标志，窗口缩放或内容变更时置 true
     SDL_Texture *m_textureCache =
         nullptr; ///< 离屏纹理缓存，由基类统一管理生命周期
+
+    SDL_Color color = {0, 0, 0, 0};
 };
 
 #endif //_UIELEMENT_H_
