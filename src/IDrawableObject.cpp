@@ -21,7 +21,7 @@ void IDrawableObject::parseEvents(Event *event, float totalTime)
 
 void IDrawableObject::setAnchor(AnchorPoint anchor) { VState->Anchor = anchor; }
 
-void IDrawableObject::setPosition(float xPercent, float yPercent)
+void IDrawableObject::setPosition(float x, float y)
 {
     SDL_Rect parentRect{0, 0, OpenCoreManagers::SetManager.getTargetWidth(),
                         OpenCoreManagers::SetManager.getTargetHeight()};
@@ -31,8 +31,12 @@ void IDrawableObject::setPosition(float xPercent, float yPercent)
         parentRect = parentContainer->getLogicalBounds();
     }
 
-    VState->Position[0] = parentRect.x + xPercent * parentRect.w;
-    VState->Position[1] = parentRect.y + parentRect.h * yPercent;
+    // 自动判断：|值| > 1.0f 视为绝对像素，否则视为相对百分比
+    float absX = (x > 1.0f || x < -1.0f) ? x : parentRect.x + x * parentRect.w;
+    float absY = (y > 1.0f || y < -1.0f) ? y : parentRect.y + y * parentRect.h;
+
+    VState->Position[0] = absX;
+    VState->Position[1] = absY;
 }
 
 SDL_Rect IDrawableObject::getPhysicalBounds()
@@ -107,8 +111,12 @@ void IDrawableObject::setScale(float w, float h)
         parentRect = parentContainer->getLogicalBounds();
     }
 
+    // 自动判断：|值| > 1.0f 视为绝对像素，否则视为相对（父容器尺寸的倍数）
+    float relW = (w > 1.0f || w < -1.0f) ? w / parentRect.w : w;
+    float relH = (h > 1.0f || h < -1.0f) ? h / parentRect.h : h;
+
     float wph = 1.0f;
-    if (w * h == 0.0f)
+    if (relW * relH == 0.0f)
     {
         // texture一定要存在才能得到原始尺寸！
         if (!texture->texture)
@@ -121,17 +129,18 @@ void IDrawableObject::setScale(float w, float h)
 
         wph = texture->getWidthHeight();
         // Ensure that not both parameters are zero!
-        absWidth = (w == 0.0f) ? h * parentRect.h * wph : parentRect.w * w;
-        absHeight = (h == 0.0f) ? (w * parentRect.w) / wph : parentRect.h * h;
+        absWidth =
+            (relW == 0.0f) ? relH * parentRect.h * wph : parentRect.w * relW;
+        absHeight =
+            (relH == 0.0f) ? (relW * parentRect.w) / wph : parentRect.h * relH;
 
         LOG("元素为固定宽高比 ID:{}, {}, {}, {}", id.c_str(), absWidth,
             absHeight, wph);
     }
     else
     {
-
-        absWidth = w * parentRect.w;
-        absHeight = h * parentRect.h;
+        absWidth = relW * parentRect.w;
+        absHeight = relH * parentRect.h;
     }
 }
 

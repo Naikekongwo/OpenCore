@@ -126,9 +126,10 @@ class IDrawableObject
     bool isAnimeFinished() const;
 
     /**
-     * @brief 设置缩放比例。
-     * @param w 宽度缩放因子（1.0 表示原始宽度）。
-     * @param h 高度缩放因子（1.0 表示原始高度）。
+     * @brief 设置缩放比例。自动判断绝对/相对：
+     *        |值| > 1.0f 视为绝对像素，否则视为父容器尺寸的倍数。
+     * @param w 宽度（相对：父容器宽度的倍数；绝对：像素值）。
+     * @param h 高度（相对：父容器高度的倍数；绝对：像素值）。
      */
     void setScale(float w, float h);
     /**
@@ -137,11 +138,13 @@ class IDrawableObject
      */
     void setAnchor(AnchorPoint anchor);
     /**
-     * @brief 设置对象的位置（使用百分比坐标）。
-     * @param xPercent 相对于父容器宽度的百分比（0.0 ~ 1.0）。
-     * @param yPercent 相对于父容器高度的百分比（0.0 ~ 1.0）。
+     * @brief 设置对象的位置。自动判断绝对/相对：
+     *        |值| > 1.0f 视为绝对像素，否则视为父容器尺寸的百分比（0.0
+     * ~ 1.0）。
+     * @param x 水平位置（相对：百分比；绝对：像素值）。
+     * @param y 垂直位置（相对：百分比；绝对：像素值）。
      */
-    void setPosition(float xPercent, float yPercent);
+    void setPosition(float x, float y);
     /**
      * @brief 设置父容器对象。
      * @param parentContainer 父对象的指针。
