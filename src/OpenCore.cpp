@@ -5,6 +5,7 @@
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_gamepad.h>
+#include <SDL3/SDL_render.h>
 #include <memory>
 
 #include "Core/Event/ControllerManager.hpp"
@@ -146,6 +147,7 @@ bool OpenEngine::MainLoop()
             sController->onRender();
             SDL_RenderPresent(renderer);
         }
+
 #pragma endregion
 
 #pragma region 帧率控制

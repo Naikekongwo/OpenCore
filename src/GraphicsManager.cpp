@@ -181,7 +181,9 @@ int GraphicsManager::setRenderTarget(SDL_Texture *texture)
 
 void GraphicsManager::FillRect(const Rect &rect, const SDL_Color &color)
 {
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     SDL_FRect fRect = rect;
     SDL_RenderFillRect(renderer, &fRect);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 }

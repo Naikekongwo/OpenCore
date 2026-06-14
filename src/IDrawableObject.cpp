@@ -235,7 +235,12 @@ bool IDrawableObject::onDestroy()
     return true;
 }
 
-void IDrawableObject::setMagnetFactor(int Margin) { magnetFactor = Margin; }
+void IDrawableObject::setMagnetFactor(int Margin)
+{
+    magnetFactor = Margin;
+    this->VState->scale[0] *= 1.05f;
+    this->VState->scale[1] *= 1.05f;
+}
 
 SDL_Rect IDrawableObject::magnetRect(const SDL_Rect &srcRect) const
 {
