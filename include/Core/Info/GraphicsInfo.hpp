@@ -6,4 +6,6 @@ struct GraphicsInfo
     int resolutionHeight = 1080;
     int targetFrameRate = 144;
     bool nearestScaling = false;
+    bool keepRatio = false;
+    bool resizable = true;
 };

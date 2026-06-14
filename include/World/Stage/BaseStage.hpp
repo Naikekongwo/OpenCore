@@ -8,6 +8,12 @@
 
 class BaseStage : public Stage
 {
+  public:
+    BaseStage(Timer *timer, StageManager *sController,
+              StageType type = baseStage)
+        : Stage(timer, sController, type)
+    {
+    }
 };
 
 #endif //_BASE_STAGE_H_

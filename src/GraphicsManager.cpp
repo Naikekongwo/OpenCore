@@ -82,6 +82,21 @@ void GraphicsManager::refreshWindowProperties()
 
     TargetWindowWidth = gameInfo->_graphicsInfo.resolutionWidth;
     TargetWindowHeight = gameInfo->_graphicsInfo.resolutionHeight;
+
+    if (!gameInfo->_graphicsInfo.resizable)
+    {
+        SDL_SetWindowResizable(window, false);
+    }
+    else if (gameInfo->_graphicsInfo.keepRatio)
+    {
+        int windowWidth = 0;
+        int windowHeight = 0;
+        SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+
+        windowWidth =
+            (TargetWindowWidth * 1.0f / TargetWindowHeight) * windowHeight;
+        SDL_SetWindowSize(window, windowWidth, windowHeight);
+    }
 }
 
 void GraphicsManager::CleanUp()
