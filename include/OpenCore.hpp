@@ -90,7 +90,6 @@ class OpenEngine final
     // 单例的获取函数
     static OpenEngine &getInstance();
 
-    bool Run();
     bool Initialize();
     bool MainLoop();
     bool CleanUp();

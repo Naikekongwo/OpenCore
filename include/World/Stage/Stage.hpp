@@ -74,6 +74,14 @@ class Stage
     ElementManager *getElementManager() const { return Elements.get(); }
 
   protected:
+    Stage() = default;
+    Stage(Timer *timer, StageManager *sController,
+          StageType type = unregistered)
+        : timer(timer), sController(sController), stageType(type)
+    {
+        Elements = std::make_unique<ElementManager>();
+    }
+
     // 先前内置的渲染器、资源管理器和音效管理器全部都被弃用了
     Timer *timer = nullptr;
     // 场景控制器

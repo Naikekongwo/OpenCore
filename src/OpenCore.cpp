@@ -16,29 +16,6 @@ OpenEngine &OpenEngine::getInstance()
     return instance;
 }
 
-bool OpenEngine::Run()
-{
-    // 初始化函数
-    if (!Initialize())
-    {
-        return false;
-    }
-
-    // 主循环
-    if (!MainLoop())
-    {
-        return false;
-    }
-
-    // 生命周期结束
-    if (!CleanUp())
-    {
-        return false;
-    }
-
-    return true;
-}
-
 bool OpenEngine::Initialize()
 {
     // 引用引擎所有管理类的命名空间
