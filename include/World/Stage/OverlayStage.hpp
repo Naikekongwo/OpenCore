@@ -9,12 +9,7 @@
 class OverlayStage : public Stage
 {
   public:
-    OverlayStage() = default;
-    OverlayStage(Timer *timer, StageManager *sController,
-                 StageType type = overlayStage)
-        : Stage(timer, sController, type)
-    {
-    }
+    OverlayStage() : Stage(overlayStage) {}
 };
 
 #endif //_OVERLAY_STAGE_H_

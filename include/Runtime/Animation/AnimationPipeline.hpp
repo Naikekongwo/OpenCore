@@ -14,8 +14,6 @@
 
 #include "Runtime/Animation/Manager/AnimationManager.hpp"
 
-#include "Runtime/Config/SettingsManager.hpp"
-
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -57,10 +55,9 @@ class AnimationPipeline
     }
     // 添加移动动画（相对百分比 0.0~1.0）
     AnimationPipeline &MoveR(float startX, float startY, float endX, float endY,
-                             float duration, bool isLooping = false)
+                             float duration, int targetW, int targetH,
+                             bool isLooping = false)
     {
-        int targetW = SettingsManager::getInstance().getTargetWidth();
-        int targetH = SettingsManager::getInstance().getTargetHeight();
         animations.push_back(std::make_shared<MoveAnimation>(
             static_cast<int16_t>(startX * targetW),
             static_cast<int16_t>(startY * targetH),
@@ -68,6 +65,7 @@ class AnimationPipeline
             static_cast<int16_t>(endY * targetH), duration, isLooping));
         return *this;
     }
+
     // 添加缩放动画
     AnimationPipeline &Scale(float startScale, float endScale, float duration,
                              bool isLooping = false)

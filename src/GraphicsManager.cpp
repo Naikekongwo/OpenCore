@@ -71,10 +71,6 @@ void GraphicsManager::refreshWindowProperties()
 
     SDL_SetWindowTitle(window, title.c_str());
 
-    OpenCoreManagers::SetManager.setTargetWidth(
-        gameInfo->_graphicsInfo.resolutionWidth,
-        gameInfo->_graphicsInfo.resolutionHeight);
-
     SDL_SetRenderLogicalPresentation(renderer,
                                      gameInfo->_graphicsInfo.resolutionWidth,
                                      gameInfo->_graphicsInfo.resolutionHeight,

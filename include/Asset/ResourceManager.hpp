@@ -35,13 +35,12 @@ using std::unique_ptr;
 /**
  * @class ResourceManager
  * @brief 资源管理单例类，提供资源加载、缓存、异步操作和释放功能。
- *
+ * @deprecated 应当逐步废弃，因为该资源管理器的支持有限
  * 该类管理两种资源类型：纹理(SDL_Texture*)、字体(TTF_Font*)。
  * 所有资源通过 short 类型的唯一标识符进行存取。支持同步和异步加载/释放，
  * 异步任务通过 ThreadManager 提交到工作线程，并返回 std::future 以便同步。
  * 资源内部使用智能指针封装，自动管理生命周期，但提供了显式的释放接口。
  */
-
 class ResourceManager
 {
   public:

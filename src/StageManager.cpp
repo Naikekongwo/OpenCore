@@ -69,6 +69,9 @@ void StageManager::processCommandQueue()
                 stageContainer[index]->onDestroy();
             }
             stageContainer[index] = std::move(task->stage_);
+            // 自动注入 timer 和 sController，对外部隐藏这两者
+            stageContainer[index]->configure(
+                OpenEngine::getInstance().getTimer(), this);
             stageContainer[index]->onEnter();
             // 完整的执行替换前的场景的回收函数
             // 然后完整的执行新场景的初始化内容

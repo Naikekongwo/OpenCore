@@ -23,8 +23,12 @@ void IDrawableObject::setAnchor(AnchorPoint anchor) { VState->Anchor = anchor; }
 
 void IDrawableObject::setPosition(float x, float y)
 {
-    SDL_Rect parentRect{0, 0, OpenCoreManagers::SetManager.getTargetWidth(),
-                        OpenCoreManagers::SetManager.getTargetHeight()};
+    SDL_Rect parentRect{
+        0, 0,
+        OpenEngine::getInstance().getGameInfo()->_graphicsInfo.resolutionWidth,
+        OpenEngine::getInstance()
+            .getGameInfo()
+            ->_graphicsInfo.resolutionHeight};
 
     if (parentContainer != nullptr)
     {
@@ -103,8 +107,12 @@ SDL_Rect IDrawableObject::getLogicalBounds()
 
 void IDrawableObject::setScale(float w, float h)
 {
-    SDL_Rect parentRect{0, 0, OpenCoreManagers::SetManager.getTargetWidth(),
-                        OpenCoreManagers::SetManager.getTargetHeight()};
+    SDL_Rect parentRect{
+        0, 0,
+        OpenEngine::getInstance().getGameInfo()->_graphicsInfo.resolutionWidth,
+        OpenEngine::getInstance()
+            .getGameInfo()
+            ->_graphicsInfo.resolutionHeight};
 
     if (parentContainer)
     {

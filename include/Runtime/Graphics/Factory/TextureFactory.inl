@@ -1,11 +1,6 @@
 // TextureFactory.inl
 // 纹理的工厂方法
-
+#pragma once
 #include "OpenCore.hpp"
+#include "Runtime/Graphics/IDrawableObject/Texture.hpp"
 
-inline unique_ptr<Texture> MakeTexture(uint8_t xCount, uint8_t yCount,
-                                       short texId)
-{
-    return std::make_unique<Texture>(
-        xCount, yCount, OpenCoreManagers::ResManager.GetTexture(texId));
-}

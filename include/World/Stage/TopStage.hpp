@@ -8,6 +8,8 @@
 
 class TopStage : public Stage
 {
+  public:
+    TopStage() : Stage(topStage) {}
 };
 
 #endif //_TOP_STAGE_H_

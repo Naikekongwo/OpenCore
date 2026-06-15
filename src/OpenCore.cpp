@@ -8,6 +8,7 @@
 #include <SDL3/SDL_render.h>
 #include <memory>
 
+#include "Asset/PackageManager.hpp"
 #include "Core/Event/ControllerManager.hpp"
 
 // 单例
@@ -21,9 +22,6 @@ bool OpenEngine::Initialize()
 {
     // 引用引擎所有管理类的命名空间
     using namespace OpenCoreManagers;
-
-    // 创建设置管理器
-    (void)SetManager;
 
     // 创建 GFX 实例
     (void)GFXManager;
@@ -50,6 +48,11 @@ bool OpenEngine::Initialize()
     // 初始化资源管理器(其初始化时需要renderer，所以必须在GFX之后初始化)
     ResManager.Init();
 
+    packageManager = std::make_unique<PackageManager>(gameInfo->gameName);
+
+    gameInfo->entranceStage->configure(timer.get(), sController.get());
+    sController->changeStage(std::move(gameInfo->entranceStage));
+
     return true;
     // 初始化成功
 }
@@ -63,10 +66,6 @@ bool OpenEngine::MainLoop()
     bool hasFocus = true;
     bool needsTitleUpdate = true;
     Event event;
-
-    SetManager.RefreshSettings();
-
-    sController->changeStage(std::move(gameInfo->entranceStage));
 
     while (!should_close)
     {

@@ -35,6 +35,24 @@ enum stageState
 class Stage
 {
   public:
+    Stage() : Stage(unregistered) {}
+
+  protected:
+    Stage(StageType type) : stageType(type)
+    {
+        Elements = std::make_unique<ElementManager>();
+    }
+
+  public:
+    /**
+     * @brief 设置场景上下文（由 StageManager 自动调用）
+     */
+    void configure(Timer *tm, StageManager *ctrl)
+    {
+        timer = tm;
+        sController = ctrl;
+    }
+
     virtual ~Stage() = default;
 
     /**
@@ -74,14 +92,6 @@ class Stage
     ElementManager *getElementManager() const { return Elements.get(); }
 
   protected:
-    Stage() = default;
-    Stage(Timer *timer, StageManager *sController,
-          StageType type = unregistered)
-        : timer(timer), sController(sController), stageType(type)
-    {
-        Elements = std::make_unique<ElementManager>();
-    }
-
     // 先前内置的渲染器、资源管理器和音效管理器全部都被弃用了
     Timer *timer = nullptr;
     // 场景控制器
