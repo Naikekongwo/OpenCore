@@ -160,10 +160,10 @@ class ResourceManager
     void ConvertToTexture(short id, SDL_Surface *surface);
 
     // 资源缓存
-    std::mutex textureMutex_;                            ///< 纹理缓存互斥锁
+    std::mutex                            textureMutex_; ///< 纹理缓存互斥锁
     std::unordered_map<short, TexturePtr> textureCache_; ///< 纹理缓存
 
-    std::mutex fontMutex_;                         ///< 字体缓存互斥锁
+    std::mutex                         fontMutex_; ///< 字体缓存互斥锁
     std::unordered_map<short, FontPtr> fontCache_; ///< 字体缓存
 };
 
