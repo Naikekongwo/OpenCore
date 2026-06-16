@@ -359,6 +359,19 @@ bool PackageManager::generatePackage(string_view manifestPath)
     output.close();
 
     LOG("资源包已生成到 {}", outputPath.string());
+
+    // 清理原始资源文件和清单
+    std::error_code ec;
+    for (const auto &node : originalNodes)
+    {
+        std::filesystem::remove(std::filesystem::path(node.filePath), ec);
+        if (ec)
+            LOG("警告：无法删除源文件 {} - {}", node.filePath, ec.message());
+    }
+    std::filesystem::remove(std::filesystem::path(manifestPath), ec);
+    if (ec)
+        LOG("警告：无法删除原始清单 {} - {}", manifestPath, ec.message());
+
     return true;
 }
 
