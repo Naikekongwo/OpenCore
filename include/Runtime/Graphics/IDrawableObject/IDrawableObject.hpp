@@ -101,7 +101,7 @@ class IDrawableObject
      * @brief 更改当前显示的贴图（纹理）。
      * @param newTexture 纹理智能指针。
      */
-    void changeTexture(unique_ptr<Texture> newTexture);
+    void changeTexture(shared_ptr<Texture> newTexture);
 
     /**
      * @brief 设置动画是否为顺序播放（而非循环或随机）。
@@ -185,17 +185,15 @@ class IDrawableObject
     DrawableConfigurator Configure();
 
   protected:
-    std::string id;                            ///< 对象唯一标识符
-    uint8_t layer = 0;                         ///< 渲染图层（0 最低）
+    std::string                  id;           ///< 对象唯一标识符
+    uint8_t                      layer = 0;    ///< 渲染图层（0 最低）
     unique_ptr<AnimationManager> AnimeManager; ///< 动画管理器
-    unique_ptr<VisualState> VState;            ///< 视觉状态（位置、缩放等）
-    uint16_t absWidth, absHeight;              ///< 原始宽高（像素）
-    unique_ptr<Texture> texture;               ///< 当前纹理
-    int magnetFactor = 0;                      ///< 磁吸因子（像素）
+    unique_ptr<VisualState>      VState;       ///< 视觉状态（位置、缩放等）
+    uint16_t                     absWidth, absHeight; ///< 原始宽高（像素）
+    shared_ptr<Texture>          texture;             ///< 当前纹理
+    int                          magnetFactor = 0;    ///< 磁吸因子（像素）
     bool absolutePosite = true; ///< 位置是否基于绝对坐标（否则为相对父容器）
     IDrawableObject *parentContainer = nullptr; ///< 父容器指针
-
-    shared_ptr<Texture> neo_texture; // 新纹理，其生命周期由外部所管理
 };
 
 #endif //_IDRAWABLE_H_

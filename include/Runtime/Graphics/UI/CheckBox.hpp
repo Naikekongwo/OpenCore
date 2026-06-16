@@ -42,7 +42,7 @@ class CheckBox : public UIElement
      * @param layer   渲染图层。
      * @param texture 纹理（应包含两帧：帧0 = 未勾选，帧1 = 勾选）。
      */
-    CheckBox(const string &id, short layer, unique_ptr<Texture> texture);
+    CheckBox(const string &id, short layer, shared_ptr<Texture> texture);
     void parseEvents(Event *event, float totalTime) override;
     // void onUpdate(float totalTime) override;   // 未使用，注释保留
     void Draw() override;
@@ -63,7 +63,7 @@ class CheckBox : public UIElement
 
   private:
     unique_ptr<ImageBoard> Img; ///< 内部图像板，负责显示勾选框图形
-    shared_ptr<bool> Value =
+    shared_ptr<bool>       Value =
         std::make_shared<bool>(false); ///< 绑定的布尔值（默认 false）
     CheckBoxStatus status = CheckBoxStatus::Creating; ///< 当前状态
 };

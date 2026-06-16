@@ -13,7 +13,7 @@ SDL_Rect UIElement::getLogicalBounds()
 
     const auto &state = *VState;
 
-    float logicalWidth = absWidth * state.scale[0];
+    float logicalWidth  = absWidth * state.scale[0];
     float logicalHeight = absHeight * state.scale[1];
 
     float logicalX = state.Position[0];
@@ -99,9 +99,9 @@ void UIElement::parseEvents(Event *event, float totalTime)
     }
 }
 
-UIElement::UIElement(const string &id, short layer, unique_ptr<Texture> texture)
+UIElement::UIElement(const string &id, short layer, shared_ptr<Texture> texture)
 {
-    this->id = id;
+    this->id    = id;
     this->layer = layer;
 
     if (!texture)
@@ -112,7 +112,7 @@ UIElement::UIElement(const string &id, short layer, unique_ptr<Texture> texture)
     }
     else
     {
-        this->texture = std::move(texture);
+        this->texture = texture;
     }
 }
 

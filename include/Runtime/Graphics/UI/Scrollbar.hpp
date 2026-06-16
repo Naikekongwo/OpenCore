@@ -77,10 +77,10 @@ class Scrollbar : public UIElement
     void UpdateBar();
 
   private:
-    short backgroundTexture = 2009;               ///< 背景纹理资源 ID
-    short buttonTexture = 2026;                   ///< 滑块纹理资源 ID
-    unique_ptr<ImageBoard> slideBar;              ///< 滑块子控件
-    unique_ptr<BaseBackground> baseBack;          ///< 背景条子控件
-    shared_ptr<float> value;                      ///< 绑定的数值（0~1）
-    ScrollStatus status = ScrollStatus::Creating; ///< 当前交互状态
+    short                      backgroundTexture = 2009; ///< 背景纹理资源 ID
+    short                      buttonTexture     = 2026; ///< 滑块纹理资源 ID
+    unique_ptr<ImageBoard>     slideBar;                 ///< 滑块子控件
+    unique_ptr<BaseBackground> baseBack;                 ///< 背景条子控件
+    shared_ptr<float>          value;                    ///< 绑定的数值（0~1）
+    ScrollStatus status = ScrollStatus::Creating;        ///< 当前交互状态
 };

@@ -81,9 +81,9 @@ class ResourceManager
     /**
      * @brief 获取已加载的字体资源。
      * @param id 资源的标识符。
-     * @return TTF_Font* 指针，若未加载则返回 nullptr。
+     * @return shared_ptr<TTF_Font> 智能指针，若未加载则为空。
      */
-    TTF_Font *GetFont(short id);
+    shared_ptr<TTF_Font> GetFont(short id);
 
     /**
      * @brief 异步加载纹理资源。

@@ -29,7 +29,7 @@ class ImageBoard : public UIElement
      * @param texture 关联的纹理智能指针（不能为空）。
      */
     ImageBoard(const std::string &id, uint8_t layer,
-               unique_ptr<Texture> texture);
+               shared_ptr<Texture> texture);
 
     void Draw() override;
 };

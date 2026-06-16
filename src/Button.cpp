@@ -5,16 +5,16 @@
 #include "Core/Math/OpenCore_Rect.hpp"
 
 Button::Button(const std::string &id, uint8_t layer,
-               unique_ptr<Texture> texture)
-    : UIElement(id, layer, std::move(texture))
+               shared_ptr<Texture> texture)
+    : UIElement(id, layer, texture)
 {
 }
 
 void Button::parseEvents(Event *event, float totalTime)
 {
     const SDL_Event &sdlEvent = event->GetSDLEvent();
-    Point mousePos{};
-    Rect bounds = getPhysicalBounds();
+    Point            mousePos{};
+    Rect             bounds = getPhysicalBounds();
 
     switch (sdlEvent.type)
     {
@@ -96,8 +96,8 @@ void Button::Draw()
     if (!texture->get())
         return;
 
-    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
-    Rect VRect = GFX.getSccissorRect();
+    auto &GFX   = OpenCoreManagers::GFXManager.getInstance();
+    Rect  VRect = GFX.getSccissorRect();
     if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
         return;
 

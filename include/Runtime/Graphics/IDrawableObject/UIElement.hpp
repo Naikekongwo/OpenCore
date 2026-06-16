@@ -27,7 +27,7 @@ class UIElement : public IDrawableObject
      * @param layer   渲染图层（值越小越靠后）。
      * @param texture 关联的纹理智能指针（可为空，例如纯容器控件）。
      */
-    UIElement(const string &id, short layer, unique_ptr<Texture> texture);
+    UIElement(const string &id, short layer, shared_ptr<Texture> texture);
     ~UIElement() override;
 
     virtual SDL_Rect getLogicalBounds() override;
@@ -47,7 +47,7 @@ class UIElement : public IDrawableObject
      * @note 基类默认返回 false，需要具体控件覆盖实现。
      */
     virtual bool generateTexture(SDL_Texture *texture) { return false; }
-    bool onDestroy() override;
+    bool         onDestroy() override;
 
   protected:
     bool m_textureDirty =

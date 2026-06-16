@@ -52,16 +52,14 @@ void ResourceManager::LoadTexture(short id, const std::string &path)
 shared_ptr<SDL_Texture> ResourceManager::GetTexture(short id)
 {
     std::lock_guard<std::mutex> lock(textureMutex_);
-    auto it = textureCache_.find(id);
+    auto                        it = textureCache_.find(id);
 
     if (it == textureCache_.end())
     {
         LOG("ResourceManager::GetTexture failed to get texture id {}", id);
         return nullptr;
     }
-    return shared_ptr<SDL_Texture>(
-        it->second.get(),
-        [](SDL_Texture *) { /* do nothing, managed by unique_ptr */ });
+    return it->second;
 }
 
 void ResourceManager::LoadFont(short id, const std::string &path, int size)
@@ -70,7 +68,7 @@ void ResourceManager::LoadFont(short id, const std::string &path, int size)
     if (fontCache_.count(id))
         return;
 
-    FontPtr font(TTF_OpenFont(path.c_str(), size));
+    FontPtr font(TTF_OpenFont(path.c_str(), size), TextureDeleter{});
     if (!font)
     {
         LOG("TTF_OpenFont failed: {}", SDL_GetError());
@@ -78,7 +76,7 @@ void ResourceManager::LoadFont(short id, const std::string &path, int size)
     }
 
     LOG("ResourceManager::LoadFont font id {} loaded successfully.", id);
-    fontCache_[id] = std::move(font);
+    fontCache_[id] = font;
 }
 
 std::future<void>
@@ -87,24 +85,24 @@ ResourceManager::LoadFontAsync(short id, const std::string &path, int size)
     return EnqueueTask([this, id, path, size] { LoadFont(id, path, size); });
 }
 
-TTF_Font *ResourceManager::GetFont(short id)
+shared_ptr<TTF_Font> ResourceManager::GetFont(short id)
 {
     std::lock_guard<std::mutex> lock(fontMutex_);
-    auto it = fontCache_.find(id);
+    auto                        it = fontCache_.find(id);
 
     if (it == fontCache_.end())
     {
         LOG("ResourceManager::GetFont failed to get font id {}", id);
         return nullptr;
     }
-    return it->second.get();
+    return it->second;
 }
 
-std::future<void> ResourceManager::LoadTextureAsync(short id,
+std::future<void> ResourceManager::LoadTextureAsync(short              id,
                                                     const std::string &path)
 {
-    auto promise = std::make_shared<std::promise<void>>();
-    std::future<void> future = promise->get_future();
+    auto              promise = std::make_shared<std::promise<void>>();
+    std::future<void> future  = promise->get_future();
 
     EnqueueTask(
         [this, id, path, promise]
@@ -175,14 +173,14 @@ void ResourceManager::ProcessMainThreadTasks()
 
 void ResourceManager::ConvertToTexture(short id, SDL_Surface *surface)
 {
-    TexturePtr texture = std::move(ConvertSurfaceToTexture(renderer, surface));
+    TexturePtr texture = ConvertSurfaceToTexture(renderer, surface);
 
     if (!texture)
     {
         LOG("Failed to convert surface!");
         return;
     }
-    textureCache_[id] = std::move(texture);
+    textureCache_[id] = texture;
     LOG("ResourceManager: texture id {} converted and stored", id);
 }
 
@@ -200,9 +198,9 @@ std::future<void> ResourceManager::LoadResourcesFromJson(short id)
         return p.get_future();
     }
 
-    char readBuffer[65536];
+    char                      readBuffer[65536];
     rapidjson::FileReadStream stream(file, readBuffer, sizeof(readBuffer));
-    rapidjson::Document doc;
+    rapidjson::Document       doc;
     doc.ParseStream(stream);
     fclose(file);
 
@@ -247,7 +245,7 @@ std::future<void> ResourceManager::LoadResourcesFromJson(short id)
             continue;
         }
 
-        std::string path = resObj["path"].GetString();
+        std::string path     = resObj["path"].GetString();
         std::string category = resObj["category"].GetString();
 
         if (category == "music")

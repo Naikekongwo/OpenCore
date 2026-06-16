@@ -35,8 +35,10 @@ PackageManager::PackageManager(string_view pName)
         std::filesystem::remove(packageManifestFile);
     }
 
-    auto packageOCData = std::filesystem::path(
-        string("data//") + string(packageName) + string("_00.ocdata"));
+    auto packageOCData =
+        std::filesystem::path(reinterpret_cast<const char8_t *>(
+            (string("data//") + string(packageName) + string("_00.ocdata"))
+                .c_str()));
     if (std::filesystem::exists(packageOCData))
     {
         packedMode = true;
@@ -149,7 +151,9 @@ std::filesystem::path PackageManager::getManifestPath(string_view packageName,
 {
     string path = string("data//") + string(packageName) +
                   (packed ? "_packagemanifest.txt" : "_manifest.txt");
-    return std::filesystem::path(path);
+    // C++20/23: 用 char8_t* 构造函数确保 UTF-8 路径在 Windows 上正确转换
+    return std::filesystem::path(
+        reinterpret_cast<const char8_t *>(path.c_str()));
 }
 
 void PackageManager::evictStaleEntries()
@@ -378,8 +382,8 @@ bool PackageManager::generatePackage(string_view manifestPath, bool cleanup)
     uint32_t manifestLength = static_cast<uint32_t>(packedManifestStr.size());
 
     // ⑥ 组装最终文件
-    auto    outputPath = std::filesystem::path(string("data//") + pkgName +
-                                               string("_00.ocdata"));
+    auto outputPath = std::filesystem::path(reinterpret_cast<const char8_t *>(
+        (string("data//") + pkgName + string("_00.ocdata")).c_str()));
     fstream output(outputPath,
                    std::ios::out | std::ios::binary | std::ios::trunc);
     if (!output.is_open())

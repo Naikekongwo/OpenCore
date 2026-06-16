@@ -27,9 +27,9 @@ void TypeWriter::Draw()
     if (status < TypeWriterStatus::Ready)
         return;
 
-    Rect dstRect = getLogicalBounds();
-    auto &GFX = OpenCoreManagers::GFXManager;
-    Rect VRect = GFX.getSccissorRect();
+    Rect  dstRect = getLogicalBounds();
+    auto &GFX     = OpenCoreManagers::GFXManager;
+    Rect  VRect   = GFX.getSccissorRect();
     if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
         return;
 
@@ -61,13 +61,13 @@ void TypeWriter::parseEvents(Event *event, float totalTime)
 void TypeWriter::setText(string_view textContent)
 {
     // 设置对应的文字
-    m_textContent = textContent;
+    m_textContent  = textContent;
     m_textureDirty = true;
 }
 
 void TypeWriter::setFontSize(short fontSize)
 {
-    m_fontSize = fontSize;
+    m_fontSize     = fontSize;
     m_textureDirty = true;
 }
 
@@ -117,8 +117,8 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
     if (VState->transparency <= 0.0f)
         return false;
 
-    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
-    Rect container = getLogicalBounds();
+    auto &GFX       = OpenCoreManagers::GFXManager.getInstance();
+    Rect  container = getLogicalBounds();
 
     auto font = OpenCoreManagers::ResManager.getInstance().GetFont(fontID);
     if (!font)
@@ -150,13 +150,13 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
     auto measure = [&](const std::string &s) -> float
     {
         SDL_Surface *surf = TTF_RenderText_Blended(
-            font, s.c_str(), s.length(),
+            font.get(), s.c_str(), s.length(),
             {255, 255, 255, static_cast<uint8_t>(VState->getAlpha())});
         if (!surf)
             return 0;
 
         float scale = m_fontSize * 1.0f / surf->h;
-        float w = surf->w * scale;
+        float w     = surf->w * scale;
 
         SDL_DestroySurface(surf);
         return w;
@@ -172,8 +172,8 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
 
     for (size_t i = 0; i < m_textContent.size();)
     {
-        size_t len = utf8Len((unsigned char)m_textContent[i]);
-        std::string ch = m_textContent.substr(i, len);
+        size_t      len = utf8Len((unsigned char)m_textContent[i]);
+        std::string ch  = m_textContent.substr(i, len);
 
         if (ch == "\n")
         {
@@ -201,8 +201,8 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
 
     for (auto &l : m_parsedLines)
     {
-        SDL_Surface *surf = TTF_RenderText_Blended(font, l.c_str(), l.length(),
-                                                   {255, 255, 255, 255});
+        SDL_Surface *surf = TTF_RenderText_Blended(
+            font.get(), l.c_str(), l.length(), {255, 255, 255, 255});
 
         if (!surf)
         {

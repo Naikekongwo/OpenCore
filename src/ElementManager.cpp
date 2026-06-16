@@ -77,7 +77,7 @@ unique_ptr<IDrawableObject> ElementManager::getElement(const std::string &id)
         if ((*it)->getID() == id)
         {
             auto element = std::move(*it);
-            it = Elements.erase(it);
+            it           = Elements.erase(it);
             return element;
         }
     }

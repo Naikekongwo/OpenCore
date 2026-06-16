@@ -5,8 +5,8 @@
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
 ImageBoard::ImageBoard(const std::string &id, uint8_t layer,
-                       unique_ptr<Texture> texture)
-    : UIElement(id, layer, std::move(texture))
+                       shared_ptr<Texture> texture)
+    : UIElement(id, layer, texture)
 {
     // id、layer、texture、AnimeManager、VState 均已在基类链中正确初始化
 }
@@ -18,8 +18,8 @@ void ImageBoard::Draw()
     if (!texture->get())
         return;
 
-    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
-    Rect VRect = GFX.getSccissorRect();
+    auto &GFX   = OpenCoreManagers::GFXManager.getInstance();
+    Rect  VRect = GFX.getSccissorRect();
     ///< 在此处不需要进行PhysicalBounds的判断，如果其逻辑位置在屏幕之外，那就没有必要渲染。
     if (VState->getAlpha() > 0.0f && visible(dstRect, VRect))
     {

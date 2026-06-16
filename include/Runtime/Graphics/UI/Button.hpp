@@ -42,7 +42,7 @@ class Button : public UIElement
      * @param texture 按钮纹理（应包含至少三帧，顺序为 Normal, Hovered,
      * Pressed）。
      */
-    Button(const std::string &id, uint8_t layer, unique_ptr<Texture> texture);
+    Button(const std::string &id, uint8_t layer, shared_ptr<Texture> texture);
 
     void parseEvents(Event *event, float totalTime) override;
     void Draw() override;
@@ -55,9 +55,9 @@ class Button : public UIElement
     void setOnClick(std::function<void()> func) { onClick = std::move(func); }
 
   protected:
-    ButtonState State = ButtonState::Normal; ///< 当前按钮状态
-    std::function<void()> onClick;           ///< 点击回调函数
-    short soundID = 1002;                    ///< 点击时播放的音效 ID
+    ButtonState           State = ButtonState::Normal; ///< 当前按钮状态
+    std::function<void()> onClick;                     ///< 点击回调函数
+    short                 soundID = 1002;              ///< 点击时播放的音效 ID
 };
 
 #endif //_BUTTON_H_

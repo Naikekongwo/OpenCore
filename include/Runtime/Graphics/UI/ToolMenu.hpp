@@ -5,7 +5,7 @@
 class ToolMenu : public UIElement
 {
   public:
-    ToolMenu(const string &id, short layer, unique_ptr<Texture> texture);
+    ToolMenu(const string &id, short layer, shared_ptr<Texture> texture);
     ~ToolMenu() override;
 
     void onUpdate(float totalTime) override;

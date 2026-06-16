@@ -12,7 +12,7 @@
 TextArea::TextArea(const string &id, uint8_t layer, short fontID)
     : UIElement(id, layer, nullptr)
 {
-    this->fontID = fontID;
+    this->fontID   = fontID;
     m_textureDirty = false; // 初始无文本，无需刷新
     LOG("文本框创建，字体代号:{}", fontID);
 }
@@ -42,8 +42,8 @@ void TextArea::Draw()
     }
 
     Rect dstRect = getLogicalBounds();
-    auto GFX = OpenCoreManagers::GFXManager.getInstance();
-    Rect VRect = GFX.getSccissorRect();
+    auto GFX     = OpenCoreManagers::GFXManager.getInstance();
+    Rect VRect   = GFX.getSccissorRect();
     if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
     {
         return;
@@ -58,21 +58,21 @@ void TextArea::Draw()
 void TextArea::setText(string_view textContent)
 {
     // 设置后刷新缓存
-    m_textContent = textContent;
+    m_textContent  = textContent;
     m_textureDirty = true;
 }
 
 void TextArea::setFontSize(short fontSize)
 {
     // 设置字号后刷新缓存
-    m_fontSize = fontSize;
+    m_fontSize     = fontSize;
     m_textureDirty = true;
 }
 
 void TextArea::refreshTextureCache()
 {
-    Rect loRect = getLogicalBounds();
-    auto &GFX = GraphicsManager::getInstance();
+    Rect  loRect = getLogicalBounds();
+    auto &GFX    = GraphicsManager::getInstance();
 
     auto target = GFX.createTexture(loRect.w, loRect.h);
 
@@ -93,7 +93,7 @@ void TextArea::refreshTextureCache()
     uint8_t textAlpha = VState->getAlpha();
 
     SDL_Surface *text = TTF_RenderText_Blended(
-        font, m_textContent.c_str(), m_textContent.length(),
+        font.get(), m_textContent.c_str(), m_textContent.length(),
         {m_colorR, m_colorG, m_colorB, textAlpha});
     SDL_Texture *textBuffer =
         SDL_CreateTextureFromSurface(GFX.getRenderer(), text);
@@ -122,9 +122,9 @@ void TextArea::refreshTextureCache()
 
     if (m_shadowEnable)
     {
-        uint8_t shadowAlpha = VState->getAlpha() * transparency;
+        uint8_t      shadowAlpha   = VState->getAlpha() * transparency;
         SDL_Surface *shadowSurface = TTF_RenderText_Blended(
-            font, m_textContent.c_str(), m_textContent.length(),
+            font.get(), m_textContent.c_str(), m_textContent.length(),
             {0, 0, 0, shadowAlpha});
 
         SDL_Texture *shadowBuffer =

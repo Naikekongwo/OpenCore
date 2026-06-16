@@ -56,7 +56,7 @@ class TypeWriter : public UIElement
      *
      * @param textContent
      */
-    void setText(std::string_view textContent);
+    void   setText(std::string_view textContent);
     string getText() { return m_textContent; }
 
     /**
@@ -91,25 +91,25 @@ class TypeWriter : public UIElement
     bool generateTexture(SDL_Texture *texture) override;
 
   private:
-    short fontID = 9001;
+    short fontID     = 9001;
     short m_fontSize = 20;
-    short lineGap = 2;
+    short lineGap    = 2;
 
     SDL_Color fontColor{255, 255, 255, 255};
 
     // bool m_textureValid = false; — 已提升到基类 m_textureDirty
     bool m_shadowEnable = true;
-    bool m_aligncenter = false;
+    bool m_aligncenter  = false;
 
     uint8_t m_shadowOffset = 2;
-    uint8_t transparency = 176;
+    uint8_t transparency   = 176;
 
     string m_textContent;
 
     vector<string> m_parsedLines;
 
     TypeWriterStatus status = TypeWriterStatus::Creating;
-    TypeWriterMode mode = TypeWriterMode::TypeWriter;
+    TypeWriterMode   mode   = TypeWriterMode::TypeWriter;
 
     unique_ptr<BaseBackground> m_baseBackground;
 

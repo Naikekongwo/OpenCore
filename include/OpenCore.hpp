@@ -14,11 +14,11 @@
 
 enum DebugFlags
 {
-    DEBUG_OFF = 0,
-    DEBUG_WATERWAVE = 1 << 0,  // 0x01
-    DEBUG_MAIN = 1 << 1,       // 0x02
+    DEBUG_OFF        = 0,
+    DEBUG_WATERWAVE  = 1 << 0, // 0x01
+    DEBUG_MAIN       = 1 << 1, // 0x02
     DEBUG_PASS_VIDEO = 1 << 2, // 0x04
-    DEBUG_COPYRIGHT = 1 << 3
+    DEBUG_COPYRIGHT  = 1 << 3
 };
 
 constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN;
@@ -49,10 +49,10 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN;
  */
 namespace OpenCoreManagers
 {
-inline ThreadManager &ThrManager = ThreadManager::getInstance();
-inline ResourceManager &ResManager = ResourceManager::getInstance();
-inline EventManager &EvtManager = EventManager::GetInstance();
-inline GraphicsManager &GFXManager = GraphicsManager::getInstance();
+inline ThreadManager      &ThrManager     = ThreadManager::getInstance();
+inline ResourceManager    &ResManager     = ResourceManager::getInstance();
+inline EventManager       &EvtManager     = EventManager::GetInstance();
+inline GraphicsManager    &GFXManager     = GraphicsManager::getInstance();
 inline TextureMetaManager &TexMetaManager = TextureMetaManager::getInstance();
 } // namespace OpenCoreManagers
 
@@ -100,7 +100,7 @@ class OpenEngine final
     bool GameRegistry(unique_ptr<GameInfo> gameInfo);
 
     // 工具函数
-    Timer *getTimer() const noexcept { return timer.get(); }
+    Timer        *getTimer() const noexcept { return timer.get(); }
     StageManager *getStageController() const noexcept
     {
         return sController.get();
@@ -113,9 +113,9 @@ class OpenEngine final
     GameInfo *getGameInfo() { return gameInfo.get(); }
 
   private:
-    unique_ptr<GameInfo> gameInfo = std::make_unique<GameInfo>();
-    unique_ptr<StageManager> sController;
-    unique_ptr<Timer> timer;
+    unique_ptr<GameInfo>       gameInfo = std::make_unique<GameInfo>();
+    unique_ptr<StageManager>   sController;
+    unique_ptr<Timer>          timer;
     unique_ptr<PackageManager> packageManager;
 };
 

@@ -59,7 +59,7 @@ SDL_Rect IDrawableObject::getLogicalBounds()
 
     const auto &state = *VState;
 
-    float logicalWidth = absWidth * state.scale[0];
+    float logicalWidth  = absWidth * state.scale[0];
     float logicalHeight = absHeight * state.scale[1];
 
     float logicalX = state.Position[0];
@@ -147,7 +147,7 @@ void IDrawableObject::setScale(float w, float h)
     }
     else
     {
-        absWidth = relW * parentRect.w;
+        absWidth  = relW * parentRect.w;
         absHeight = relH * parentRect.h;
     }
 }
@@ -169,11 +169,11 @@ bool IDrawableObject::isAnimeFinished() const
     return AnimeManager->isFinished();
 }
 
-void IDrawableObject::changeTexture(unique_ptr<Texture> newTexture)
+void IDrawableObject::changeTexture(shared_ptr<Texture> newTexture)
 {
     if (newTexture)
     {
-        texture = std::move(newTexture);
+        texture = newTexture;
     }
     else
     {
@@ -183,27 +183,27 @@ void IDrawableObject::changeTexture(unique_ptr<Texture> newTexture)
 
 IDrawableObject::IDrawableObject()
 {
-    this->id = "null";
+    this->id    = "null";
     this->layer = 0;
 
     AnimeManager = std::make_unique<AnimationManager>();
-    VState = std::make_unique<VisualState>();
+    VState       = std::make_unique<VisualState>();
 
     // 此构造器理应给那些不需要纹理的元素使用，所以不加载纹理
 }
 
 IDrawableObject::IDrawableObject(string_view id, short layer, short textureID)
 {
-    this->id = id;
+    this->id    = id;
     this->layer = layer;
 
     AnimeManager = std::make_unique<AnimationManager>();
-    VState = std::make_unique<VisualState>();
+    VState       = std::make_unique<VisualState>();
 
     auto texOpt = OpenCoreManagers::TexMetaManager.getTexture(textureID);
     if (texOpt != std::nullopt)
     {
-        neo_texture = texOpt.value();
+        texture = texOpt.value();
     }
     else
     {
@@ -217,7 +217,7 @@ void IDrawableObject::setParentContainer(IDrawableObject *parentContainer)
     if (parentContainer != nullptr)
     {
 
-        absolutePosite = false;
+        absolutePosite        = false;
         this->parentContainer = parentContainer;
 
         this->layer = parentContainer->getLayer() + 1;

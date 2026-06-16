@@ -6,8 +6,8 @@
 #include <memory>
 
 BaseBackground::BaseBackground(const std::string &id, uint8_t layer,
-                               unique_ptr<Texture> texture)
-    : UIElement(id, layer, std::move(texture))
+                               shared_ptr<Texture> texture)
+    : UIElement(id, layer, texture)
 {
     // UIElement 构造器已处理 id、layer、texture 的初始化
 }
@@ -29,9 +29,9 @@ void BaseBackground::onUpdate(float totalTime)
 }
 void BaseBackground::onEnter()
 {
-    auto &GFX = OpenCoreManagers::GFXManager;
+    auto    &GFX    = OpenCoreManagers::GFXManager;
     SDL_Rect bounds = getLogicalBounds();
-    m_textureCache = GFX.createTexture(bounds.w, bounds.h);
+    m_textureCache  = GFX.createTexture(bounds.w, bounds.h);
     generateTexture(m_textureCache);
 }
 
@@ -49,9 +49,9 @@ void BaseBackground::Draw()
     if (!m_textureCache)
         return;
 
-    Rect logiRect = getLogicalBounds();
-    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
-    Rect VRect = GFX.getSccissorRect();
+    Rect  logiRect = getLogicalBounds();
+    auto &GFX      = OpenCoreManagers::GFXManager.getInstance();
+    Rect  VRect    = GFX.getSccissorRect();
 
     if (VState->getAlpha() > 0.0f && visible(logiRect, VRect))
     {

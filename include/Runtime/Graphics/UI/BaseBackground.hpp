@@ -40,7 +40,7 @@ class BaseBackground : public UIElement
      * @param texture 原始纹理（将被分割为 3x3 网格）。
      */
     BaseBackground(const string &id, uint8_t layer,
-                   unique_ptr<Texture> texture);
+                   shared_ptr<Texture> texture);
     bool generateTexture(SDL_Texture *texture) override;
     void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;
@@ -55,6 +55,6 @@ class BaseBackground : public UIElement
     void setNativeScale(uint8_t scale);
 
   private:
-    uint8_t nativeScale = 60; ///< 九宫格边角缩放基数（像素）
+    uint8_t              nativeScale = 60; ///< 九宫格边角缩放基数（像素）
     BaseBackgroundStatus status = BaseBackgroundStatus::empty; ///< 当前状态
 };

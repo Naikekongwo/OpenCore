@@ -8,9 +8,10 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 #include <SDL3/SDL_surface.h>
+#include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
+
 
 #include "Core/Helpers/Debugger.hpp"
 
@@ -18,6 +19,7 @@
 #include <source_location>
 #include <string>
 
+using std::shared_ptr;
 using std::string;
 using std::unique_ptr;
 
@@ -25,7 +27,7 @@ using std::unique_ptr;
  * @struct TextureDeleter
  * @brief SDL_Texture 和 TTF_Font 的智能指针删除器。
  *
- * 用于 unique_ptr 的自定义删除器，确保资源正确释放。
+ * 用于 shared_ptr 的自定义删除器，确保资源正确释放。
  */
 struct TextureDeleter
 {
@@ -33,8 +35,8 @@ struct TextureDeleter
     void operator()(TTF_Font *font) const;
 };
 
-using TexturePtr = unique_ptr<SDL_Texture, TextureDeleter>;
-using FontPtr = unique_ptr<TTF_Font, TextureDeleter>;
+using TexturePtr = shared_ptr<SDL_Texture>;
+using FontPtr    = shared_ptr<TTF_Font>;
 
 /**
  * @brief 从文件加载图像并转换为优化格式的表面。
@@ -58,8 +60,7 @@ inline SDL_Surface *LoadSurface(const string &path)
         return nullptr;
     }
     SDL_Surface *convertedSurface =
-        SDL_ConvertSurface(surface,
-                           SDL_PIXELFORMAT_ABGR8888);
+        SDL_ConvertSurface(surface, SDL_PIXELFORMAT_ABGR8888);
 
     SDL_DestroySurface(surface);
 
@@ -86,7 +87,7 @@ inline SDL_Surface *LoadSurface(const string &path)
  * 参数无论转换成功与否都会被释放（成功时内部释放，失败时手动释放）。
  */
 inline TexturePtr ConvertSurfaceToTexture(SDL_Renderer *renderer,
-                                          SDL_Surface *surface)
+                                          SDL_Surface  *surface)
 {
     if (!renderer)
     {
@@ -105,5 +106,5 @@ inline TexturePtr ConvertSurfaceToTexture(SDL_Renderer *renderer,
         return nullptr;
     }
 
-    return TexturePtr(texture);
+    return shared_ptr<SDL_Texture>(texture, TextureDeleter{});
 }

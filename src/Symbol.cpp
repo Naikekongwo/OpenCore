@@ -20,9 +20,9 @@ Symbol::Symbol(std::string_view id, short layer, short texMetaID)
     }
 
     this->AnimeManager = std::make_unique<AnimationManager>();
-    this->VState = std::make_unique<VisualState>();
+    this->VState       = std::make_unique<VisualState>();
 
-    neo_texture = texOpt.value();
+    texture = texOpt.value();
 }
 
 void Symbol::parseEvents(Event *event, float totalTime) {}
@@ -31,22 +31,22 @@ void Symbol::onUpdate(float totalTime) { UIElement::onUpdate(totalTime); }
 
 void Symbol::Draw()
 {
-    if (!neo_texture)
+    if (!texture)
         return;
 
-    Rect dstRect = getLogicalBounds();
-    auto &GFX = OpenCoreManagers::GFXManager.getInstance();
-    Rect VRect = GFX.getSccissorRect();
+    Rect  dstRect = getLogicalBounds();
+    auto &GFX     = OpenCoreManagers::GFXManager.getInstance();
+    Rect  VRect   = GFX.getSccissorRect();
     if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
         return;
 
     // 应用透明度效果
-    SDL_SetTextureAlphaMod(neo_texture->get(), VState->getAlpha());
+    SDL_SetTextureAlphaMod(texture->get(), VState->getAlpha());
 
-    Rect srcRect = neo_texture->getSubRect(static_cast<int>(m_symbolType));
+    Rect srcRect = texture->getSubRect(static_cast<int>(m_symbolType));
 
-    GFX.Draw(neo_texture->get(), &srcRect, &dstRect, VState->angle, nullptr);
+    GFX.Draw(texture->get(), &srcRect, &dstRect, VState->angle, nullptr);
 
     // 撤销透明度效果
-    SDL_SetTextureAlphaMod(neo_texture->get(), 255);
+    SDL_SetTextureAlphaMod(texture->get(), 255);
 }
