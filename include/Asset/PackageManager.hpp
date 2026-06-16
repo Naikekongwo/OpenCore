@@ -116,14 +116,13 @@ class PackageManager final
 
     bool registerResource(ResourceType rType, string_view name,
                           string_view filePath);
+    bool registerResource(ResourceNode newBee);
+    bool registerResources(std::initializer_list<ResourceNode> newBees);
 
   private:
     string packageName;
 
     vector<ResourceNode> resourceManifestBuffer;
-
-    mutex textureMutex;
-    mutex fontMutex;
 
     bool contains(ResourceNode newBee)
     {

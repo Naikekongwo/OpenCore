@@ -105,6 +105,10 @@ class OpenEngine final
     {
         return sController.get();
     }
+    PackageManager *getPackageManager() const noexcept
+    {
+        return packageManager.get();
+    }
 
     GameInfo *getGameInfo() { return gameInfo.get(); }
 

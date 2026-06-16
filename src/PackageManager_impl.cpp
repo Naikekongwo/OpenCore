@@ -3,6 +3,7 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
+#include <initializer_list>
 #include <stdexcept>
 
 using std::fstream;
@@ -41,17 +42,22 @@ PackageManager::PackageManager(string_view pName)
 bool PackageManager::registerResource(ResourceType rType, string_view name,
                                       string_view filePath)
 {
-    if (packageName.empty())
-    {
-        LOG("包名为空，无法确定清单位置");
-        return false;
-    }
-
     ResourceNode newBee;
 
     newBee.rType = rType;
     newBee.name = name;
     newBee.filePath = filePath;
+
+    return registerResource(newBee);
+}
+
+bool PackageManager::registerResource(ResourceNode newBee)
+{
+    if (packageName.empty())
+    {
+        LOG("包名为空，无法确定清单位置");
+        return false;
+    }
 
     if (contains(newBee))
         return true;
@@ -73,4 +79,15 @@ bool PackageManager::registerResource(ResourceType rType, string_view name,
 
     manifest.close();
     return true;
+}
+
+bool PackageManager::registerResources(
+    std::initializer_list<ResourceNode> newBees)
+{
+    bool result = true;
+    for (const auto &entry : newBees)
+    {
+        result &= registerResource(entry);
+    }
+    return result;
 }
