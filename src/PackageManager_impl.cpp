@@ -1,5 +1,6 @@
 #include "Asset/PackageManager.hpp"
 #include "OpenCore.hpp"
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <exception>
@@ -41,7 +42,8 @@ PackageManager::PackageManager(string_view pName)
         packedMode = true;
 
         // 读取魔数判断资源包状态
-        char    magic[4]{};
+        char magic[4]{};
+
         fstream pkgFile(packageOCData, std::ios::in | std::ios::binary);
         if (pkgFile.is_open())
         {
@@ -89,8 +91,8 @@ bool PackageManager::registerResource(ResourceType rType, string_view name,
 {
     ResourceNode resource;
 
-    resource.rType = rType;
-    resource.name = name;
+    resource.rType    = rType;
+    resource.name     = name;
     resource.filePath = filePath;
 
     return registerResource(resource);
@@ -150,12 +152,43 @@ std::filesystem::path PackageManager::getManifestPath(string_view packageName,
     return std::filesystem::path(path);
 }
 
-bool PackageManager::contains(ResourceNode target)
+void PackageManager::evictStaleEntries()
 {
-    for (const auto &entry : resourceManifestBuffer)
+    if (!timer || resourceManifestBuffer.empty())
+        return;
+
+    float now = timer->getTotalTime();
+
+    // 末尾是 expireTime 最小的（最老），从后往前删
+    while (!resourceManifestBuffer.empty() &&
+           now > resourceManifestBuffer.back().expireTime)
     {
-        if (entry == target)
+        resourceManifestBuffer.pop_back();
+    }
+}
+
+void PackageManager::onUpdate() { evictStaleEntries(); }
+
+void PackageManager::onDestroy() { resourceManifestBuffer.clear(); }
+
+bool PackageManager::contains(ResourceNode target, bool nameOnly)
+{
+    auto matches = [&](const ResourceNode &entry) -> bool
+    { return nameOnly ? (entry.name == target.name) : (entry == target); };
+
+    for (auto &entry : resourceManifestBuffer)
+    {
+        if (matches(entry))
+        {
+            if (timer)
+                entry.expireTime = timer->getTotalTime() + 15.0f;
+            // 按 expireTime 降序排序，最近使用的排前面
+            std::sort(resourceManifestBuffer.begin(),
+                      resourceManifestBuffer.end(),
+                      [](const ResourceNode &a, const ResourceNode &b)
+                      { return a.expireTime > b.expireTime; });
             return true;
+        }
     }
 
     // 缓冲中未命中，尝试从清单文件中按需加载
@@ -169,10 +202,16 @@ bool PackageManager::contains(ResourceNode target)
             if (!line.empty())
             {
                 ResourceNode node = ResourceNode::deserialize(line);
-                if (node == target)
+                if (matches(node))
                 {
                     // 从文件加载到内存缓冲
+                    if (timer)
+                        target.expireTime = timer->getTotalTime() + 15.0f;
                     resourceManifestBuffer.push_back(target);
+                    std::sort(resourceManifestBuffer.begin(),
+                              resourceManifestBuffer.end(),
+                              [](const ResourceNode &a, const ResourceNode &b)
+                              { return a.expireTime > b.expireTime; });
                     return true;
                 }
             }
@@ -235,9 +274,9 @@ bool PackageManager::extractManifest(string_view packagePath)
     string fileName =
         (slashPos == string::npos) ? pathStr : pathStr.substr(slashPos + 1);
     auto   underscorePos = fileName.find('_');
-    string pkgName = (underscorePos == string::npos)
-                         ? fileName.substr(0, fileName.find_last_of('.'))
-                         : fileName.substr(0, underscorePos);
+    string pkgName       = (underscorePos == string::npos)
+                               ? fileName.substr(0, fileName.find_last_of('.'))
+                               : fileName.substr(0, underscorePos);
 
     // ④ 写入 data//xxxx_packagemanifest.txt
     auto    destPath = getManifestPath(pkgName, true);
@@ -254,7 +293,7 @@ bool PackageManager::extractManifest(string_view packagePath)
     return true;
 }
 
-bool PackageManager::generatePackage(string_view manifestPath)
+bool PackageManager::generatePackage(string_view manifestPath, bool cleanup)
 {
     // 读取原始清单
     fstream manifestFile(string(manifestPath), std::ios::in | std::ios::binary);
@@ -309,9 +348,9 @@ bool PackageManager::generatePackage(string_view manifestPath)
         resFile.close();
 
         ResourceNode exportNode;
-        exportNode.rType = node.rType;
-        exportNode.name = node.name;
-        exportNode.filePath = ""; // 打包后路径为空
+        exportNode.rType      = node.rType;
+        exportNode.name       = node.name;
+        exportNode.filePath   = ""; // 打包后路径为空
         exportNode.startIndex = static_cast<int>(currentOffset);
         exportNode.endIndex = static_cast<int>(currentOffset + content.size());
         exportNodes.push_back(exportNode);
@@ -331,9 +370,9 @@ bool PackageManager::generatePackage(string_view manifestPath)
     string fileName =
         (slashPos == string::npos) ? pathStr : pathStr.substr(slashPos + 1);
     auto   underscorePos = fileName.find('_');
-    string pkgName = (underscorePos == string::npos)
-                         ? fileName.substr(0, fileName.find_last_of('.'))
-                         : fileName.substr(0, underscorePos);
+    string pkgName       = (underscorePos == string::npos)
+                               ? fileName.substr(0, fileName.find_last_of('.'))
+                               : fileName.substr(0, underscorePos);
 
     // ⑤ 计算 manifest 长度
     uint32_t manifestLength = static_cast<uint32_t>(packedManifestStr.size());
@@ -360,17 +399,21 @@ bool PackageManager::generatePackage(string_view manifestPath)
 
     LOG("资源包已生成到 {}", outputPath.string());
 
-    // 清理原始资源文件和清单
-    std::error_code ec;
-    for (const auto &node : originalNodes)
+    if (cleanup)
     {
-        std::filesystem::remove(std::filesystem::path(node.filePath), ec);
+        // 清理原始资源文件和清单
+        std::error_code ec;
+        for (const auto &node : originalNodes)
+        {
+            std::filesystem::remove(std::filesystem::path(node.filePath), ec);
+            if (ec)
+                LOG("警告：无法删除源文件 {} - {}", node.filePath,
+                    ec.message());
+        }
+        std::filesystem::remove(std::filesystem::path(manifestPath), ec);
         if (ec)
-            LOG("警告：无法删除源文件 {} - {}", node.filePath, ec.message());
+            LOG("警告：无法删除原始清单 {} - {}", manifestPath, ec.message());
     }
-    std::filesystem::remove(std::filesystem::path(manifestPath), ec);
-    if (ec)
-        LOG("警告：无法删除原始清单 {} - {}", manifestPath, ec.message());
 
     return true;
 }
@@ -419,7 +462,7 @@ bool PackageManager::enablePackage(string_view packagePath)
     // 计算资源数据区
     // 文件结构：[OCCP(4)][manifest(manifestLength)][资源数据][4字节]
     size_t dataOffset = 4 + manifestLength;
-    size_t dataSize = static_cast<size_t>(fileSize) - 4 - manifestLength - 4;
+    size_t dataSize   = static_cast<size_t>(fileSize) - 4 - manifestLength - 4;
 
     // 读取资源数据
     vector<char> resourceData(dataSize);

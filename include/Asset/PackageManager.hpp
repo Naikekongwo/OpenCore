@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+#include "Core/Timer.hpp"
+
 using std::fstream;
 using std::mutex;
 using std::shared_ptr;
@@ -40,9 +42,10 @@ struct ResourceNode
 {
     ResourceType rType;
     string       name;
-    string       filePath;
-    int          startIndex = 0;
-    int          endIndex = 0;
+    string       filePath;       // 此参数在生成资源包时舍弃
+    int          startIndex = 0; // 此参数不由外部显式注册
+    int          endIndex   = 0; // 此参数不由外部显式注册
+    float expireTime = 0.0f;     // 此参数与序列化、反序列化无关（不储存到本地）
 
     /// 序列化为一行字符串（CSV格式）
     string serialize() const
@@ -69,9 +72,9 @@ struct ResourceNode
     {
         ResourceNode node;
         // 按逗号分割
-        auto firstComma = line.find(',');
+        auto firstComma  = line.find(',');
         auto secondComma = line.find(',', firstComma + 1);
-        auto thirdComma = line.find(',', secondComma + 1);
+        auto thirdComma  = line.find(',', secondComma + 1);
         auto fourthComma = line.find(',', thirdComma + 1);
 
         string typeStr(line.substr(0, firstComma));
@@ -95,7 +98,8 @@ struct ResourceNode
     bool operator==(const ResourceNode &other) const
     {
         return rType == other.rType && name == other.name &&
-               filePath == other.filePath;
+               filePath == other.filePath && startIndex == other.startIndex &&
+               endIndex == other.endIndex;
     }
 };
 
@@ -131,15 +135,20 @@ class PackageManager final
   private:
     string packageName;
     bool   packedMode = false;
+    Timer *timer      = nullptr;
 
     vector<ResourceNode> resourceManifestBuffer;
+
+    static constexpr float EVICT_TTL = 10.0f; // 进行资源删除轮询的时间
+
+    void evictStaleEntries();
 
     static std::filesystem::path getManifestPath(string_view packageName,
                                                  bool        packed);
 
-    bool contains(ResourceNode target);
+    bool contains(ResourceNode target, bool nameOnly = false);
 
     bool extractManifest(string_view packagePath);
-    bool generatePackage(string_view manifestPath);
+    bool generatePackage(string_view manifestPath, bool cleanup = true);
     bool enablePackage(string_view packagePath);
 };
