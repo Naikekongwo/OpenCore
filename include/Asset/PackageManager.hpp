@@ -134,7 +134,8 @@ class PackageManager final
 
     vector<ResourceNode> resourceManifestBuffer;
 
-    static string getManifestPath(string_view packageName, bool packed);
+    static std::filesystem::path getManifestPath(string_view packageName,
+                                                 bool        packed);
 
     bool contains(ResourceNode target);
 

@@ -28,14 +28,14 @@ PackageManager::PackageManager(string_view pName)
     packageName = pName;
 
     // 清除旧的非打包模式清单文件
-    string packageManifestFile = getManifestPath(packageName, false);
+    auto packageManifestFile = getManifestPath(packageName, false);
     if (std::filesystem::exists(packageManifestFile))
     {
         std::filesystem::remove(packageManifestFile);
     }
 
-    string packageOCData =
-        string("data//") + packageName + string("_00.ocdata");
+    auto packageOCData = std::filesystem::path(
+        string("data//") + string(packageName) + string("_00.ocdata"));
     if (std::filesystem::exists(packageOCData))
     {
         packedMode = true;
@@ -49,23 +49,24 @@ PackageManager::PackageManager(string_view pName)
             pkgFile.close();
         }
 
-        string packedManifest = getManifestPath(packageName, true);
+        auto packedManifest = getManifestPath(packageName, true);
 
         if (std::strncmp(magic, "OCCP", 4) == 0)
         {
-            extractManifest(packageOCData);
-            LOG("初始化成功，已从资源包提取清单到 {}", packedManifest);
+            extractManifest(packageOCData.string());
+            LOG("初始化成功，已从资源包提取清单到 {}", packedManifest.string());
         }
         else if (std::strncmp(magic, "DATA", 4) == 0)
         {
             if (!std::filesystem::exists(packedManifest))
             {
                 LOG("错误：资源包已启用但本地找不到清单文件 {}",
-                    packedManifest);
+                    packedManifest.string());
             }
             else
             {
-                LOG("初始化成功，已加载已启用的资源包清单 {}", packedManifest);
+                LOG("初始化成功，已加载已启用的资源包清单 {}",
+                    packedManifest.string());
             }
         }
         else
@@ -79,7 +80,7 @@ PackageManager::PackageManager(string_view pName)
         newManifest.open(packageManifestFile, std::ios::out);
         newManifest.close();
 
-        LOG("初始化成功，清单文件已生成到 {}", packageManifestFile);
+        LOG("初始化成功，清单文件已生成到 {}", packageManifestFile.string());
     }
 }
 
@@ -114,13 +115,13 @@ bool PackageManager::registerResource(ResourceNode resource)
 
     resourceManifestBuffer.push_back(resource);
 
-    string packageManifestFile = getManifestPath(packageName, packedMode);
-
-    fstream manifest(packageManifestFile.c_str(), std::ios::app);
+    auto    packageManifestFile = getManifestPath(packageName, false);
+    fstream manifest(packageManifestFile, std::ios::app | std::ios::binary);
 
     if (!manifest.good())
     {
-        LOG("发生了意外的错误，该清单文件不存在 {}", packageManifestFile);
+        LOG("发生了意外的错误，该清单文件不存在 {}",
+            packageManifestFile.string());
         return false;
     }
 
@@ -141,13 +142,12 @@ bool PackageManager::registerResources(
     return result;
 }
 
-string PackageManager::getManifestPath(string_view packageName, bool packed)
+std::filesystem::path PackageManager::getManifestPath(string_view packageName,
+                                                      bool        packed)
 {
-    if (packed)
-        return string("data//") + string(packageName) +
-               string("_packagemanifest.txt");
-    else
-        return string("data//") + string(packageName) + string("_manifest.txt");
+    string path = string("data//") + string(packageName) +
+                  (packed ? "_packagemanifest.txt" : "_manifest.txt");
+    return std::filesystem::path(path);
 }
 
 bool PackageManager::contains(ResourceNode target)
@@ -159,8 +159,8 @@ bool PackageManager::contains(ResourceNode target)
     }
 
     // 缓冲中未命中，尝试从清单文件中按需加载
-    string  packageManifestFile = getManifestPath(packageName, packedMode);
-    fstream manifest(packageManifestFile.c_str(), std::ios::in);
+    auto    packageManifestFile = getManifestPath(packageName, packedMode);
+    fstream manifest(packageManifestFile, std::ios::in | std::ios::binary);
     if (manifest.good())
     {
         string line;
@@ -185,7 +185,8 @@ bool PackageManager::contains(ResourceNode target)
 
 bool PackageManager::extractManifest(string_view packagePath)
 {
-    fstream pkgFile(string(packagePath), std::ios::in | std::ios::binary);
+    fstream pkgFile(std::filesystem::path(string(packagePath)),
+                    std::ios::in | std::ios::binary);
     if (!pkgFile.is_open())
     {
         LOG("无法打开资源包文件 {}", packagePath);
@@ -218,9 +219,11 @@ bool PackageManager::extractManifest(string_view packagePath)
     pkgFile.seekg(4, std::ios::beg);
     string manifestContent(manifestLength, '\0');
     pkgFile.read(manifestContent.data(), manifestLength);
+
+    auto bytesRead = pkgFile.gcount();
     pkgFile.close();
 
-    if (pkgFile.gcount() != static_cast<std::streamsize>(manifestLength))
+    if (bytesRead != static_cast<std::streamsize>(manifestLength))
     {
         LOG("读取资源包清单内容不完整");
         return false;
@@ -237,24 +240,24 @@ bool PackageManager::extractManifest(string_view packagePath)
                          : fileName.substr(0, underscorePos);
 
     // ④ 写入 data//xxxx_packagemanifest.txt
-    string  destPath = getManifestPath(pkgName, true);
+    auto    destPath = getManifestPath(pkgName, true);
     fstream dest(destPath, std::ios::out | std::ios::binary | std::ios::trunc);
     if (!dest.is_open())
     {
-        LOG("无法创建清单文件 {}", destPath);
+        LOG("无法创建清单文件 {}", destPath.string());
         return false;
     }
     dest.write(manifestContent.data(), manifestContent.size());
     dest.close();
 
-    LOG("清单已从资源包提取到 {}", destPath);
+    LOG("清单已从资源包提取到 {}", destPath.string());
     return true;
 }
 
 bool PackageManager::generatePackage(string_view manifestPath)
 {
     // 读取原始清单
-    fstream manifestFile(string(manifestPath), std::ios::in);
+    fstream manifestFile(string(manifestPath), std::ios::in | std::ios::binary);
     if (!manifestFile.is_open())
     {
         LOG("无法打开清单文件 {}", manifestPath);
@@ -293,7 +296,8 @@ bool PackageManager::generatePackage(string_view manifestPath)
 
     for (const auto &node : originalNodes)
     {
-        fstream resFile(node.filePath, std::ios::in | std::ios::binary);
+        fstream resFile(std::filesystem::path(node.filePath),
+                        std::ios::in | std::ios::binary);
         if (!resFile.is_open())
         {
             LOG("无法读取资源文件 {}", node.filePath);
@@ -335,12 +339,13 @@ bool PackageManager::generatePackage(string_view manifestPath)
     uint32_t manifestLength = static_cast<uint32_t>(packedManifestStr.size());
 
     // ⑥ 组装最终文件
-    string  outputPath = string("data//") + pkgName + string("_00.ocdata");
+    auto    outputPath = std::filesystem::path(string("data//") + pkgName +
+                                               string("_00.ocdata"));
     fstream output(outputPath,
                    std::ios::out | std::ios::binary | std::ios::trunc);
     if (!output.is_open())
     {
-        LOG("无法创建资源包文件 {}", outputPath);
+        LOG("无法创建资源包文件 {}", outputPath.string());
         return false;
     }
 
@@ -353,13 +358,14 @@ bool PackageManager::generatePackage(string_view manifestPath)
 
     output.close();
 
-    LOG("资源包已生成到 {}", outputPath);
+    LOG("资源包已生成到 {}", outputPath.string());
     return true;
 }
 
 bool PackageManager::enablePackage(string_view packagePath)
 {
-    fstream pkgFile(string(packagePath), std::ios::in | std::ios::binary);
+    fstream pkgFile(std::filesystem::path(string(packagePath)),
+                    std::ios::in | std::ios::binary);
     if (!pkgFile.is_open())
     {
         LOG("无法打开资源包文件 {}", packagePath);
