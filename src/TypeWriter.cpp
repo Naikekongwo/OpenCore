@@ -10,13 +10,14 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <cstdint>
 #include <memory>
+#include <string>
 
-TypeWriter::TypeWriter(string_view id, uint8_t layer, short fontID)
+TypeWriter::TypeWriter(string_view id, uint8_t layer, std::string_view fontName)
     : UIElement(id.data(), layer, nullptr)
 {
-    this->fontID = fontID;
+    this->fontName = fontName;
 
-    LOG("初始化成功，ID {}, 字体ID {}", id.data(), fontID);
+    LOG("初始化成功，ID {}, 字体名称 {}", id.data(), fontName);
 }
 
 void TypeWriter::Draw()
@@ -79,7 +80,7 @@ void TypeWriter::onUpdate(float totalTime)
         if (m_enableBackground)
         {
             m_baseBackground =
-                UI<BaseBackground>("baseBackground", 0, 2046, NULL, NULL);
+                UI<BaseBackground>("baseBackground", 0, "", NULL, NULL);
 
             m_baseBackground->setNativeScale(10);
             m_baseBackground->Configure()
@@ -120,7 +121,8 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
     auto &GFX       = OpenCoreManagers::GFXManager.getInstance();
     Rect  container = getLogicalBounds();
 
-    auto font = OpenCoreManagers::ResManager.getInstance().GetFont(fontID);
+    auto font = OpenEngine::getInstance().getPackageManager()->getFont(
+        fontName, m_fontSize);
     if (!font)
         return false;
 

@@ -34,19 +34,9 @@ TextureMetaManager::getTexture(string_view name)
 
     const TextureMeta &meta = metaIt->second;
 
-    // 从 PackageManager 加载纹理
-    auto *pkg = OpenEngine::getInstance().getPackageManager();
-    if (!pkg)
-        return std::nullopt;
-
-    auto sdlTex = pkg->getTexture(name);
-    if (!sdlTex)
-        return std::nullopt;
-
-    auto texture =
-        std::make_shared<Texture>(meta.cols, meta.rows, std::move(sdlTex));
-    if (!texture)
-        return std::nullopt;
+    // 始终创建 Texture 对象，即使 SDL_Texture 尚未加载
+    // 内部 name 字段会让 Texture::get() 在首次访问时懒加载
+    auto texture = std::make_shared<Texture>(meta.cols, meta.rows, name);
 
     _textureCache[key] = texture;
     return texture;

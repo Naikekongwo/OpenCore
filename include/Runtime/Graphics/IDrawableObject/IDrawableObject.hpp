@@ -46,7 +46,7 @@ class IDrawableObject
   public:
     IDrawableObject();
 
-    IDrawableObject(string_view id, short layer, short textureID);
+    IDrawableObject(string_view id, short layer, string_view textureName);
 
     virtual ~IDrawableObject() = default;
 

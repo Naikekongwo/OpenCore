@@ -618,44 +618,36 @@ std::shared_future<void> PackageManager::requestFontLoad(string_view name,
 }
 
 // ──────────────────────────────────────────────
-//  getTexture — 两阶段资源获取（缓存 → pending → 加载）
+//  getTexture — 非阻塞资源获取（缓存 → 触发异步加载 → 返回 nullptr）
 // ──────────────────────────────────────────────
 shared_ptr<SDL_Texture> PackageManager::getTexture(string_view name)
 {
     string key(name);
+    bool   needLoad = false;
 
-    std::unique_lock<std::mutex> lock(cacheMutex_);
-
-    // 阶段 1：缓存命中
     {
-        auto it = textureCache_.find(key);
-        if (it != textureCache_.end())
-            return it->second;
-    }
+        std::lock_guard<std::mutex> lock(cacheMutex_);
 
-    // 阶段 2：已在加载中，等同一个 future
-    {
-        auto it = pendingTextures_.find(key);
-        if (it != pendingTextures_.end())
+        // 阶段 1：缓存命中
         {
-            auto fut = it->second;
-            lock.unlock();
-            fut.wait();
-            lock.lock();
-            // 加载完成后 cache 中一定有数据（或 nullptr 未存入）
-            auto cached = textureCache_.find(key);
-            return cached != textureCache_.end() ? cached->second : nullptr;
+            auto it = textureCache_.find(key);
+            if (it != textureCache_.end())
+                return it->second;
+        }
+
+        // 阶段 2：已在加载中，不重复提交，不等待
+        {
+            auto it = pendingTextures_.find(key);
+            if (it == pendingTextures_.end())
+                needLoad = true;
         }
     }
 
-    // 阶段 3：首次请求，启动加载
-    lock.unlock();
-    auto fut = requestTextureLoad(name);
-    fut.wait();
+    // 阶段 3：首次请求，释放锁后触发异步加载但不等待
+    if (needLoad)
+        requestTextureLoad(name);
 
-    lock.lock();
-    auto cached = textureCache_.find(key);
-    return cached != textureCache_.end() ? cached->second : nullptr;
+    return nullptr;
 }
 
 // ──────────────────────────────────────────────

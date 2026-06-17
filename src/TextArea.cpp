@@ -1,4 +1,3 @@
-#include "Asset/ResourceManager.hpp"
 #include "Core/Helpers/Debugger.hpp"
 #include "OpenCore.hpp"
 #include "Runtime/Animation/IAnimation.hpp"
@@ -9,12 +8,12 @@
 #include <memory>
 #include <string>
 
-TextArea::TextArea(const string &id, uint8_t layer, short fontID)
+TextArea::TextArea(const string &id, uint8_t layer, std::string_view fontName)
     : UIElement(id, layer, nullptr)
 {
-    this->fontID   = fontID;
+    this->fontName = fontName;
     m_textureDirty = false; // 初始无文本，无需刷新
-    LOG("文本框创建，字体代号:{}", fontID);
+    LOG("文本框创建，字体名称:{}", fontName);
 }
 
 void TextArea::onUpdate(float totalTime)
@@ -81,7 +80,8 @@ void TextArea::refreshTextureCache()
 
     GFX.setRenderTarget(target);
 
-    auto font = OpenCoreManagers::ResManager.GetFont(fontID);
+    auto font = OpenEngine::getInstance().getPackageManager()->getFont(
+        fontName, m_fontSize);
     if (!font)
     {
         LOG("资源管理器查询字体对象的结果为空");

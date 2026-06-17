@@ -29,8 +29,6 @@ bool OpenEngine::Initialize()
     (void)EvtManager;
     // 创建线程管理器实例
     (void)ThrManager;
-    // 创建资源管理器实例
-    (void)ResManager;
     // 创建场景控制器实例
     sController = std::make_unique<StageManager>();
     // 创建计时器实例
@@ -43,8 +41,6 @@ bool OpenEngine::Initialize()
     ControllerManager::GetInstance().Init();
     // 初始化线程管理器
     ThrManager.start(2, 8);
-    // 初始化资源管理器(其初始化时需要renderer，所以必须在GFX之后初始化)
-    ResManager.Init();
 
     packageManager = std::make_unique<PackageManager>(gameInfo->gameName,
                                                       gameInfo->_resourceInfo);
@@ -128,7 +124,7 @@ bool OpenEngine::MainLoop()
         EvtManager.EndFrame();
 
         timer->Tick();
-        ResManager.ProcessMainThreadTasks();
+        ThrManager.process_main_thread_tasks();
 
         sController->onUpdate();
 #pragma endregion
@@ -172,7 +168,6 @@ bool OpenEngine::CleanUp()
     timer.reset();
 
     ControllerManager::GetInstance().Shutdown();
-    ResManager.CleanUp();
     ThrManager.shutdown();
     GFXManager.CleanUp();
 

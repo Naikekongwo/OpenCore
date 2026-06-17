@@ -28,7 +28,7 @@ using std::unique_ptr;
 class TextArea : public UIElement
 {
   public:
-    TextArea(const string &id, uint8_t layer, short fontID);
+    TextArea(const string &id, uint8_t layer, std::string_view fontName);
 
     void parseEvents(Event *event, float totalTime) override;
 
@@ -53,26 +53,26 @@ class TextArea : public UIElement
 
     void setTextColor(uint8_t r, uint8_t g, uint8_t b)
     {
-        m_colorR = r;
-        m_colorG = g;
-        m_colorB = b;
+        m_colorR       = r;
+        m_colorG       = g;
+        m_colorB       = b;
         m_textureDirty = true;
     }
 
   private:
-    short fontID = 9001;
-    short m_fontSize = 20;
+    string fontName   = "9001";
+    short  m_fontSize = 20;
 
     uint8_t m_colorR = 255;
     uint8_t m_colorG = 255;
     uint8_t m_colorB = 255;
 
     bool m_shadowEnable = true;
-    bool m_aligncenter = false;
+    bool m_aligncenter  = false;
 
     // bool m_valid = true; — 已提升到基类 m_textureDirty
     uint8_t m_shadowOffset = 2;
-    uint8_t transparency = 176;
+    uint8_t transparency   = 176;
 
     string m_textContent;
 

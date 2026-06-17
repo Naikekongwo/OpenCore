@@ -77,6 +77,13 @@ bool BaseBackground::generateTexture(SDL_Texture *target)
 
     GFX.setRenderTarget(target);
 
+    if (!texture || !texture->get())
+    {
+        LOG("BaseBackground::generateTexture() 纹理尚未加载");
+        GFX.setRenderTarget(nullptr);
+        return false;
+    }
+
     float texW, texH;
     SDL_GetTextureSize(texture->get(), &texW, &texH);
 

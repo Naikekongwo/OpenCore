@@ -46,7 +46,7 @@ enum class TypeWriterStatus
 class TypeWriter : public UIElement
 {
   public:
-    TypeWriter(string_view id, uint8_t layer, short fontID);
+    TypeWriter(string_view id, uint8_t layer, std::string_view fontName);
 
     void parseEvents(Event *event, float totalTime) override;
 
@@ -91,9 +91,9 @@ class TypeWriter : public UIElement
     bool generateTexture(SDL_Texture *texture) override;
 
   private:
-    short fontID     = 9001;
-    short m_fontSize = 20;
-    short lineGap    = 2;
+    string fontName   = "9001";
+    short  m_fontSize = 20;
+    short  lineGap    = 2;
 
     SDL_Color fontColor{255, 255, 255, 255};
 

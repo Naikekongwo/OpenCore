@@ -11,7 +11,6 @@
 
 #include <memory>
 
-class ResourceManager;
 class Timer;
 class StageManager;
 class Event;
@@ -49,7 +48,7 @@ class Stage
      */
     void configure(Timer *tm, StageManager *ctrl)
     {
-        timer = tm;
+        timer       = tm;
         sController = ctrl;
     }
 
@@ -82,7 +81,7 @@ class Stage
 
     // 场景类型
     StageType getStageType() const { return stageType; }
-    void setStageType(StageType stageType) { this->stageType = stageType; }
+    void      setStageType(StageType stageType) { this->stageType = stageType; }
 
     // 元素传送相关
     bool transferElementTo(Stage *destStage, const std::string &id);

@@ -13,7 +13,7 @@ enum SymbolType : int
 class Symbol : public UIElement
 {
   public:
-    Symbol(std::string_view id, short layer, short texMetaID);
+    Symbol(std::string_view id, short layer, std::string_view textureName);
 
     void SetSymbolType(SymbolType type) { m_symbolType = type; }
 

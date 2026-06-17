@@ -2,15 +2,15 @@
 #include "OpenCore.hpp"
 #include <memory>
 
-Scrollbar::Scrollbar(const string &id, short layer, short backTexID,
-                     short buttTexID)
+Scrollbar::Scrollbar(const string &id, short layer,
+                     std::string_view backTexName, std::string_view buttTexName)
     : UIElement(id, layer, nullptr)
 {
 
-    if (backTexID * buttTexID)
+    if (!backTexName.empty() && !buttTexName.empty())
     {
-        this->backgroundTexture = backTexID;
-        this->buttonTexture = buttTexID;
+        this->backgroundTextureName = backTexName;
+        this->buttonTextureName     = buttTexName;
     }
 
     value = make_shared<float>(0);
@@ -21,9 +21,9 @@ void Scrollbar::onEnter()
     if (status == ScrollStatus::Creating)
     {
 
-        baseBack =
-            UI<BaseBackground>("background", 1, backgroundTexture, NULL, NULL);
-        slideBar = UI<ImageBoard>("slideimg", 1, buttonTexture, 1, 1);
+        baseBack = UI<BaseBackground>("background", 1, backgroundTextureName,
+                                      NULL, NULL);
+        slideBar = UI<ImageBoard>("slideimg", 1, buttonTextureName, 1, 1);
 
         slideBar->Configure()
             .Anchor(AnchorPoint::Center)
@@ -75,15 +75,16 @@ void Scrollbar::parseEvents(Event *event, float totalTime)
         baseBack->parseEvents(event, totalTime);
 
     const SDL_Event &sdlEvent = event->GetSDLEvent();
-    SDL_Point mousePos{};
-    SDL_Rect bounds = getPhysicalBounds();
+    SDL_Point        mousePos{};
+    SDL_Rect         bounds = getPhysicalBounds();
 
     switch (sdlEvent.type)
     {
 
     case SDL_EVENT_MOUSE_MOTION:
     {
-        mousePos = {static_cast<int>(sdlEvent.motion.x), static_cast<int>(sdlEvent.motion.y)};
+        mousePos = {static_cast<int>(sdlEvent.motion.x),
+                    static_cast<int>(sdlEvent.motion.y)};
         if (!SDL_PointInRect(&mousePos, &bounds))
         {
             status = ScrollStatus::Ready;
@@ -101,7 +102,8 @@ void Scrollbar::parseEvents(Event *event, float totalTime)
     {
         if (sdlEvent.button.button == SDL_BUTTON_LEFT)
         {
-            mousePos = {static_cast<int>(sdlEvent.button.x), static_cast<int>(sdlEvent.button.y)};
+            mousePos = {static_cast<int>(sdlEvent.button.x),
+                        static_cast<int>(sdlEvent.button.y)};
 
             if (SDL_PointInRect(&mousePos, &bounds))
             {

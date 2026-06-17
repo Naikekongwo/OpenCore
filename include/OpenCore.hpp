@@ -27,7 +27,6 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN;
 #include "Core/Timer.hpp"
 
 #include "Asset/PackageManager.hpp"
-#include "Asset/ResourceManager.hpp"
 #include "Core/Info/GameInfo.hpp"
 #include "Core/Math/OpenCore_Spiral.hpp"
 #include "Core/Math/OpenCore_Vec3.hpp"
@@ -50,7 +49,6 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN;
 namespace OpenCoreManagers
 {
 inline ThreadManager   &ThrManager = ThreadManager::getInstance();
-inline ResourceManager &ResManager = ResourceManager::getInstance();
 inline EventManager    &EvtManager = EventManager::GetInstance();
 inline GraphicsManager &GFXManager = GraphicsManager::getInstance();
 // TextureMetaManager 由 OpenEngine 独占管理，通过 getTextureMetaManager() 访问
@@ -63,8 +61,8 @@ inline GraphicsManager &GFXManager = GraphicsManager::getInstance();
 #include "World/Stage/StageManager.hpp"
 
 template <typename T>
-unique_ptr<T> UI(const std::string &id, uint8_t layer, short texID,
-                 short frameX, short frameY);
+unique_ptr<T> UI(const std::string &id, uint8_t layer,
+                 std::string_view textureName, short frameX, short frameY);
 
 #include <memory>
 
@@ -72,15 +70,6 @@ using std::make_shared;
 using std::shared_ptr;
 using std::string;
 using std::unique_ptr;
-
-#include "Runtime/Graphics/Factory/UIFactory.inl"
-
-inline unique_ptr<Texture> MakeTexture(uint8_t xCount, uint8_t yCount,
-                                       short texId)
-{
-    return std::make_unique<Texture>(
-        xCount, yCount, OpenCoreManagers::ResManager.GetTexture(texId));
-}
 
 /**
  * @brief OpenCore的引擎主类
@@ -124,6 +113,24 @@ class OpenEngine final
     unique_ptr<TextureMetaManager> textureMetaManager;
 };
 
+#include "Runtime/Graphics/Factory/UIFactory.inl"
+
+inline unique_ptr<Texture> MakeTexture(uint8_t xCount, uint8_t yCount,
+                                       std::string_view textureName)
+{
+    auto texOpt = OpenEngine::getInstance().getTextureMetaManager()->getTexture(
+        textureName);
+    if (texOpt.has_value())
+    {
+        auto tex = texOpt.value();
+        // 用 TextureMetaManager 返回的 Texture（可能尚无 SDL_Texture），
+        // 但重新指定网格数；内部 name 保留，get() 会懒加载
+        return std::make_unique<Texture>(xCount, yCount, tex->name);
+    }
+    LOG("MakeTexture: 未找到纹理 {}", textureName);
+    return nullptr;
+}
+
 /// @brief 从 PackageManager 按资源名创建纹理
 inline shared_ptr<Texture> MakeTextureFromPkg(uint8_t xCount, uint8_t yCount,
                                               string_view resName)
@@ -131,7 +138,7 @@ inline shared_ptr<Texture> MakeTextureFromPkg(uint8_t xCount, uint8_t yCount,
     auto texOpt =
         OpenEngine::getInstance().getTextureMetaManager()->getTexture(resName);
     if (texOpt.has_value())
-        return std::make_shared<Texture>(xCount, yCount, (*texOpt)->texture);
+        return texOpt.value();
     return nullptr;
 }
 

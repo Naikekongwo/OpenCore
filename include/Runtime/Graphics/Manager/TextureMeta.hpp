@@ -56,10 +56,10 @@ class TextureMetaManager final
     optional<shared_ptr<Texture>> getTexture(string_view name);
 
     /// @deprecated 兼容旧 short ID 的重载，将 ID 转字符串后查找
-    optional<shared_ptr<Texture>> getTexture(short id)
-    {
-        return getTexture(std::to_string(id));
-    }
+    // optional<shared_ptr<Texture>> getTexture(short id)
+    // {
+    //     return getTexture(std::to_string(id));
+    // }
 
   private:
     unordered_map<string, TextureMeta>         _metaRegistry;

@@ -40,12 +40,13 @@ class Scrollbar : public UIElement
   public:
     /**
      * @brief 构造滑动条对象。
-     * @param id         唯一标识符。
-     * @param layer      渲染图层。
-     * @param backTexID  背景纹理的资源 ID。
-     * @param buttTexID  滑块纹理的资源 ID。
+     * @param id           唯一标识符。
+     * @param layer        渲染图层。
+     * @param backTexName  背景纹理的资源名称。
+     * @param buttTexName  滑块纹理的资源名称。
      */
-    Scrollbar(const string &id, short layer, short backTexID, short buttTexID);
+    Scrollbar(const string &id, short layer, std::string_view backTexName,
+              std::string_view buttTexName);
     void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;
     void Draw() override;
@@ -77,10 +78,10 @@ class Scrollbar : public UIElement
     void UpdateBar();
 
   private:
-    short                      backgroundTexture = 2009; ///< 背景纹理资源 ID
-    short                      buttonTexture     = 2026; ///< 滑块纹理资源 ID
-    unique_ptr<ImageBoard>     slideBar;                 ///< 滑块子控件
-    unique_ptr<BaseBackground> baseBack;                 ///< 背景条子控件
-    shared_ptr<float>          value;                    ///< 绑定的数值（0~1）
-    ScrollStatus status = ScrollStatus::Creating;        ///< 当前交互状态
+    string                     backgroundTextureName; ///< 背景纹理资源名称
+    string                     buttonTextureName;     ///< 滑块纹理资源名称
+    unique_ptr<ImageBoard>     slideBar;              ///< 滑块子控件
+    unique_ptr<BaseBackground> baseBack;              ///< 背景条子控件
+    shared_ptr<float>          value;                 ///< 绑定的数值（0~1）
+    ScrollStatus status = ScrollStatus::Creating;     ///< 当前交互状态
 };

@@ -127,9 +127,10 @@ void IDrawableObject::setScale(float w, float h)
     if (relW * relH == 0.0f)
     {
         // texture一定要存在才能得到原始尺寸！
-        if (!texture->texture)
+        if (!texture || !texture->get())
         {
-            LOG("该元素是一个无需纹理的元素，所以你不应该对本元素使用固定宽高比"
+            LOG("该元素是一个无需纹理或纹理尚未加载的元素，所以你不应该对本元素"
+                "使用固定宽高比"
                 "的属性 元素ID:{}",
                 id.c_str());
             return;
@@ -192,7 +193,8 @@ IDrawableObject::IDrawableObject()
     // 此构造器理应给那些不需要纹理的元素使用，所以不加载纹理
 }
 
-IDrawableObject::IDrawableObject(string_view id, short layer, short textureID)
+IDrawableObject::IDrawableObject(string_view id, short layer,
+                                 string_view textureName)
 {
     this->id    = id;
     this->layer = layer;
@@ -201,7 +203,7 @@ IDrawableObject::IDrawableObject(string_view id, short layer, short textureID)
     VState       = std::make_unique<VisualState>();
 
     auto texOpt = OpenEngine::getInstance().getTextureMetaManager()->getTexture(
-        textureID);
+        textureName);
     if (texOpt != std::nullopt)
     {
         texture = texOpt.value();
@@ -209,7 +211,7 @@ IDrawableObject::IDrawableObject(string_view id, short layer, short textureID)
     else
     {
         LOG("元素初始化时候遇到了空纹理，元素ID {} 纹理ID {}", id.data(),
-            textureID);
+            textureName);
     }
 }
 

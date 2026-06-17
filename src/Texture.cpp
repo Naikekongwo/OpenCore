@@ -11,7 +11,7 @@ Texture::Texture(size_t x, size_t y, shared_ptr<SDL_Texture> tex)
     {
         LOG("Texture::Texture() encountered empty texture in the "
             "initialization, using fallback size.");
-        width = static_cast<uint16_t>(W);
+        width  = static_cast<uint16_t>(W);
         height = static_cast<uint16_t>(H);
         return;
     }
@@ -22,7 +22,7 @@ Texture::Texture(size_t x, size_t y, shared_ptr<SDL_Texture> tex)
     W = static_cast<int>(W_f);
     H = static_cast<int>(H_f);
 
-    width = static_cast<uint16_t>(W);
+    width  = static_cast<uint16_t>(W);
     height = static_cast<uint16_t>(H);
 
     if (xCount == 0 || yCount == 0)
@@ -35,13 +35,80 @@ Texture::Texture(size_t x, size_t y, shared_ptr<SDL_Texture> tex)
     height /= yCount;
 }
 
+Texture::Texture(size_t x, size_t y) : xCount(x), yCount(y)
+{
+    if (xCount == 0 || yCount == 0)
+    {
+        LOG("Texture::Texture(x, y) 网格参数非法，使用默认值 1x1");
+        xCount = 1;
+        yCount = 1;
+    }
+
+    width  = 1;
+    height = 1;
+}
+
+Texture::Texture(size_t x, size_t y, string_view name)
+    : xCount(x), yCount(y), name(name)
+{
+    if (xCount == 0 || yCount == 0)
+    {
+        LOG("Texture::Texture(x, y, name) 网格参数非法，使用默认值 1x1");
+        xCount = 1;
+        yCount = 1;
+    }
+
+    width  = 1;
+    height = 1;
+}
+
 Texture::Texture()
 {
-    width = 1;
+    width  = 1;
     height = 1;
 
     xCount = 1;
     yCount = 1;
+}
+
+SDL_Texture *Texture::get()
+{
+    // 已有真实的 SDL_Texture，直接返回
+    if (texture)
+        return texture.get();
+
+    // 没有资源名，无法懒加载
+    if (name.empty())
+        return nullptr;
+
+    // 从 PackageManager 非阻塞获取（触发异步加载但不等待）
+    auto *pkg = OpenEngine::getInstance().getPackageManager();
+    if (!pkg)
+        return nullptr;
+
+    auto sdlTex = pkg->getTexture(name);
+    if (!sdlTex)
+    {
+        // 纹理尚未就绪，本次跳过；异步加载完成后，下次调用会命中
+        return nullptr;
+    }
+
+    // 加载成功，计算尺寸并缓存
+    SDL_SetTextureBlendMode(sdlTex.get(), SDL_BLENDMODE_BLEND);
+    float W_f, H_f;
+    SDL_GetTextureSize(sdlTex.get(), &W_f, &H_f);
+
+    width  = static_cast<uint16_t>(W_f);
+    height = static_cast<uint16_t>(H_f);
+
+    if (xCount > 0 && yCount > 0)
+    {
+        width /= xCount;
+        height /= yCount;
+    }
+
+    texture = std::move(sdlTex);
+    return texture.get();
 }
 
 bool Texture::configure(size_t rows, size_t cols,
@@ -54,13 +121,15 @@ bool Texture::configure(size_t rows, size_t cols,
         LOG("部署时候遇到空的纹理，该方法不应该传入空纹理");
 
     this->texture = texture;
+    xCount        = cols;
+    yCount        = rows;
 
     float W_f, H_f;
     SDL_GetTextureSize(texture.get(), &W_f, &H_f);
     int W = static_cast<int>(W_f);
     int H = static_cast<int>(H_f);
 
-    width = static_cast<uint16_t>(W);
+    width  = static_cast<uint16_t>(W);
     height = static_cast<uint16_t>(H);
 
     if (xCount == 0 || yCount == 0)

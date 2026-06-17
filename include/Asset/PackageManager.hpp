@@ -148,13 +148,15 @@ class PackageManager final
     bool registerResources(initializer_list<ResourceNode> resources);
 
     // ──────────────────────────────────────────────
-    //  资源访问接口（取代 ResourceManager）
+    //  资源访问接口
     // ──────────────────────────────────────────────
 
     /**
-     * @brief 获取已加载的纹理，若未加载则触发异步加载并阻塞等待。
+     * @brief 获取已加载的纹理。
+     *        若未加载则触发异步加载，不阻塞等待，返回 nullptr。
+     *        加载完成后，下次调用即可从缓存中获取。
      * @param name 资源名称（注册时使用的 name）
-     * @return shared_ptr<SDL_Texture>，失败时返回 nullptr
+     * @return shared_ptr<SDL_Texture>，缓存命中时返回，否则 nullptr
      */
     shared_ptr<SDL_Texture> getTexture(string_view name);
 

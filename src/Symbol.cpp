@@ -6,16 +6,16 @@
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 #include <SDL3/SDL_render.h>
 
-Symbol::Symbol(std::string_view id, short layer, short texMetaID)
+Symbol::Symbol(std::string_view id, short layer, std::string_view textureName)
     : UIElement(id.data(), layer, nullptr)
 {
     auto *TMMGR = OpenEngine::getInstance().getTextureMetaManager();
 
-    auto texOpt = TMMGR->getTexture(texMetaID);
+    auto texOpt = TMMGR->getTexture(textureName);
     if (texOpt == std::nullopt)
     {
-        LOG("创建元素 {} 时发生错误，根据指定META ID {}未找到对应的贴图",
-            id.data(), texMetaID);
+        LOG("创建元素 {} 时发生错误，根据指定纹理名称 {} 未找到对应的贴图",
+            id.data(), textureName);
         return;
     }
 

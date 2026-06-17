@@ -15,7 +15,7 @@ void ImageBoard::Draw()
 {
     UIElement::Draw();
     Rect dstRect = getLogicalBounds();
-    if (!texture->get())
+    if (!texture || !texture->get())
         return;
 
     auto &GFX   = OpenCoreManagers::GFXManager.getInstance();
