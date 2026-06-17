@@ -3,44 +3,51 @@
 #include <memory>
 #include <optional>
 
-TextureMetaManager &TextureMetaManager::getInstance()
-{
-    static TextureMetaManager instance;
-    return instance;
-}
-
 TextureMetaManager::TextureMetaManager()
 {
-    // 初始化的相关操作
     _metaRegistry.clear();
     _textureCache.clear();
 }
 
 bool TextureMetaManager::registerTextureMeta(TextureMeta meta)
 {
-    if (meta.textureID < 0)
+    if (meta.textureName.empty())
         return false;
-    _metaRegistry[meta.textureID] = meta;
+    _metaRegistry[meta.textureName] = meta;
     return true;
 }
 
 std::optional<shared_ptr<Texture>>
-TextureMetaManager::getTexture(short textureID)
+TextureMetaManager::getTexture(string_view name)
 {
-    auto it = _textureCache.find(textureID);
-    if (it != _textureCache.end())
-        return it->second;
+    string key(name);
 
-    auto metaIt = _metaRegistry.find(textureID);
+    // 查缓存
+    auto cacheIt = _textureCache.find(key);
+    if (cacheIt != _textureCache.end())
+        return cacheIt->second;
+
+    // 查元信息
+    auto metaIt = _metaRegistry.find(key);
     if (metaIt == _metaRegistry.end())
         return std::nullopt;
 
     const TextureMeta &meta = metaIt->second;
-    auto texture = make_shared<Texture>(
-        meta.cols, meta.rows,
-        OpenCoreManagers::ResManager.GetTexture(meta.textureID));
+
+    // 从 PackageManager 加载纹理
+    auto *pkg = OpenEngine::getInstance().getPackageManager();
+    if (!pkg)
+        return std::nullopt;
+
+    auto sdlTex = pkg->getTexture(name);
+    if (!sdlTex)
+        return std::nullopt;
+
+    auto texture =
+        std::make_shared<Texture>(meta.cols, meta.rows, std::move(sdlTex));
     if (!texture)
         return std::nullopt;
 
+    _textureCache[key] = texture;
     return texture;
 }

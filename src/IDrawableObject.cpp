@@ -200,7 +200,8 @@ IDrawableObject::IDrawableObject(string_view id, short layer, short textureID)
     AnimeManager = std::make_unique<AnimationManager>();
     VState       = std::make_unique<VisualState>();
 
-    auto texOpt = OpenCoreManagers::TexMetaManager.getTexture(textureID);
+    auto texOpt = OpenEngine::getInstance().getTextureMetaManager()->getTexture(
+        textureID);
     if (texOpt != std::nullopt)
     {
         texture = texOpt.value();

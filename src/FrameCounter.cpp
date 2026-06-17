@@ -1,8 +1,7 @@
 
 #include "OpenCore.hpp"
 
-FrameCounter::FrameCounter(const std::string &id, uint8_t layer,
-                           Texture *texture)
+FrameCounter::FrameCounter(const std::string &id, uint8_t layer)
     : UIElement(id, layer, nullptr)
 {
     this->VState       = std::make_unique<VisualState>();
@@ -13,10 +12,17 @@ void FrameCounter::parseEvents(Event *event, float totalTime) {}
 
 void FrameCounter::Draw() // 这个帧数应该是常态显示的吧，所以未添加可见判断
 {
-    auto &Res  = ResourceManager::getInstance();
-    auto  font = Res.GetFont(fontID);
+    // 懒加载字体（首次 Draw 时从 PackageManager 加载）
     if (!font)
-        return;
+    {
+        LOG("请求字体");
+        auto *pkg = OpenEngine::getInstance().getPackageManager();
+        if (pkg)
+            font = pkg->getFont(fontName, fontSize);
+        if (!font)
+            return;
+        LOG("请求字体A");
+    }
 
     std::string fpsText = "FPS: " + std::to_string(static_cast<int>(FPS));
     SDL_Color   color   = {255, 255, 255, 255};

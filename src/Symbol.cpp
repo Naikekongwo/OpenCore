@@ -9,9 +9,9 @@
 Symbol::Symbol(std::string_view id, short layer, short texMetaID)
     : UIElement(id.data(), layer, nullptr)
 {
-    auto &TMMGR = OpenCoreManagers::TexMetaManager.getInstance();
+    auto *TMMGR = OpenEngine::getInstance().getTextureMetaManager();
 
-    auto texOpt = TMMGR.getTexture(texMetaID);
+    auto texOpt = TMMGR->getTexture(texMetaID);
     if (texOpt == std::nullopt)
     {
         LOG("创建元素 {} 时发生错误，根据指定META ID {}未找到对应的贴图",

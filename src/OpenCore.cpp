@@ -31,8 +31,6 @@ bool OpenEngine::Initialize()
     (void)ThrManager;
     // 创建资源管理器实例
     (void)ResManager;
-    // 创建纹理元管理器
-    (void)TexMetaManager;
     // 创建场景控制器实例
     sController = std::make_unique<StageManager>();
     // 创建计时器实例
@@ -50,6 +48,7 @@ bool OpenEngine::Initialize()
 
     packageManager = std::make_unique<PackageManager>(gameInfo->gameName,
                                                       gameInfo->_resourceInfo);
+    textureMetaManager = std::make_unique<TextureMetaManager>();
 
     gameInfo->entranceStage->configure(timer.get(), sController.get());
     sController->changeStage(std::move(gameInfo->entranceStage));

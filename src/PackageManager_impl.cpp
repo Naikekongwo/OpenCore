@@ -366,7 +366,344 @@ bool PackageManager::onEnter()
         }
 
         packedMode = true;
+        // 清除注册阶段的旧节点（startIndex/endIndex 均为 0），
+        // 后续 findNode 将从 _packagemanifest.txt 加载正确偏移
+        resourceManifestBuffer.clear();
         LOG("自动打包并启用资源包成功");
     }
+
+    // 获取渲染器指针（纹理创建需要）
+    renderer_ = OpenCoreManagers::GFXManager.getRenderer();
+    if (!renderer_)
+    {
+        LOG("警告：获取渲染器失败，纹理加载将不可用");
+    }
+
     return true;
+}
+
+// ──────────────────────────────────────────────
+//  findNode — 按名称查找 ResourceNode
+// ──────────────────────────────────────────────
+ResourceNode *PackageManager::findNode(string_view name)
+{
+    // 1) 先查内存缓冲
+    for (auto &entry : resourceManifestBuffer)
+    {
+        if (entry.name == name)
+            return &entry;
+    }
+
+    // 2) 缓冲未命中 → 从清单位文件按需加载
+    auto    manifestFile = getManifestPath(packageName, packedMode);
+    fstream manifest(manifestFile, ios::in | ios::binary);
+    if (!manifest.is_open())
+        return nullptr;
+
+    string line;
+    while (getline(manifest, line))
+    {
+        if (line.empty())
+            continue;
+
+        ResourceNode node = ResourceNode::deserialize(line);
+        if (node.name == name)
+        {
+            // 加载到缓冲，下次直接命中
+            resourceManifestBuffer.push_back(std::move(node));
+            return &resourceManifestBuffer.back();
+        }
+    }
+    return nullptr;
+}
+
+// ──────────────────────────────────────────────
+//  extractResourceData — 从 .ocdata 提取原始二进制
+// ──────────────────────────────────────────────
+std::vector<char> PackageManager::extractResourceData(const ResourceNode &node)
+{
+    string  ocdataPath = string("data//") + packageName + string("_00.ocdata");
+    fstream file(
+        fs::path(reinterpret_cast<const char8_t *>(ocdataPath.c_str())),
+        ios::in | ios::binary);
+    if (!file.is_open())
+    {
+        LOG("无法打开资源包文件 {}", ocdataPath);
+        return {};
+    }
+
+    size_t dataSize = node.endIndex - node.startIndex;
+    if (dataSize == 0)
+        return {};
+
+    std::vector<char> buf(dataSize);
+
+    // 跳过 4 字节 OCDT 魔数 + startIndex
+    file.seekg(4 + node.startIndex, ios::beg);
+    if (!file.good())
+    {
+        LOG("资源包文件定位失败 offset={}", 4 + node.startIndex);
+        return {};
+    }
+
+    file.read(buf.data(), dataSize);
+    if (!file.good())
+    {
+        LOG("资源包文件读取失败 size={}", dataSize);
+        return {};
+    }
+
+    return buf;
+}
+
+// ──────────────────────────────────────────────
+//  requestTextureLoad — 异步加载纹理，返回 future 供去重
+// ──────────────────────────────────────────────
+std::shared_future<void> PackageManager::requestTextureLoad(string_view name)
+{
+    auto promise = std::make_shared<std::promise<void>>();
+    auto fut     = promise->get_future().share();
+
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex_);
+        pendingTextures_[string(name)] = fut;
+    }
+
+    // 在后台线程解码图像
+    ThreadManager::getInstance().submit(
+        [this, name = string(name), promise = std::move(promise)]
+        {
+            // --- 工作线程：解码 surface ---
+            ResourceNode *node = findNode(name);
+            if (!node)
+            {
+                LOG("资源 \"{}\" 未在清单中注册", name);
+                promise->set_value();
+                return;
+            }
+
+            auto data = extractResourceData(*node);
+            if (data.empty())
+            {
+                promise->set_value();
+                return;
+            }
+
+            SDL_IOStream *io = SDL_IOFromConstMem(data.data(), data.size());
+            if (!io)
+            {
+                LOG("SDL_IOFromConstMem 失败");
+                promise->set_value();
+                return;
+            }
+
+            SDL_Surface *surface = IMG_Load_IO(io, true);
+            if (!surface)
+            {
+                LOG("IMG_Load_IO 加载纹理 \"{}\" 失败: {}", name,
+                    SDL_GetError());
+                promise->set_value();
+                return;
+            }
+
+            // 转换为标准格式（不涉及渲染器，工作线程安全）
+            SDL_Surface *converted =
+                SDL_ConvertSurface(surface, SDL_PIXELFORMAT_ABGR8888);
+            SDL_DestroySurface(surface);
+
+            if (!converted)
+            {
+                LOG("SDL_ConvertSurface 失败: {}", SDL_GetError());
+                promise->set_value();
+                return;
+            }
+
+            // 纹理创建必须在主线程（涉及渲染器）
+            ThreadManager::getInstance().submit_to_main_thread(
+                [this, name, converted, promise]
+                {
+                    // 若进入此 lambda 时 renderer_ 仍为空，记录警告
+                    auto tex = ConvertSurfaceToTexture(renderer_, converted);
+                    if (!tex)
+                    {
+                        LOG("ConvertSurfaceToTexture 失败，"
+                            "renderer_=%p",
+                            (void *)renderer_);
+                    }
+
+                    {
+                        std::lock_guard<std::mutex> lock(cacheMutex_);
+                        if (tex)
+                            textureCache_[name] = std::move(tex);
+                        pendingTextures_.erase(name);
+                    }
+                    promise->set_value();
+                });
+        });
+
+    return fut;
+}
+
+// ──────────────────────────────────────────────
+//  requestFontLoad — 异步加载字体，返回 future 供去重
+// ──────────────────────────────────────────────
+std::shared_future<void> PackageManager::requestFontLoad(string_view name,
+                                                         int         ptsize)
+{
+    string key = string(name) + "@" + std::to_string(ptsize);
+
+    auto promise = std::make_shared<std::promise<void>>();
+    auto fut     = promise->get_future().share();
+
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex_);
+        pendingFonts_[key] = fut;
+    }
+
+    // TTF_OpenFontIO 不涉及渲染器，工作线程完成即可
+    ThreadManager::getInstance().submit(
+        [this, name = string(name), key, ptsize, promise = std::move(promise)]
+        {
+            ResourceNode *node = findNode(name);
+            if (!node)
+            {
+                LOG("字体 \"{}\" 未在清单中注册", name);
+                promise->set_value();
+                return;
+            }
+
+            auto data = extractResourceData(*node);
+            if (data.empty())
+            {
+                promise->set_value();
+                return;
+            }
+
+            SDL_IOStream *io = SDL_IOFromConstMem(data.data(), data.size());
+            if (!io)
+            {
+                promise->set_value();
+                return;
+            }
+
+            TTF_Font *font =
+                TTF_OpenFontIO(io, true, static_cast<float>(ptsize));
+            if (!font)
+            {
+                LOG("TTF_OpenFont_IO 加载字体 \"{}\" 失败: {}", name,
+                    SDL_GetError());
+                promise->set_value();
+                return;
+            }
+
+            // TTF_Font 可能引用 IO 流的内存，data 必须和字体同寿命
+            auto dataKeepAlive =
+                std::make_shared<std::vector<char>>(std::move(data));
+            auto fontPtr = shared_ptr<TTF_Font>(font,
+                                                [dataKeepAlive](TTF_Font *f)
+                                                {
+                                                    (void)dataKeepAlive;
+                                                    TextureDeleter{}(f);
+                                                });
+
+            {
+                std::lock_guard<std::mutex> lock(cacheMutex_);
+                fontCache_[key] = std::move(fontPtr);
+                pendingFonts_.erase(key);
+            }
+            promise->set_value();
+        });
+
+    return fut;
+}
+
+// ──────────────────────────────────────────────
+//  getTexture — 两阶段资源获取（缓存 → pending → 加载）
+// ──────────────────────────────────────────────
+shared_ptr<SDL_Texture> PackageManager::getTexture(string_view name)
+{
+    string key(name);
+
+    std::unique_lock<std::mutex> lock(cacheMutex_);
+
+    // 阶段 1：缓存命中
+    {
+        auto it = textureCache_.find(key);
+        if (it != textureCache_.end())
+            return it->second;
+    }
+
+    // 阶段 2：已在加载中，等同一个 future
+    {
+        auto it = pendingTextures_.find(key);
+        if (it != pendingTextures_.end())
+        {
+            auto fut = it->second;
+            lock.unlock();
+            fut.wait();
+            lock.lock();
+            // 加载完成后 cache 中一定有数据（或 nullptr 未存入）
+            auto cached = textureCache_.find(key);
+            return cached != textureCache_.end() ? cached->second : nullptr;
+        }
+    }
+
+    // 阶段 3：首次请求，启动加载
+    lock.unlock();
+    auto fut = requestTextureLoad(name);
+    fut.wait();
+
+    lock.lock();
+    auto cached = textureCache_.find(key);
+    return cached != textureCache_.end() ? cached->second : nullptr;
+}
+
+// ──────────────────────────────────────────────
+//  getFont — 两阶段资源获取
+// ──────────────────────────────────────────────
+shared_ptr<TTF_Font> PackageManager::getFont(string_view name, int ptsize)
+{
+    string key = string(name) + "@" + std::to_string(ptsize);
+
+    std::unique_lock<std::mutex> lock(cacheMutex_);
+
+    // 阶段 1：缓存命中
+    {
+        auto it = fontCache_.find(key);
+        if (it != fontCache_.end())
+            return it->second;
+    }
+
+    // 阶段 2：已在加载中
+    {
+        auto it = pendingFonts_.find(key);
+        if (it != pendingFonts_.end())
+        {
+            auto fut = it->second;
+            lock.unlock();
+            fut.wait();
+            lock.lock();
+            auto cached = fontCache_.find(key);
+            return cached != fontCache_.end() ? cached->second : nullptr;
+        }
+    }
+
+    // 阶段 3：首次请求，启动加载
+    lock.unlock();
+    auto fut = requestFontLoad(name, ptsize);
+    fut.wait();
+
+    lock.lock();
+    auto cached = fontCache_.find(key);
+    return cached != fontCache_.end() ? cached->second : nullptr;
+}
+
+// ──────────────────────────────────────────────
+//  clearCache — 清空所有资源缓存
+// ──────────────────────────────────────────────
+void PackageManager::clearCache()
+{
+    std::lock_guard<std::mutex> lock(cacheMutex_);
+    textureCache_.clear();
+    fontCache_.clear();
 }

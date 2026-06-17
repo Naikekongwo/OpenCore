@@ -20,7 +20,7 @@ inline unique_ptr<FrameCounter> UI<FrameCounter>(const std::string &id,
                                                  uint8_t layer, short texID,
                                                  short reserve0, short reserve1)
 {
-    return std::make_unique<FrameCounter>(id, layer, nullptr);
+    return std::make_unique<FrameCounter>(id, layer);
 }
 
 template <>

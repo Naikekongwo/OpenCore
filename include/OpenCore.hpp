@@ -49,11 +49,11 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN;
  */
 namespace OpenCoreManagers
 {
-inline ThreadManager      &ThrManager     = ThreadManager::getInstance();
-inline ResourceManager    &ResManager     = ResourceManager::getInstance();
-inline EventManager       &EvtManager     = EventManager::GetInstance();
-inline GraphicsManager    &GFXManager     = GraphicsManager::getInstance();
-inline TextureMetaManager &TexMetaManager = TextureMetaManager::getInstance();
+inline ThreadManager   &ThrManager = ThreadManager::getInstance();
+inline ResourceManager &ResManager = ResourceManager::getInstance();
+inline EventManager    &EvtManager = EventManager::GetInstance();
+inline GraphicsManager &GFXManager = GraphicsManager::getInstance();
+// TextureMetaManager 由 OpenEngine 独占管理，通过 getTextureMetaManager() 访问
 } // namespace OpenCoreManagers
 
 #include "Runtime/Animation/AnimationPipeline.hpp"
@@ -109,14 +109,30 @@ class OpenEngine final
     {
         return packageManager.get();
     }
+    TextureMetaManager *getTextureMetaManager() const noexcept
+    {
+        return textureMetaManager.get();
+    }
 
     GameInfo *getGameInfo() { return gameInfo.get(); }
 
   private:
-    unique_ptr<GameInfo>       gameInfo = std::make_unique<GameInfo>();
-    unique_ptr<StageManager>   sController;
-    unique_ptr<Timer>          timer;
-    unique_ptr<PackageManager> packageManager;
+    unique_ptr<GameInfo>           gameInfo = std::make_unique<GameInfo>();
+    unique_ptr<StageManager>       sController;
+    unique_ptr<Timer>              timer;
+    unique_ptr<PackageManager>     packageManager;
+    unique_ptr<TextureMetaManager> textureMetaManager;
 };
+
+/// @brief 从 PackageManager 按资源名创建纹理
+inline shared_ptr<Texture> MakeTextureFromPkg(uint8_t xCount, uint8_t yCount,
+                                              string_view resName)
+{
+    auto texOpt =
+        OpenEngine::getInstance().getTextureMetaManager()->getTexture(resName);
+    if (texOpt.has_value())
+        return std::make_shared<Texture>(xCount, yCount, (*texOpt)->texture);
+    return nullptr;
+}
 
 #endif //_OPENCORE_H_

@@ -12,13 +12,21 @@
 
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <initializer_list>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
+
+#include "Asset/TextureLoader.hpp"
 #include "Core/Info/ResourceInfo.hpp"
+#include "Core/Thread/ThreadManager.hpp"
 #include "Core/Timer.hpp"
 
 using std::fstream;
@@ -139,22 +147,61 @@ class PackageManager final
     bool registerResource(ResourceNode resource);
     bool registerResources(initializer_list<ResourceNode> resources);
 
+    // ──────────────────────────────────────────────
+    //  资源访问接口（取代 ResourceManager）
+    // ──────────────────────────────────────────────
+
+    /**
+     * @brief 获取已加载的纹理，若未加载则触发异步加载并阻塞等待。
+     * @param name 资源名称（注册时使用的 name）
+     * @return shared_ptr<SDL_Texture>，失败时返回 nullptr
+     */
+    shared_ptr<SDL_Texture> getTexture(string_view name);
+
+    /**
+     * @brief 获取已加载的字体，若未加载则触发异步加载并阻塞等待。
+     * @param name   资源名称
+     * @param ptsize 字体大小（磅值）
+     * @return shared_ptr<TTF_Font>，失败时返回 nullptr
+     */
+    shared_ptr<TTF_Font> getFont(string_view name, int ptsize);
+
+    /**
+     * @brief 清空所有资源缓存，下次 getTexture/getFont 会重新加载
+     */
+    void clearCache();
+
   private:
-    string packageName;
-    bool   packedMode = false;
-    Timer *timer      = nullptr;
-
-    ResourceInfo resourceInfo;
-
+    // ── 内部状态 ──
+    string               packageName;
+    bool                 packedMode = false;
+    Timer               *timer      = nullptr;
+    ResourceInfo         resourceInfo;
     vector<ResourceNode> resourceManifestBuffer;
+    SDL_Renderer        *renderer_ = nullptr;
 
-    static constexpr float EVICT_TTL = 10.0f; // 进行资源删除轮询的时间
+    // ── 资源缓存（已就绪） ──
+    std::unordered_map<string, shared_ptr<SDL_Texture>> textureCache_;
+    std::unordered_map<string, shared_ptr<TTF_Font>>    fontCache_;
 
+    // ── 加载中去重（按类型分离避免 key 碰撞） ──
+    std::unordered_map<string, std::shared_future<void>> pendingTextures_;
+    std::unordered_map<string, std::shared_future<void>> pendingFonts_;
+
+    std::mutex cacheMutex_;
+
+    static constexpr float EVICT_TTL = 10.0f; // 资源删除轮询间隔
+
+    // ── 辅助方法 ──
     void evictStaleEntries();
 
-    static path getManifestPath(string_view packageName, bool packed);
-
     bool contains(ResourceNode target, bool nameOnly = false);
-
     bool generatePackage(const path &manifestPath, bool cleanup = true);
+
+    static path       getManifestPath(string_view packageName, bool packed);
+    ResourceNode     *findNode(string_view name);
+    std::vector<char> extractResourceData(const ResourceNode &node);
+
+    std::shared_future<void> requestTextureLoad(string_view name);
+    std::shared_future<void> requestFontLoad(string_view name, int ptsize);
 };
