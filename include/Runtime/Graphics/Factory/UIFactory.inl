@@ -17,16 +17,20 @@ inline shared_ptr<Texture> GetTextureByName(std::string_view name)
 // 通用版本
 template <typename T>
 inline unique_ptr<T> UI(const std::string &id, uint8_t layer,
-                        std::string_view textureName, short frameX,
-                        short frameY)
+                        std::string_view textureName, uint8_t frameX,
+                        uint8_t frameY)
 {
-    return std::make_unique<T>(id, layer, GetTextureByName(textureName));
+    return std::make_unique<T>(
+        id, layer,
+        OpenEngine::getInstance().getTextureMetaManager()->registerTexture(
+            {textureName, frameX, frameY}));
 }
 
 template <>
 inline unique_ptr<FrameCounter>
 UI<FrameCounter>(const std::string &id, uint8_t layer,
-                 std::string_view textureName, short reserve0, short reserve1)
+                 std::string_view textureName, uint8_t reserve0,
+                 uint8_t reserve1)
 {
     return std::make_unique<FrameCounter>(id, layer);
 }
@@ -34,7 +38,8 @@ UI<FrameCounter>(const std::string &id, uint8_t layer,
 template <>
 inline unique_ptr<BaseBackground>
 UI<BaseBackground>(const std::string &id, uint8_t layer,
-                   std::string_view textureName, short reserve0, short reserve1)
+                   std::string_view textureName, uint8_t reserve0,
+                   uint8_t reserve1)
 {
     return std::make_unique<BaseBackground>(id, layer,
                                             GetTextureByName(textureName));
@@ -43,7 +48,7 @@ UI<BaseBackground>(const std::string &id, uint8_t layer,
 template <>
 inline unique_ptr<CheckBox> UI<CheckBox>(const std::string &id, uint8_t layer,
                                          std::string_view textureName,
-                                         short reserve1, short reserve0)
+                                         uint8_t reserve1, uint8_t reserve0)
 {
     return std::make_unique<CheckBox>(id, layer, GetTextureByName(textureName));
 }
@@ -51,7 +56,7 @@ inline unique_ptr<CheckBox> UI<CheckBox>(const std::string &id, uint8_t layer,
 template <>
 inline unique_ptr<TextArea> UI<TextArea>(const std::string &id, uint8_t layer,
                                          std::string_view fontName,
-                                         short reserve1, short reserve0)
+                                         uint8_t reserve1, uint8_t reserve0)
 {
     return std::make_unique<TextArea>(id, layer, fontName);
 }
@@ -59,7 +64,7 @@ inline unique_ptr<TextArea> UI<TextArea>(const std::string &id, uint8_t layer,
 template <>
 inline unique_ptr<TypeWriter>
 UI<TypeWriter>(const std::string &id, uint8_t layer, std::string_view fontName,
-               short reserve1, short reserve0)
+               uint8_t reserve1, uint8_t reserve0)
 {
     return std::make_unique<TypeWriter>(id, layer, fontName);
 }

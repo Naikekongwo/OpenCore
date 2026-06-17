@@ -15,7 +15,7 @@ using std::unordered_map;
 
 struct TextureMeta
 {
-    string  textureName; // PackageManager 中注册的资源名
+    string textureName; // PackageManager 中注册的资源名
     uint8_t cols;
     uint8_t rows;
 
@@ -55,13 +55,10 @@ class TextureMetaManager final
     // 从 PackageManager 获取纹理（含缓存）
     optional<shared_ptr<Texture>> getTexture(string_view name);
 
-    /// @deprecated 兼容旧 short ID 的重载，将 ID 转字符串后查找
-    // optional<shared_ptr<Texture>> getTexture(short id)
-    // {
-    //     return getTexture(std::to_string(id));
-    // }
+    // 利用TextureMeta进行注册并且返回Texture
+    shared_ptr<Texture> registerTexture(TextureMeta meta);
 
   private:
-    unordered_map<string, TextureMeta>         _metaRegistry;
+    unordered_map<string, TextureMeta> _metaRegistry;
     unordered_map<string, shared_ptr<Texture>> _textureCache;
 };

@@ -185,15 +185,17 @@ class IDrawableObject
     DrawableConfigurator Configure();
 
   protected:
-    std::string                  id;           ///< 对象唯一标识符
-    uint8_t                      layer = 0;    ///< 渲染图层（0 最低）
+    std::string id;                            ///< 对象唯一标识符
+    uint8_t layer = 0;                         ///< 渲染图层（0 最低）
     unique_ptr<AnimationManager> AnimeManager; ///< 动画管理器
-    unique_ptr<VisualState>      VState;       ///< 视觉状态（位置、缩放等）
-    uint16_t                     absWidth, absHeight; ///< 原始宽高（像素）
-    shared_ptr<Texture>          texture;             ///< 当前纹理
-    int                          magnetFactor = 0;    ///< 磁吸因子（像素）
+    unique_ptr<VisualState> VState;            ///< 视觉状态（位置、缩放等）
+    uint16_t absWidth, absHeight;              ///< 原始宽高（像素）
+    shared_ptr<Texture> texture;               ///< 当前纹理
+    int magnetFactor = 0;                      ///< 磁吸因子（像素）
     bool absolutePosite = true; ///< 位置是否基于绝对坐标（否则为相对父容器）
     IDrawableObject *parentContainer = nullptr; ///< 父容器指针
+
+    float scaleArgs_[2] = {0}; ///< setScale 最近一次调用的原始 w, h
 };
 
 #endif //_IDRAWABLE_H_

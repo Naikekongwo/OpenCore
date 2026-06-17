@@ -21,6 +21,8 @@
 #include <cstdarg>
 #include <memory>
 
+struct Texture;
+
 enum class RenderViewport
 {
     Fullscreen,
@@ -126,6 +128,13 @@ class GraphicsManager
      * @param color 填充颜色（含 Alpha）
      */
     void FillRect(const Rect &rect, const SDL_Color &color);
+
+    /**
+     * @brief 截取当前渲染器画面，返回 shared_ptr<Texture>（网格 1×1）。
+     *        可直接用于 changeTexture / ImageBoard 等。
+     * @return shared_ptr<Texture>，失败返回 nullptr
+     */
+    std::shared_ptr<Texture> captureScreen();
 
   private:
     SDL_Window *window;

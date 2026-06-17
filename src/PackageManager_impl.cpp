@@ -79,8 +79,8 @@ bool PackageManager::registerResource(ResourceType rType, string_view name,
 {
     ResourceNode resource;
 
-    resource.rType    = rType;
-    resource.name     = name;
+    resource.rType = rType;
+    resource.name = name;
     resource.filePath = filePath;
 
     return registerResource(resource);
@@ -105,7 +105,7 @@ bool PackageManager::registerResource(ResourceNode resource)
 
     resourceManifestBuffer.push_back(resource);
 
-    auto    packageManifestFile = getManifestPath(packageName, false);
+    auto packageManifestFile = getManifestPath(packageName, false);
     fstream manifest(packageManifestFile, ios::app | ios::binary);
 
     if (!manifest.good())
@@ -178,7 +178,7 @@ bool PackageManager::contains(ResourceNode target, bool nameOnly)
     }
 
     // 缓冲中未命中，尝试从清单文件中按需加载
-    auto    packageManifestFile = getManifestPath(packageName, packedMode);
+    auto packageManifestFile = getManifestPath(packageName, packedMode);
     fstream manifest(packageManifestFile, ios::in | ios::binary);
     if (manifest.good())
     {
@@ -219,7 +219,7 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
     }
 
     vector<ResourceNode> originalNodes;
-    string               line;
+    string line;
     while (getline(manifestFile, line))
     {
         if (!line.empty())
@@ -245,8 +245,8 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
 
     // ③④ 遍历manifest，生成导出节点并拼接资源数据
     vector<ResourceNode> exportNodes;
-    ostringstream        resourceStream;
-    size_t               currentOffset = 0;
+    ostringstream resourceStream;
+    size_t currentOffset = 0;
 
     for (const auto &node : originalNodes)
     {
@@ -263,7 +263,7 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
 
         ResourceNode exportNode;
         exportNode.rType = node.rType;
-        exportNode.name  = node.name;
+        exportNode.name = node.name;
         exportNode.filePath =
             resourceInfo.keepStructureWhenPackaging ? node.filePath : "";
         exportNode.startIndex = static_cast<int>(currentOffset);
@@ -283,7 +283,7 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
     string pkgName = string(this->packageName);
 
     // ⑤ 写出 _packagemanifest.txt（单独文件，不嵌入 .ocdata）
-    auto    packedManifestPath = getManifestPath(pkgName, true);
+    auto packedManifestPath = getManifestPath(pkgName, true);
     fstream mfOut(packedManifestPath, ios::out | ios::binary | ios::trunc);
     if (!mfOut.is_open())
     {
@@ -294,7 +294,7 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
     mfOut.close();
 
     // ⑥ 组装 .ocdata 文件（仅 OCDT 魔数 + 资源数据）
-    auto    outputPath = fs::path(reinterpret_cast<const char8_t *>(
+    auto outputPath = fs::path(reinterpret_cast<const char8_t *>(
         (string("data//") + pkgName + string("_00.ocdata")).c_str()));
     fstream output(outputPath, ios::out | ios::binary | ios::trunc);
     if (!output.is_open())
@@ -358,7 +358,7 @@ bool PackageManager::onEnter()
     {
         // 自动打包：将 _manifest.txt 打包为 .ocdata + _packagemanifest.txt
         auto manifestFsPath = getManifestPath(packageName, false);
-        bool result         = generatePackage(manifestFsPath, false);
+        bool result = generatePackage(manifestFsPath, false);
         if (!result)
         {
             LOG("自动打包失败，源清单文件: {}", manifestFsPath.string());
@@ -395,7 +395,7 @@ ResourceNode *PackageManager::findNode(string_view name)
     }
 
     // 2) 缓冲未命中 → 从清单位文件按需加载
-    auto    manifestFile = getManifestPath(packageName, packedMode);
+    auto manifestFile = getManifestPath(packageName, packedMode);
     fstream manifest(manifestFile, ios::in | ios::binary);
     if (!manifest.is_open())
         return nullptr;
@@ -422,7 +422,7 @@ ResourceNode *PackageManager::findNode(string_view name)
 // ──────────────────────────────────────────────
 std::vector<char> PackageManager::extractResourceData(const ResourceNode &node)
 {
-    string  ocdataPath = string("data//") + packageName + string("_00.ocdata");
+    string ocdataPath = string("data//") + packageName + string("_00.ocdata");
     fstream file(
         fs::path(reinterpret_cast<const char8_t *>(ocdataPath.c_str())),
         ios::in | ios::binary);
@@ -462,7 +462,7 @@ std::vector<char> PackageManager::extractResourceData(const ResourceNode &node)
 std::shared_future<void> PackageManager::requestTextureLoad(string_view name)
 {
     auto promise = std::make_shared<std::promise<void>>();
-    auto fut     = promise->get_future().share();
+    auto fut = promise->get_future().share();
 
     {
         std::lock_guard<std::mutex> lock(cacheMutex_);
@@ -548,12 +548,12 @@ std::shared_future<void> PackageManager::requestTextureLoad(string_view name)
 //  requestFontLoad — 异步加载字体，返回 future 供去重
 // ──────────────────────────────────────────────
 std::shared_future<void> PackageManager::requestFontLoad(string_view name,
-                                                         int         ptsize)
+                                                         int ptsize)
 {
     string key = string(name) + "@" + std::to_string(ptsize);
 
     auto promise = std::make_shared<std::promise<void>>();
-    auto fut     = promise->get_future().share();
+    auto fut = promise->get_future().share();
 
     {
         std::lock_guard<std::mutex> lock(cacheMutex_);
@@ -623,7 +623,7 @@ std::shared_future<void> PackageManager::requestFontLoad(string_view name,
 shared_ptr<SDL_Texture> PackageManager::getTexture(string_view name)
 {
     string key(name);
-    bool   needLoad = false;
+    bool needLoad = false;
 
     {
         std::lock_guard<std::mutex> lock(cacheMutex_);
@@ -648,6 +648,88 @@ shared_ptr<SDL_Texture> PackageManager::getTexture(string_view name)
         requestTextureLoad(name);
 
     return nullptr;
+}
+
+// ──────────────────────────────────────────────
+//  loadTextureSync — 同步阻塞加载纹理
+// ──────────────────────────────────────────────
+shared_ptr<SDL_Texture> PackageManager::loadTextureSync(string_view name)
+{
+    string key(name);
+
+    // 阶段 1：缓存命中
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex_);
+        auto it = textureCache_.find(key);
+        if (it != textureCache_.end())
+            return it->second;
+    }
+
+    // 阶段 2：已有异步加载在进行中，等待完成
+    {
+        std::unique_lock<std::mutex> lock(cacheMutex_);
+        auto it = pendingTextures_.find(key);
+        if (it != pendingTextures_.end())
+        {
+            auto fut = it->second;
+            lock.unlock();
+            fut.wait();
+            lock.lock();
+            auto cached = textureCache_.find(key);
+            return cached != textureCache_.end() ? cached->second : nullptr;
+        }
+    }
+
+    // 阶段 3：首次请求，当前线程同步完成全部加载
+    ResourceNode *node = findNode(name);
+    if (!node)
+    {
+        LOG("loadTextureSync: 资源 \"{}\" 未在清单中注册", name);
+        return nullptr;
+    }
+
+    auto data = extractResourceData(*node);
+    if (data.empty())
+        return nullptr;
+
+    SDL_IOStream *io = SDL_IOFromConstMem(data.data(), data.size());
+    if (!io)
+    {
+        LOG("loadTextureSync: SDL_IOFromConstMem 失败");
+        return nullptr;
+    }
+
+    SDL_Surface *surface = IMG_Load_IO(io, true);
+    if (!surface)
+    {
+        LOG("loadTextureSync: IMG_Load_IO 加载 \"{}\" 失败: {}", name,
+            SDL_GetError());
+        return nullptr;
+    }
+
+    SDL_Surface *converted =
+        SDL_ConvertSurface(surface, SDL_PIXELFORMAT_ABGR8888);
+    SDL_DestroySurface(surface);
+    if (!converted)
+    {
+        LOG("loadTextureSync: SDL_ConvertSurface 失败: {}", SDL_GetError());
+        return nullptr;
+    }
+
+    auto tex = ConvertSurfaceToTexture(renderer_, converted);
+    if (!tex)
+    {
+        LOG("loadTextureSync: ConvertSurfaceToTexture 失败");
+        return nullptr;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex_);
+        textureCache_[key] = tex;
+    }
+
+    LOG("loadTextureSync: 同步加载完成 \"{}\"", name);
+    return tex;
 }
 
 // ──────────────────────────────────────────────

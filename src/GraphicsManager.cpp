@@ -198,3 +198,29 @@ void GraphicsManager::FillRect(const Rect &rect, const SDL_Color &color)
     SDL_RenderFillRect(renderer, &fRect);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 }
+
+shared_ptr<Texture> GraphicsManager::captureScreen()
+{
+    // 截取当前渲染器画面到 surface
+    SDL_Surface *surface = SDL_RenderReadPixels(renderer, nullptr);
+    if (!surface)
+    {
+        LOG("captureScreen: SDL_RenderReadPixels failed: {}", SDL_GetError());
+        return nullptr;
+    }
+
+    SDL_Texture *sdlTex = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_DestroySurface(surface);
+
+    if (!sdlTex)
+    {
+        LOG("captureScreen: SDL_CreateTextureFromSurface failed: {}",
+            SDL_GetError());
+        return nullptr;
+    }
+
+    SDL_SetTextureBlendMode(sdlTex, SDL_BLENDMODE_BLEND);
+
+    return std::make_shared<Texture>(1, 1,
+                                     TexturePtr(sdlTex, TextureDeleter{}));
+}

@@ -53,11 +53,11 @@ enum ResourceType
 struct ResourceNode
 {
     ResourceType rType;
-    string       name;
-    string       filePath;       // 此参数在生成资源包时舍弃
-    int          startIndex = 0; // 此参数不由外部显式注册
-    int          endIndex   = 0; // 此参数不由外部显式注册
-    float expireTime = 0.0f;     // 此参数与序列化、反序列化无关（不储存到本地）
+    string name;
+    string filePath;         // 此参数在生成资源包时舍弃
+    int startIndex = 0;      // 此参数不由外部显式注册
+    int endIndex = 0;        // 此参数不由外部显式注册
+    float expireTime = 0.0f; // 此参数与序列化、反序列化无关（不储存到本地）
 
     /// 序列化为一行字符串（CSV格式）
     string serialize() const
@@ -84,9 +84,9 @@ struct ResourceNode
     {
         ResourceNode node;
         // 按逗号分割
-        auto firstComma  = line.find(',');
+        auto firstComma = line.find(',');
         auto secondComma = line.find(',', firstComma + 1);
-        auto thirdComma  = line.find(',', secondComma + 1);
+        auto thirdComma = line.find(',', secondComma + 1);
         auto fourthComma = line.find(',', thirdComma + 1);
 
         string typeStr(line.substr(0, firstComma));
@@ -122,7 +122,7 @@ struct ResourceNode
 class PackageManager final
 {
   public:
-    explicit PackageManager(string_view  pName,
+    explicit PackageManager(string_view pName,
                             ResourceInfo resInfo = ResourceInfo{});
     ~PackageManager() = default;
 
@@ -161,6 +161,14 @@ class PackageManager final
     shared_ptr<SDL_Texture> getTexture(string_view name);
 
     /**
+     * @brief 同步加载纹理，阻塞直到 SDL_Texture 就绪。
+     *        用于 UI 控件等需要立即获取 SDL_Texture 的场景。
+     * @param name 资源名称
+     * @return shared_ptr<SDL_Texture>，失败时返回 nullptr
+     */
+    shared_ptr<SDL_Texture> loadTextureSync(string_view name);
+
+    /**
      * @brief 获取已加载的字体，若未加载则触发异步加载并阻塞等待。
      * @param name   资源名称
      * @param ptsize 字体大小（磅值）
@@ -175,16 +183,16 @@ class PackageManager final
 
   private:
     // ── 内部状态 ──
-    string               packageName;
-    bool                 packedMode = false;
-    Timer               *timer      = nullptr;
-    ResourceInfo         resourceInfo;
+    string packageName;
+    bool packedMode = false;
+    Timer *timer = nullptr;
+    ResourceInfo resourceInfo;
     vector<ResourceNode> resourceManifestBuffer;
-    SDL_Renderer        *renderer_ = nullptr;
+    SDL_Renderer *renderer_ = nullptr;
 
     // ── 资源缓存（已就绪） ──
     std::unordered_map<string, shared_ptr<SDL_Texture>> textureCache_;
-    std::unordered_map<string, shared_ptr<TTF_Font>>    fontCache_;
+    std::unordered_map<string, shared_ptr<TTF_Font>> fontCache_;
 
     // ── 加载中去重（按类型分离避免 key 碰撞） ──
     std::unordered_map<string, std::shared_future<void>> pendingTextures_;
@@ -200,8 +208,8 @@ class PackageManager final
     bool contains(ResourceNode target, bool nameOnly = false);
     bool generatePackage(const path &manifestPath, bool cleanup = true);
 
-    static path       getManifestPath(string_view packageName, bool packed);
-    ResourceNode     *findNode(string_view name);
+    static path getManifestPath(string_view packageName, bool packed);
+    ResourceNode *findNode(string_view name);
     std::vector<char> extractResourceData(const ResourceNode &node);
 
     std::shared_future<void> requestTextureLoad(string_view name);

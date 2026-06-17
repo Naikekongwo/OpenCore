@@ -59,7 +59,7 @@ SDL_Rect IDrawableObject::getLogicalBounds()
 
     const auto &state = *VState;
 
-    float logicalWidth  = absWidth * state.scale[0];
+    float logicalWidth = absWidth * state.scale[0];
     float logicalHeight = absHeight * state.scale[1];
 
     float logicalX = state.Position[0];
@@ -123,19 +123,14 @@ void IDrawableObject::setScale(float w, float h)
     float relW = (w > 1.0f || w < -1.0f) ? w / parentRect.w : w;
     float relH = (h > 1.0f || h < -1.0f) ? h / parentRect.h : h;
 
+    // 保存原始参数，供 changeTexture 重算使用
+    scaleArgs_[0] = w;
+    scaleArgs_[1] = h;
+
     float wph = 1.0f;
     if (relW * relH == 0.0f)
     {
-        // texture一定要存在才能得到原始尺寸！
-        if (!texture || !texture->get())
-        {
-            LOG("该元素是一个无需纹理或纹理尚未加载的元素，所以你不应该对本元素"
-                "使用固定宽高比"
-                "的属性 元素ID:{}",
-                id.c_str());
-            return;
-        }
-
+        // 固定宽高比模式 —— 纹理必须持有 SDL_Texture（本版本构造时已同步加载）
         wph = texture->getWidthHeight();
         // Ensure that not both parameters are zero!
         absWidth =
@@ -148,7 +143,7 @@ void IDrawableObject::setScale(float w, float h)
     }
     else
     {
-        absWidth  = relW * parentRect.w;
+        absWidth = relW * parentRect.w;
         absHeight = relH * parentRect.h;
     }
 }
@@ -175,6 +170,8 @@ void IDrawableObject::changeTexture(shared_ptr<Texture> newTexture)
     if (newTexture)
     {
         texture = newTexture;
+        // 按之前决定的相对坐标（如 w=1.0, h=0 → 横向铺满）配合新纹理尺寸重算
+        setScale(scaleArgs_[0], scaleArgs_[1]);
     }
     else
     {
@@ -184,11 +181,11 @@ void IDrawableObject::changeTexture(shared_ptr<Texture> newTexture)
 
 IDrawableObject::IDrawableObject()
 {
-    this->id    = "null";
+    this->id = "null";
     this->layer = 0;
 
     AnimeManager = std::make_unique<AnimationManager>();
-    VState       = std::make_unique<VisualState>();
+    VState = std::make_unique<VisualState>();
 
     // 此构造器理应给那些不需要纹理的元素使用，所以不加载纹理
 }
@@ -196,11 +193,11 @@ IDrawableObject::IDrawableObject()
 IDrawableObject::IDrawableObject(string_view id, short layer,
                                  string_view textureName)
 {
-    this->id    = id;
+    this->id = id;
     this->layer = layer;
 
     AnimeManager = std::make_unique<AnimationManager>();
-    VState       = std::make_unique<VisualState>();
+    VState = std::make_unique<VisualState>();
 
     auto texOpt = OpenEngine::getInstance().getTextureMetaManager()->getTexture(
         textureName);
@@ -220,7 +217,7 @@ void IDrawableObject::setParentContainer(IDrawableObject *parentContainer)
     if (parentContainer != nullptr)
     {
 
-        absolutePosite        = false;
+        absolutePosite = false;
         this->parentContainer = parentContainer;
 
         this->layer = parentContainer->getLayer() + 1;
