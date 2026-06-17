@@ -48,7 +48,8 @@ bool OpenEngine::Initialize()
     // 初始化资源管理器(其初始化时需要renderer，所以必须在GFX之后初始化)
     ResManager.Init();
 
-    packageManager = std::make_unique<PackageManager>(gameInfo->gameName);
+    packageManager = std::make_unique<PackageManager>(gameInfo->gameName,
+                                                      gameInfo->_resourceInfo);
 
     gameInfo->entranceStage->configure(timer.get(), sController.get());
     sController->changeStage(std::move(gameInfo->entranceStage));
@@ -61,10 +62,12 @@ bool OpenEngine::MainLoop()
 {
     using namespace OpenCoreManagers;
 
-    bool should_close = false;
-    bool isMinimized = false;
-    bool hasFocus = true;
-    bool needsTitleUpdate = true;
+    packageManager->onEnter();
+
+    bool  should_close     = false;
+    bool  isMinimized      = false;
+    bool  hasFocus         = true;
+    bool  needsTitleUpdate = true;
     Event event;
 
     while (!should_close)

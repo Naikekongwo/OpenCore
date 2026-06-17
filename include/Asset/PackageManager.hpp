@@ -12,20 +12,24 @@
 
 #include <filesystem>
 #include <fstream>
+#include <initializer_list>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
 
+#include "Core/Info/ResourceInfo.hpp"
 #include "Core/Timer.hpp"
 
 using std::fstream;
+using std::initializer_list;
 using std::mutex;
 using std::shared_ptr;
 using std::string;
 using std::string_view;
 using std::unique_ptr;
 using std::vector;
+using std::filesystem::path;
 
 enum ResourceType
 {
@@ -110,7 +114,8 @@ struct ResourceNode
 class PackageManager final
 {
   public:
-    explicit PackageManager(string_view pName);
+    explicit PackageManager(string_view  pName,
+                            ResourceInfo resInfo = ResourceInfo{});
     ~PackageManager() = default;
 
     /**
@@ -119,6 +124,8 @@ class PackageManager final
      * @param pName
      */
     void setPackageName(string_view pName) { this->packageName = pName; }
+
+    bool onEnter();
 
     /**
      * @brief 资源管理器的更新方法，用于判断资源过期等内容
@@ -130,12 +137,14 @@ class PackageManager final
     bool registerResource(ResourceType rType, string_view name,
                           string_view filePath);
     bool registerResource(ResourceNode resource);
-    bool registerResources(std::initializer_list<ResourceNode> resources);
+    bool registerResources(initializer_list<ResourceNode> resources);
 
   private:
     string packageName;
     bool   packedMode = false;
     Timer *timer      = nullptr;
+
+    ResourceInfo resourceInfo;
 
     vector<ResourceNode> resourceManifestBuffer;
 
@@ -143,12 +152,9 @@ class PackageManager final
 
     void evictStaleEntries();
 
-    static std::filesystem::path getManifestPath(string_view packageName,
-                                                 bool        packed);
+    static path getManifestPath(string_view packageName, bool packed);
 
     bool contains(ResourceNode target, bool nameOnly = false);
 
-    bool extractManifest(string_view packagePath);
-    bool generatePackage(string_view manifestPath, bool cleanup = true);
-    bool enablePackage(string_view packagePath);
+    bool generatePackage(const path &manifestPath, bool cleanup = true);
 };
