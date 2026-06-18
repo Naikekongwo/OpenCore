@@ -59,10 +59,10 @@ bool OpenEngine::MainLoop()
 
     packageManager->onEnter();
 
-    bool  should_close     = false;
-    bool  isMinimized      = false;
-    bool  hasFocus         = true;
-    bool  needsTitleUpdate = true;
+    bool should_close = false;
+    bool isMinimized = false;
+    bool hasFocus = true;
+    bool needsTitleUpdate = true;
     Event event;
 
     while (!should_close)
@@ -127,6 +127,7 @@ bool OpenEngine::MainLoop()
         ThrManager.process_main_thread_tasks();
 
         sController->onUpdate();
+        packageManager->onUpdate();
 #pragma endregion
 
 #pragma region 渲染
