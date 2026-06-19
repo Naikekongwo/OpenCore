@@ -9,10 +9,10 @@
 Symbol::Symbol(std::string_view id, short layer, std::string_view textureName)
     : UIElement(id.data(), layer, nullptr)
 {
-    auto *TMMGR = OpenEngine::getInstance().getTextureMetaManager();
+    auto *pkg = OpenEngine::getInstance().getPackageManager();
 
-    auto texOpt = TMMGR->getTexture(textureName);
-    if (texOpt == std::nullopt)
+    auto tex = pkg->getTextureObject(textureName);
+    if (!tex)
     {
         LOG("创建元素 {} 时发生错误，根据指定纹理名称 {} 未找到对应的贴图",
             id.data(), textureName);
@@ -22,7 +22,7 @@ Symbol::Symbol(std::string_view id, short layer, std::string_view textureName)
     this->AnimeManager = std::make_unique<AnimationManager>();
     this->VState       = std::make_unique<VisualState>();
 
-    texture = texOpt.value();
+    texture = tex;
 }
 
 void Symbol::parseEvents(Event *event, float totalTime) {}

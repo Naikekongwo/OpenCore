@@ -1,16 +1,4 @@
-// OpenCore.cpp
-// OpenCore 的具体实现
-
 #include "OpenCore.hpp"
-
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_gamepad.h>
-#include <SDL3/SDL_oldnames.h>
-#include <SDL3/SDL_render.h>
-#include <memory>
-
-#include "Asset/PackageManager.hpp"
-#include "Core/Event/ControllerManager.hpp"
 
 // 单例
 OpenEngine &OpenEngine::getInstance()
@@ -45,7 +33,8 @@ bool OpenEngine::Initialize()
 
     packageManager = std::make_unique<PackageManager>(gameInfo->gameName,
                                                       gameInfo->_resourceInfo);
-    textureMetaManager = std::make_unique<TextureMetaManager>();
+
+    packageManager->setTimer(timer.get());
 
     gameInfo->entranceStage->configure(timer.get(), sController.get());
     sController->changeStage(std::move(gameInfo->entranceStage));
@@ -60,10 +49,10 @@ bool OpenEngine::MainLoop()
 
     packageManager->onEnter();
 
-    bool should_close = false;
-    bool isMinimized = false;
-    bool hasFocus = true;
-    bool needsTitleUpdate = true;
+    bool  should_close     = false;
+    bool  isMinimized      = false;
+    bool  hasFocus         = true;
+    bool  needsTitleUpdate = true;
     Event event;
 
     while (!should_close)

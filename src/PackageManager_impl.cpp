@@ -79,8 +79,8 @@ bool PackageManager::registerResource(ResourceType rType, string_view name,
 {
     ResourceNode resource;
 
-    resource.rType = rType;
-    resource.name = name;
+    resource.rType    = rType;
+    resource.name     = name;
     resource.filePath = filePath;
 
     return registerResource(resource);
@@ -105,7 +105,7 @@ bool PackageManager::registerResource(ResourceNode resource)
 
     resourceManifestBuffer.push_back(resource);
 
-    auto packageManifestFile = getManifestPath(packageName, false);
+    auto    packageManifestFile = getManifestPath(packageName, false);
     fstream manifest(packageManifestFile, ios::app | ios::binary);
 
     if (!manifest.good())
@@ -155,6 +155,7 @@ void PackageManager::evictStaleEntries()
     while (!resourceManifestBuffer.empty() &&
            now > resourceManifestBuffer.back().expireTime)
     {
+        LOG("淘汰过期的资源清单条目: {}", resourceManifestBuffer.back().name);
         resourceManifestBuffer.pop_back();
     }
 
@@ -165,16 +166,22 @@ void PackageManager::evictStaleEntries()
 
         for (auto it = textureCache_.begin(); it != textureCache_.end();)
         {
-            if (it->second.use_count() == 1) // 仅缓存持有
+            if (it->second.use_count() <= 2) // 仅缓存 + SDL内部持有
+            {
+                LOG("淘汰纹理缓存: {}", it->first);
                 it = textureCache_.erase(it);
+            }
             else
                 ++it;
         }
 
         for (auto it = fontCache_.begin(); it != fontCache_.end();)
         {
-            if (it->second.use_count() == 1) // 仅缓存持有
+            if (it->second.use_count() == 1) // 仅缓存 + SDL内部持有
+            {
+                LOG("淘汰字体缓存: {}", it->first);
                 it = fontCache_.erase(it);
+            }
             else
                 ++it;
         }
@@ -205,7 +212,7 @@ bool PackageManager::contains(ResourceNode target, bool nameOnly)
     }
 
     // 缓冲中未命中，尝试从清单文件中按需加载
-    auto packageManifestFile = getManifestPath(packageName, packedMode);
+    auto    packageManifestFile = getManifestPath(packageName, packedMode);
     fstream manifest(packageManifestFile, ios::in | ios::binary);
     if (manifest.good())
     {
@@ -246,7 +253,7 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
     }
 
     vector<ResourceNode> originalNodes;
-    string line;
+    string               line;
     while (getline(manifestFile, line))
     {
         if (!line.empty())
@@ -272,8 +279,8 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
 
     // ③④ 遍历manifest，生成导出节点并拼接资源数据
     vector<ResourceNode> exportNodes;
-    ostringstream resourceStream;
-    size_t currentOffset = 0;
+    ostringstream        resourceStream;
+    size_t               currentOffset = 0;
 
     for (const auto &node : originalNodes)
     {
@@ -290,7 +297,7 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
 
         ResourceNode exportNode;
         exportNode.rType = node.rType;
-        exportNode.name = node.name;
+        exportNode.name  = node.name;
         exportNode.filePath =
             resourceInfo.keepStructureWhenPackaging ? node.filePath : "";
         exportNode.startIndex = static_cast<int>(currentOffset);
@@ -310,7 +317,7 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
     string pkgName = string(this->packageName);
 
     // ⑤ 写出 _packagemanifest.txt（单独文件，不嵌入 .ocdata）
-    auto packedManifestPath = getManifestPath(pkgName, true);
+    auto    packedManifestPath = getManifestPath(pkgName, true);
     fstream mfOut(packedManifestPath, ios::out | ios::binary | ios::trunc);
     if (!mfOut.is_open())
     {
@@ -321,7 +328,7 @@ bool PackageManager::generatePackage(const fs::path &manifestPath, bool cleanup)
     mfOut.close();
 
     // ⑥ 组装 .ocdata 文件（仅 OCDT 魔数 + 资源数据）
-    auto outputPath = fs::path(reinterpret_cast<const char8_t *>(
+    auto    outputPath = fs::path(reinterpret_cast<const char8_t *>(
         (string("data//") + pkgName + string("_00.ocdata")).c_str()));
     fstream output(outputPath, ios::out | ios::binary | ios::trunc);
     if (!output.is_open())
@@ -385,7 +392,7 @@ bool PackageManager::onEnter()
     {
         // 自动打包：将 _manifest.txt 打包为 .ocdata + _packagemanifest.txt
         auto manifestFsPath = getManifestPath(packageName, false);
-        bool result = generatePackage(manifestFsPath, false);
+        bool result         = generatePackage(manifestFsPath, false);
         if (!result)
         {
             LOG("自动打包失败，源清单文件: {}", manifestFsPath.string());
@@ -400,8 +407,8 @@ bool PackageManager::onEnter()
     }
 
     // 获取渲染器指针（纹理创建需要）
-    renderer_ = OpenCoreManagers::GFXManager.getRenderer();
-    if (!renderer_)
+    auto renderer = OpenCoreManagers::GFXManager.getRenderer();
+    if (!renderer)
     {
         LOG("警告：获取渲染器失败，纹理加载将不可用");
     }
@@ -422,7 +429,7 @@ ResourceNode *PackageManager::findNode(string_view name)
     }
 
     // 2) 缓冲未命中 → 从清单位文件按需加载
-    auto manifestFile = getManifestPath(packageName, packedMode);
+    auto    manifestFile = getManifestPath(packageName, packedMode);
     fstream manifest(manifestFile, ios::in | ios::binary);
     if (!manifest.is_open())
         return nullptr;
@@ -449,7 +456,7 @@ ResourceNode *PackageManager::findNode(string_view name)
 // ──────────────────────────────────────────────
 std::vector<char> PackageManager::extractResourceData(const ResourceNode &node)
 {
-    string ocdataPath = string("data//") + packageName + string("_00.ocdata");
+    string  ocdataPath = string("data//") + packageName + string("_00.ocdata");
     fstream file(
         fs::path(reinterpret_cast<const char8_t *>(ocdataPath.c_str())),
         ios::in | ios::binary);
@@ -489,7 +496,7 @@ std::vector<char> PackageManager::extractResourceData(const ResourceNode &node)
 std::shared_future<void> PackageManager::requestTextureLoad(string_view name)
 {
     auto promise = std::make_shared<std::promise<void>>();
-    auto fut = promise->get_future().share();
+    auto fut     = promise->get_future().share();
 
     {
         std::lock_guard<std::mutex> lock(cacheMutex_);
@@ -550,12 +557,13 @@ std::shared_future<void> PackageManager::requestTextureLoad(string_view name)
                 [this, name, converted, promise]
                 {
                     // 若进入此 lambda 时 renderer_ 仍为空，记录警告
-                    auto tex = ConvertSurfaceToTexture(renderer_, converted);
+                    auto renderer = OpenCoreManagers::GFXManager.getRenderer();
+                    auto tex = ConvertSurfaceToTexture(renderer, converted);
                     if (!tex)
                     {
                         LOG("ConvertSurfaceToTexture 失败，"
                             "renderer_=%p",
-                            (void *)renderer_);
+                            (void *)renderer);
                     }
 
                     {
@@ -575,12 +583,12 @@ std::shared_future<void> PackageManager::requestTextureLoad(string_view name)
 //  requestFontLoad — 异步加载字体，返回 future 供去重
 // ──────────────────────────────────────────────
 std::shared_future<void> PackageManager::requestFontLoad(string_view name,
-                                                         int ptsize)
+                                                         int         ptsize)
 {
     string key = string(name) + "@" + std::to_string(ptsize);
 
     auto promise = std::make_shared<std::promise<void>>();
-    auto fut = promise->get_future().share();
+    auto fut     = promise->get_future().share();
 
     {
         std::lock_guard<std::mutex> lock(cacheMutex_);
@@ -650,7 +658,7 @@ std::shared_future<void> PackageManager::requestFontLoad(string_view name,
 shared_ptr<SDL_Texture> PackageManager::getTexture(string_view name)
 {
     string key(name);
-    bool needLoad = false;
+    bool   needLoad = false;
 
     {
         std::lock_guard<std::mutex> lock(cacheMutex_);
@@ -687,7 +695,7 @@ shared_ptr<SDL_Texture> PackageManager::getTextureAsync(string_view name)
     // 阶段 1：缓存命中
     {
         std::lock_guard<std::mutex> lock(cacheMutex_);
-        auto it = textureCache_.find(key);
+        auto                        it = textureCache_.find(key);
         if (it != textureCache_.end())
             return it->second;
     }
@@ -695,7 +703,7 @@ shared_ptr<SDL_Texture> PackageManager::getTextureAsync(string_view name)
     // 阶段 2：已有异步加载在进行中，等待完成
     {
         std::unique_lock<std::mutex> lock(cacheMutex_);
-        auto it = pendingTextures_.find(key);
+        auto                         it = pendingTextures_.find(key);
         if (it != pendingTextures_.end())
         {
             auto fut = it->second;
@@ -711,7 +719,7 @@ shared_ptr<SDL_Texture> PackageManager::getTextureAsync(string_view name)
     ResourceNode *node = findNode(name);
     if (!node)
     {
-        LOG("getTextureAsync: 资源 \"{}\" 未在清单中注册", name);
+        LOG("资源 \"{}\" 未在清单中注册", name);
         return nullptr;
     }
 
@@ -722,15 +730,14 @@ shared_ptr<SDL_Texture> PackageManager::getTextureAsync(string_view name)
     SDL_IOStream *io = SDL_IOFromConstMem(data.data(), data.size());
     if (!io)
     {
-        LOG("getTextureAsync: SDL_IOFromConstMem 失败");
+        LOG("SDL_IOFromConstMem 失败");
         return nullptr;
     }
 
     SDL_Surface *surface = IMG_Load_IO(io, true);
     if (!surface)
     {
-        LOG("getTextureAsync: IMG_Load_IO 加载 \"{}\" 失败: {}", name,
-            SDL_GetError());
+        LOG("IMG_Load_IO 加载 \"{}\" 失败: {}", name, SDL_GetError());
         return nullptr;
     }
 
@@ -739,14 +746,15 @@ shared_ptr<SDL_Texture> PackageManager::getTextureAsync(string_view name)
     SDL_DestroySurface(surface);
     if (!converted)
     {
-        LOG("getTextureAsync: SDL_ConvertSurface 失败: {}", SDL_GetError());
+        LOG("SDL_ConvertSurface 失败: {}", SDL_GetError());
         return nullptr;
     }
 
-    auto tex = ConvertSurfaceToTexture(renderer_, converted);
+    auto renderer = OpenCoreManagers::GFXManager.getRenderer();
+    auto tex      = ConvertSurfaceToTexture(renderer, converted);
     if (!tex)
     {
-        LOG("getTextureAsync: ConvertSurfaceToTexture 失败");
+        LOG("ConvertSurfaceToTexture 失败");
         return nullptr;
     }
 
@@ -755,7 +763,7 @@ shared_ptr<SDL_Texture> PackageManager::getTextureAsync(string_view name)
         textureCache_[key] = tex;
     }
 
-    LOG("getTextureAsync: 同步加载完成 \"{}\"", name);
+    LOG("同步加载完成 \"{}\"", name);
     return tex;
 }
 
@@ -807,4 +815,100 @@ void PackageManager::clearCache()
     std::lock_guard<std::mutex> lock(cacheMutex_);
     textureCache_.clear();
     fontCache_.clear();
+    textureObjCache_.clear();
+    metaRegistry_.clear();
+}
+
+// ──────────────────────────────────────────────
+//  registerTextureMeta — 注册纹理元信息
+// ──────────────────────────────────────────────
+bool PackageManager::registerTextureMeta(TextureMeta meta)
+{
+    if (meta.textureName.empty())
+        return false;
+    metaRegistry_[meta.textureName] = meta;
+    return true;
+}
+
+// ──────────────────────────────────────────────
+//  queryTextureMeta — 查询纹理元信息
+// ──────────────────────────────────────────────
+optional<TextureMeta> PackageManager::queryTextureMeta(string_view name) const
+{
+    auto it = metaRegistry_.find(string(name));
+    if (it != metaRegistry_.end())
+        return it->second;
+    return std::nullopt;
+}
+
+// ──────────────────────────────────────────────
+//  getTextureObject — 获取 Texture 包装对象（含缓存）
+// ──────────────────────────────────────────────
+shared_ptr<Texture> PackageManager::getTextureObject(string_view name)
+{
+    string key(name);
+
+    // 阶段 1：Texture 包装对象缓存命中
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex_);
+        auto                        it = textureObjCache_.find(key);
+        if (it != textureObjCache_.end())
+            return it->second;
+    }
+
+    // 阶段 2：查询元信息
+    auto metaIt = metaRegistry_.find(key);
+    if (metaIt == metaRegistry_.end())
+    {
+        LOG("纹理 \"{}\" 未注册元信息", name);
+        return nullptr;
+    }
+
+    const TextureMeta &meta = metaIt->second;
+
+    // 阶段 3：同步加载 SDL_Texture
+    auto sdlTex = getTextureAsync(name);
+    if (!sdlTex)
+    {
+        LOG("同步加载 SDL_Texture \"{}\" 失败", name);
+        return nullptr;
+    }
+
+    // 阶段 4：构造 Texture 包装对象并缓存
+    auto texture =
+        std::make_shared<Texture>(meta.cols, meta.rows, std::move(sdlTex));
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex_);
+        textureObjCache_[key] = texture;
+    }
+
+    LOG("加载完成 \"{}\" ({}x{})", name, meta.cols, meta.rows);
+    return texture;
+}
+
+// ──────────────────────────────────────────────
+//  getTextureObject — 注册元信息并获取 Texture 包装对象
+// ──────────────────────────────────────────────
+shared_ptr<Texture> PackageManager::getTextureObject(TextureMeta meta)
+{
+    if (meta.textureName.empty() || meta.textureName == " ")
+        return nullptr;
+
+    // 检查现有缓存中是否有匹配的 Texture
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex_);
+        auto it = textureObjCache_.find(meta.textureName);
+        if (it != textureObjCache_.end())
+        {
+            auto &tex = it->second;
+            if (tex->xCount == meta.cols && tex->yCount == meta.rows)
+                return tex;
+        }
+    }
+
+    // 注册元信息
+    registerTextureMeta(meta);
+
+    // 加载 Texture
+    return getTextureObject(meta.textureName);
 }

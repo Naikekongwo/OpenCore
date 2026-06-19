@@ -4,14 +4,13 @@
 #include "OpenCore.hpp"
 #include <memory>
 
-/// @brief 通过 TextureMetaManager 按名称获取纹理的辅助函数
+/// @brief 通过 PackageManager 按名称获取纹理的辅助函数
 inline shared_ptr<Texture> GetTextureByName(std::string_view name)
 {
     if (name.empty())
         return nullptr;
-    auto texOpt =
-        OpenEngine::getInstance().getTextureMetaManager()->getTexture(name);
-    return texOpt.has_value() ? texOpt.value() : nullptr;
+    return OpenEngine::getInstance().getPackageManager()->getTextureObject(
+        name);
 }
 
 // 通用版本
@@ -22,7 +21,7 @@ inline unique_ptr<T> UI(const std::string &id, uint8_t layer,
 {
     return std::make_unique<T>(
         id, layer,
-        OpenEngine::getInstance().getTextureMetaManager()->registerTexture(
+        OpenEngine::getInstance().getPackageManager()->getTextureObject(
             {textureName, frameX, frameY}));
 }
 
