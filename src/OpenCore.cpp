@@ -5,6 +5,7 @@
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_gamepad.h>
+#include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_render.h>
 #include <memory>
 
@@ -59,10 +60,10 @@ bool OpenEngine::MainLoop()
 
     packageManager->onEnter();
 
-    bool  should_close     = false;
-    bool  isMinimized      = false;
-    bool  hasFocus         = true;
-    bool  needsTitleUpdate = true;
+    bool should_close = false;
+    bool isMinimized = false;
+    bool hasFocus = true;
+    bool needsTitleUpdate = true;
     Event event;
 
     while (!should_close)
@@ -139,9 +140,16 @@ bool OpenEngine::MainLoop()
 
         if (!isMinimized)
         {
+            // 为了给背景填充纯黑背景，先获取renderer，然后FillRect
             SDL_Renderer *renderer = GFXManager.getRenderer();
             SDL_RenderClear(renderer);
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderFillRect(renderer, nullptr);
+
+            // 显示场景
             sController->onRender();
+
+            // 显示
             SDL_RenderPresent(renderer);
         }
 

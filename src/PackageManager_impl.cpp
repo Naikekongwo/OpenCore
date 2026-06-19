@@ -96,7 +96,7 @@ bool PackageManager::registerResource(ResourceNode resource)
 
     if (packedMode)
     {
-        LOG("资源包模式下清单为只读，不允许注册新资源");
+        LOG("资源包模式下清单为只读");
         return false;
     }
 
