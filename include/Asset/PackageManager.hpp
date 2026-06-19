@@ -147,10 +147,6 @@ class PackageManager final
     bool registerResource(ResourceNode resource);
     bool registerResources(initializer_list<ResourceNode> resources);
 
-    // ──────────────────────────────────────────────
-    //  资源访问接口
-    // ──────────────────────────────────────────────
-
     /**
      * @brief 获取已加载的纹理。
      *        若未加载则触发异步加载，不阻塞等待，返回 nullptr。
@@ -166,7 +162,7 @@ class PackageManager final
      * @param name 资源名称
      * @return shared_ptr<SDL_Texture>，失败时返回 nullptr
      */
-    shared_ptr<SDL_Texture> loadTextureSync(string_view name);
+    shared_ptr<SDL_Texture> getTextureAsync(string_view name);
 
     /**
      * @brief 获取已加载的字体，若未加载则触发异步加载并阻塞等待。
@@ -176,13 +172,9 @@ class PackageManager final
      */
     shared_ptr<TTF_Font> getFont(string_view name, int ptsize);
 
-    /**
-     * @brief 清空所有资源缓存，下次 getTexture/getFont 会重新加载
-     */
     void clearCache();
 
   private:
-    // ── 内部状态 ──
     string packageName;
     bool packedMode = false;
     Timer *timer = nullptr;
@@ -190,19 +182,18 @@ class PackageManager final
     vector<ResourceNode> resourceManifestBuffer;
     SDL_Renderer *renderer_ = nullptr;
 
-    // ── 资源缓存（已就绪） ──
     std::unordered_map<string, shared_ptr<SDL_Texture>> textureCache_;
     std::unordered_map<string, shared_ptr<TTF_Font>> fontCache_;
 
-    // ── 加载中去重（按类型分离避免 key 碰撞） ──
     std::unordered_map<string, std::shared_future<void>> pendingTextures_;
     std::unordered_map<string, std::shared_future<void>> pendingFonts_;
 
     std::mutex cacheMutex_;
 
-    static constexpr float EVICT_TTL = 10.0f; // 资源删除轮询间隔
+    static constexpr float EVICT_TTL = 10.0f;   // 清单条目过期时间
+    static constexpr float GC_INTERVAL = 20.0f; // 整体淘汰回收间隔（2倍 TTL）
+    float lastGcTime_ = 0.0f;
 
-    // ── 辅助方法 ──
     void evictStaleEntries();
 
     bool contains(ResourceNode target, bool nameOnly = false);

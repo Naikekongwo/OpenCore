@@ -128,6 +128,7 @@ bool OpenEngine::MainLoop()
         ThrManager.process_main_thread_tasks();
 
         sController->onUpdate();
+        packageManager->onUpdate();
 #pragma endregion
 
 #pragma region 渲染

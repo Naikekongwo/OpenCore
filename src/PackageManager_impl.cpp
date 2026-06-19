@@ -141,16 +141,43 @@ fs::path PackageManager::getManifestPath(string_view packageName, bool packed)
 
 void PackageManager::evictStaleEntries()
 {
-    if (!timer || resourceManifestBuffer.empty())
+    if (!timer)
         return;
 
     float now = timer->getTotalTime();
 
-    // 末尾是 expireTime 最小的（最老），从后往前删
+    // 按 GC_INTERVAL 间隔执行，不每帧扫描
+    if (now - lastGcTime_ < GC_INTERVAL)
+        return;
+    lastGcTime_ = now;
+
+    // ① 资源清单过期条目淘汰（末尾是 expireTime 最小的，从后往前删）
     while (!resourceManifestBuffer.empty() &&
            now > resourceManifestBuffer.back().expireTime)
     {
         resourceManifestBuffer.pop_back();
+    }
+
+    // ② Texture 和 Font 的自动垃圾回收
+    //    遍历删除 use_count 为 1 的纹理/字体，即只有缓存自身持有的
+    {
+        std::lock_guard<std::mutex> lock(cacheMutex_);
+
+        for (auto it = textureCache_.begin(); it != textureCache_.end();)
+        {
+            if (it->second.use_count() == 1) // 仅缓存持有
+                it = textureCache_.erase(it);
+            else
+                ++it;
+        }
+
+        for (auto it = fontCache_.begin(); it != fontCache_.end();)
+        {
+            if (it->second.use_count() == 1) // 仅缓存持有
+                it = fontCache_.erase(it);
+            else
+                ++it;
+        }
     }
 }
 
@@ -168,7 +195,7 @@ bool PackageManager::contains(ResourceNode target, bool nameOnly)
         if (matches(entry))
         {
             if (timer)
-                entry.expireTime = timer->getTotalTime() + 15.0f;
+                entry.expireTime = timer->getTotalTime() + 2 * EVICT_TTL;
             // 按 expireTime 降序排序，最近使用的排前面
             sort(resourceManifestBuffer.begin(), resourceManifestBuffer.end(),
                  [](const ResourceNode &a, const ResourceNode &b)
@@ -651,9 +678,9 @@ shared_ptr<SDL_Texture> PackageManager::getTexture(string_view name)
 }
 
 // ──────────────────────────────────────────────
-//  loadTextureSync — 同步阻塞加载纹理
+//  getTextureAsync — 同步阻塞加载纹理
 // ──────────────────────────────────────────────
-shared_ptr<SDL_Texture> PackageManager::loadTextureSync(string_view name)
+shared_ptr<SDL_Texture> PackageManager::getTextureAsync(string_view name)
 {
     string key(name);
 
@@ -684,7 +711,7 @@ shared_ptr<SDL_Texture> PackageManager::loadTextureSync(string_view name)
     ResourceNode *node = findNode(name);
     if (!node)
     {
-        LOG("loadTextureSync: 资源 \"{}\" 未在清单中注册", name);
+        LOG("getTextureAsync: 资源 \"{}\" 未在清单中注册", name);
         return nullptr;
     }
 
@@ -695,14 +722,14 @@ shared_ptr<SDL_Texture> PackageManager::loadTextureSync(string_view name)
     SDL_IOStream *io = SDL_IOFromConstMem(data.data(), data.size());
     if (!io)
     {
-        LOG("loadTextureSync: SDL_IOFromConstMem 失败");
+        LOG("getTextureAsync: SDL_IOFromConstMem 失败");
         return nullptr;
     }
 
     SDL_Surface *surface = IMG_Load_IO(io, true);
     if (!surface)
     {
-        LOG("loadTextureSync: IMG_Load_IO 加载 \"{}\" 失败: {}", name,
+        LOG("getTextureAsync: IMG_Load_IO 加载 \"{}\" 失败: {}", name,
             SDL_GetError());
         return nullptr;
     }
@@ -712,14 +739,14 @@ shared_ptr<SDL_Texture> PackageManager::loadTextureSync(string_view name)
     SDL_DestroySurface(surface);
     if (!converted)
     {
-        LOG("loadTextureSync: SDL_ConvertSurface 失败: {}", SDL_GetError());
+        LOG("getTextureAsync: SDL_ConvertSurface 失败: {}", SDL_GetError());
         return nullptr;
     }
 
     auto tex = ConvertSurfaceToTexture(renderer_, converted);
     if (!tex)
     {
-        LOG("loadTextureSync: ConvertSurfaceToTexture 失败");
+        LOG("getTextureAsync: ConvertSurfaceToTexture 失败");
         return nullptr;
     }
 
@@ -728,7 +755,7 @@ shared_ptr<SDL_Texture> PackageManager::loadTextureSync(string_view name)
         textureCache_[key] = tex;
     }
 
-    LOG("loadTextureSync: 同步加载完成 \"{}\"", name);
+    LOG("getTextureAsync: 同步加载完成 \"{}\"", name);
     return tex;
 }
 

@@ -39,7 +39,7 @@ TextureMetaManager::getTexture(string_view name)
     if (!pkg)
         return std::nullopt;
 
-    auto sdlTex = pkg->loadTextureSync(name);
+    auto sdlTex = pkg->getTextureAsync(name);
     if (!sdlTex)
         return std::nullopt;
 
@@ -70,7 +70,7 @@ shared_ptr<Texture> TextureMetaManager::registerTexture(TextureMeta meta)
     if (!pkg)
         return nullptr;
 
-    auto sdlTex = pkg->loadTextureSync(meta.textureName);
+    auto sdlTex = pkg->getTextureAsync(meta.textureName);
     if (!sdlTex)
         return nullptr;
 

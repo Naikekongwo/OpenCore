@@ -13,7 +13,7 @@ struct Texture
     /**
      * @brief 构造纹理。
      *        内部 SDL_Texture 必须不为空 —— 调用方需保证已通过
-     *        PackageManager::loadTextureSync 同步加载完成。
+     *        PackageManager::getTextureAsync 同步加载完成。
      *
      * @param x   列数（网格分割）
      * @param y   行数
