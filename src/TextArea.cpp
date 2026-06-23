@@ -98,8 +98,7 @@ bool TextArea::generateTexture(SDL_Texture *target)
     auto wrapper = std::make_shared<Texture>(
         1, 1, std::shared_ptr<SDL_Texture>(target, [](SDL_Texture *) {}));
 
-    Text tool;
-    tool.Draw(wrapper.get(), &dstRect, m_textContent, attr);
+    Text::Draw(wrapper.get(), &dstRect, m_textContent, attr);
     return true;
 }
 

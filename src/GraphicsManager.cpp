@@ -113,15 +113,6 @@ void GraphicsManager::CleanUp()
     SDL_Quit();
 }
 
-int GraphicsManager::DrawSDLGeometry(SDL_Texture      *texture,
-                                     const SDL_Vertex *vertices,
-                                     int num_vertices, const int *indices,
-                                     int num_indices)
-{
-    return SDL_RenderGeometry(renderer, texture, vertices, num_vertices,
-                              indices, num_indices);
-}
-
 SDL_Texture *GraphicsManager::createTexture(uint16_t w, uint16_t h)
 {
     SDL_Texture *texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
@@ -158,10 +149,12 @@ int GraphicsManager::setRenderTarget(SDL_Texture *texture)
     return 0;
 }
 
-void GraphicsManager::FillRect(const Rect &rect, const SDL_Color &color)
+void GraphicsManager::FillRect(const Rect &rect, const Color &color)
 {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_Color prColor = color;
+    SDL_SetRenderDrawColor(renderer, prColor.r, prColor.g, prColor.b,
+                           prColor.a);
     SDL_FRect fRect = rect;
     SDL_RenderFillRect(renderer, &fRect);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);

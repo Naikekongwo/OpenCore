@@ -15,6 +15,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_Log.h>
 
+#include "Core/Math/OpenCore_Color.hpp"
 #include "Core/Math/OpenCore_Rect.hpp"
 #include <string>
 
@@ -99,27 +100,12 @@ class GraphicsManager
         return window;
     }
 
-    /** @brief 已废弃——纹理绘制请通过 Texture::Draw 进行。 */
-
-    /**
-     * @brief OpenCore的原生顶点渲染方法
-     * @todo 需要进一步原生封装
-     * @param texture 纹理
-     * @param vertices 顶点
-     * @param num_vertices 顶点个数
-     * @param indices 索引
-     * @param num_indices 索引个数
-     * @return int 执行结果
-     */
-    int DrawSDLGeometry(SDL_Texture *texture, const SDL_Vertex *vertices,
-                        int num_vertices, const int *indices, int num_indices);
-
     /**
      * @brief 用指定颜色填充一个矩形区域
      * @param rect  目标矩形（逻辑坐标）
      * @param color 填充颜色（含 Alpha）
      */
-    void FillRect(const Rect &rect, const SDL_Color &color);
+    void FillRect(const Rect &rect, const Color &color);
 
     /**
      * @brief 截取当前渲染器画面，返回 shared_ptr<Texture>（网格 1×1）。

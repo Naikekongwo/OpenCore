@@ -95,7 +95,7 @@ class TypeWriter : public UIElement
     short  m_fontSize = 20;
     short  lineGap    = 2;
 
-    SDL_Color fontColor{255, 255, 255, 255};
+    Color fontColor = White;
 
     // bool m_textureValid = false; — 已提升到基类 m_textureDirty
     bool m_shadowEnable = true;

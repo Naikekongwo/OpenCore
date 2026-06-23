@@ -37,6 +37,6 @@ class Text
                         int &outW, int &outH);
 
     /// @brief 将文本渲染到目标纹理上。
-    void Draw(Texture *target, const Rect *dstRect, string_view textContent,
-              const TextAttribute &attr);
+    static void Draw(Texture *target, const Rect *dstRect,
+                     string_view textContent, const TextAttribute &attr);
 };

@@ -9,6 +9,7 @@
 #ifndef _UIELEMENT_H_
 #define _UIELEMENT_H_
 
+#include "Core/Math/OpenCore_Color.hpp"
 #include "IDrawableObject.hpp"
 
 /**
@@ -33,7 +34,7 @@ class UIElement : public IDrawableObject
     virtual SDL_Rect getLogicalBounds() override;
     virtual SDL_Rect getPhysicalBounds() override;
 
-    void setBackgroundColor(SDL_Color color) { this->color = color; }
+    void setBackgroundColor(Color color) { this->color = color; }
 
     void onUpdate(float totalTime) override;
     void parseEvents(Event *event, float totalTime) override;
@@ -50,11 +51,10 @@ class UIElement : public IDrawableObject
     bool         onDestroy() override;
 
   protected:
-    bool m_textureDirty =
-        true; ///< 纹理缓存脏污标志，窗口缩放或内容变更时置 true
-    shared_ptr<Texture> m_textureCache; ///< 离屏纹理缓存
+    Color color          = None; /// <控件的背景色: 默认为透明>
+    bool  m_textureDirty = true; /// <纹理缓存脏污标志>
 
-    SDL_Color color = {0, 0, 0, 0};
+    shared_ptr<Texture> m_textureCache; ///< 离屏纹理缓存
 };
 
 #endif //_UIELEMENT_H_

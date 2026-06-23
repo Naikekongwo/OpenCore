@@ -23,7 +23,7 @@ void FrameCounter::Draw() // 这个帧数应该是常态显示的吧，所以未
     }
 
     std::string fpsText = "FPS: " + std::to_string(static_cast<int>(FPS));
-    SDL_Color   color   = {255, 255, 255, 255};
+    Color       color   = White;
 
     SDL_Surface *textSurface = TTF_RenderText_Blended(
         font.get(), fpsText.c_str(), fpsText.length(), color);
