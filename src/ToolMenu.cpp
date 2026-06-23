@@ -1,7 +1,7 @@
 #include "OpenCore.hpp"
 
-ToolMenu::ToolMenu(const string &id, short layer, shared_ptr<Texture> texture)
-    : UIElement(id, layer, texture)
+ToolMenu::ToolMenu(const string &id, short layer)
+    : UIElement(id, layer, nullptr)
 {
 }
 

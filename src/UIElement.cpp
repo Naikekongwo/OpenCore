@@ -61,22 +61,11 @@ SDL_Rect UIElement::getLogicalBounds()
 
 SDL_Rect UIElement::getPhysicalBounds() { return getLogicalBounds(); }
 
-UIElement::~UIElement()
-{
-    if (m_textureCache)
-    {
-        SDL_DestroyTexture(m_textureCache);
-        m_textureCache = nullptr;
-    }
-}
+UIElement::~UIElement() { m_textureCache.reset(); }
 
 bool UIElement::onDestroy()
 {
-    if (m_textureCache)
-    {
-        SDL_DestroyTexture(m_textureCache);
-        m_textureCache = nullptr;
-    }
+    m_textureCache.reset();
     IDrawableObject::onDestroy();
     return true;
 }

@@ -34,19 +34,13 @@ void Symbol::Draw()
     if (!texture)
         return;
 
-    Rect  dstRect = getLogicalBounds();
-    auto &GFX     = OpenCoreManagers::GFXManager.getInstance();
-    Rect  VRect   = GFX.getSccissorRect();
+    Rect dstRect = getLogicalBounds();
+    Rect VRect   = OpenCoreManagers::GFXManager.getInstance().getSccissorRect();
     if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
         return;
 
-    // 应用透明度效果
-    SDL_SetTextureAlphaMod(texture->get(), VState->getAlpha());
-
     Rect srcRect = texture->getSubRect(static_cast<int>(m_symbolType));
 
-    GFX.Draw(texture->get(), &srcRect, &dstRect, VState->angle, nullptr);
-
-    // 撤销透明度效果
-    SDL_SetTextureAlphaMod(texture->get(), 255);
+    texture->Draw(&srcRect, &dstRect, VState->angle, nullptr,
+                  static_cast<uint8_t>(VState->getAlpha()));
 }

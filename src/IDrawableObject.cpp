@@ -131,7 +131,7 @@ void IDrawableObject::setScale(float w, float h)
     if (relW * relH == 0.0f)
     {
         // 固定宽高比模式 —— 纹理必须持有 SDL_Texture（本版本构造时已同步加载）
-        wph = texture->getWidthHeight();
+        wph = texture->getTextureRatio();
         // Ensure that not both parameters are zero!
         absWidth =
             (relW == 0.0f) ? relH * parentRect.h * wph : parentRect.w * relW;

@@ -57,4 +57,5 @@ class BaseBackground : public UIElement
   private:
     uint8_t              nativeScale = 60; ///< 九宫格边角缩放基数（像素）
     BaseBackgroundStatus status = BaseBackgroundStatus::empty; ///< 当前状态
+    shared_ptr<Texture>  m_cacheTexture;                       ///< 离屏缓存纹理
 };

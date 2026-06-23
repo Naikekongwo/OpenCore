@@ -31,20 +31,19 @@ void FrameCounter::Draw() // 这个帧数应该是常态显示的吧，所以未
         return;
 
     auto        &GFX = GraphicsManager::getInstance();
-    SDL_Texture *textTexture =
+    SDL_Texture *raw =
         SDL_CreateTextureFromSurface(GFX.getRenderer(), textSurface);
-    if (!textTexture)
-    {
-        SDL_DestroySurface(textSurface);
+    SDL_DestroySurface(textSurface);
+    if (!raw)
         return;
-    }
+
+    auto tex = std::make_shared<Texture>(
+        1, 1, std::shared_ptr<SDL_Texture>(raw, SDL_DestroyTexture));
 
     Rect dstRect = {0, 0, 0, 0};
-    dstRect.w    = textSurface->w;
-    dstRect.h    = textSurface->h;
-    GFX.Draw(textTexture, nullptr, &dstRect, 0.0, nullptr);
-    SDL_DestroyTexture(textTexture);
-    SDL_DestroySurface(textSurface);
+    dstRect.w    = tex->width;
+    dstRect.h    = tex->height;
+    tex->Draw(nullptr, &dstRect, 0.0, nullptr);
 }
 void FrameCounter::onUpdate(float totalTime)
 {

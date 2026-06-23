@@ -16,9 +16,7 @@ void BaseBackground::onUpdate(float totalTime)
 {
     if (m_textureDirty)
     {
-        if (m_textureCache)
-            SDL_DestroyTexture(m_textureCache);
-        m_textureCache = nullptr;
+        m_cacheTexture.reset();
         onEnter();
         m_textureDirty = false;
     }
@@ -27,26 +25,20 @@ void BaseBackground::onUpdate(float totalTime)
         onEnter();
     }
 }
+
 void BaseBackground::onEnter()
 {
-    auto    &GFX    = OpenCoreManagers::GFXManager;
     SDL_Rect bounds = getLogicalBounds();
-    m_textureCache  = GFX.createTexture(bounds.w, bounds.h);
-    generateTexture(m_textureCache);
+    m_cacheTexture =
+        std::make_shared<Texture>(bounds.w, bounds.h, size_t(1), size_t(1));
+    generateTexture(m_cacheTexture->get());
 }
 
-void BaseBackground::onExit()
-{
-    if (m_textureCache)
-    {
-        SDL_DestroyTexture(m_textureCache);
-        m_textureCache = nullptr;
-    }
-}
+void BaseBackground::onExit() { m_cacheTexture.reset(); }
 
 void BaseBackground::Draw()
 {
-    if (!m_textureCache)
+    if (!m_cacheTexture || !m_cacheTexture->get())
         return;
 
     Rect  logiRect = getLogicalBounds();
@@ -56,9 +48,8 @@ void BaseBackground::Draw()
     if (VState->getAlpha() > 0.0f && visible(logiRect, VRect))
     {
         Rect dstRect = getPhysicalBounds();
-
-        SDL_SetTextureAlphaMod(m_textureCache, VState->getAlpha());
-        GFX.Draw(m_textureCache, NULL, &dstRect, 0, 0);
+        m_cacheTexture->Draw(nullptr, &dstRect, 0.0, nullptr,
+                             static_cast<uint8_t>(VState->getAlpha()));
     }
 }
 
@@ -71,27 +62,20 @@ void BaseBackground::parseEvents(Event *event, float totalTime)
 
 bool BaseBackground::generateTexture(SDL_Texture *target)
 {
-    auto &GFX = GraphicsManager::getInstance();
-    if (!target)
+    if (!target || !m_cacheTexture)
         return false;
-
-    GFX.setRenderTarget(target);
 
     if (!texture || !texture->get())
     {
         LOG("BaseBackground::generateTexture() 纹理尚未加载");
-        GFX.setRenderTarget(nullptr);
         return false;
     }
 
-    float texW, texH;
-    SDL_GetTextureSize(texture->get(), &texW, &texH);
+    float targetW, targetH;
+    SDL_GetTextureSize(target, &targetW, &targetH);
 
     Rect srcRect{};
     Rect dstRect{};
-
-    float targetW, targetH;
-    SDL_GetTextureSize(target, &targetW, &targetH);
 
     for (int row = 0; row < 3; row++)
     {
@@ -131,11 +115,10 @@ bool BaseBackground::generateTexture(SDL_Texture *target)
                 dstRect.h = nativeScale;
             }
 
-            GFX.Draw(texture->get(), &srcRect, &dstRect, 0.0, nullptr);
+            texture->Draw(m_cacheTexture.get(), &srcRect, &dstRect, 0.0,
+                          nullptr);
         }
     }
-
-    GFX.setRenderTarget(nullptr);
 
     status = BaseBackgroundStatus::ready;
     return true;

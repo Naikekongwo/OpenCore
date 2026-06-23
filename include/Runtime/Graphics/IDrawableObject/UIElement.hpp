@@ -52,8 +52,7 @@ class UIElement : public IDrawableObject
   protected:
     bool m_textureDirty =
         true; ///< 纹理缓存脏污标志，窗口缩放或内容变更时置 true
-    SDL_Texture *m_textureCache =
-        nullptr; ///< 离屏纹理缓存，由基类统一管理生命周期
+    shared_ptr<Texture> m_textureCache; ///< 离屏纹理缓存
 
     SDL_Color color = {0, 0, 0, 0};
 };

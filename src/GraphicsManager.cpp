@@ -76,7 +76,7 @@ void GraphicsManager::refreshWindowProperties()
                                      gameInfo->_graphicsInfo.resolutionHeight,
                                      SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
-    TargetWindowWidth = gameInfo->_graphicsInfo.resolutionWidth;
+    TargetWindowWidth  = gameInfo->_graphicsInfo.resolutionWidth;
     TargetWindowHeight = gameInfo->_graphicsInfo.resolutionHeight;
 
     if (!gameInfo->_graphicsInfo.resizable)
@@ -85,7 +85,7 @@ void GraphicsManager::refreshWindowProperties()
     }
     else if (gameInfo->_graphicsInfo.keepRatio)
     {
-        int windowWidth = 0;
+        int windowWidth  = 0;
         int windowHeight = 0;
         SDL_GetWindowSize(window, &windowWidth, &windowHeight);
 
@@ -113,48 +113,7 @@ void GraphicsManager::CleanUp()
     SDL_Quit();
 }
 
-int GraphicsManager::Draw(SDL_Texture *texture, const Rect *srcRect,
-                          const Rect *dstRect, const double angle,
-                          const Point *center)
-{
-    SDL_Rect source;
-    SDL_Rect destination;
-    SDL_Point point;
-
-    if (!texture)
-    {
-        LOG("Encountered a empty texture.");
-        return -1;
-    }
-    if (srcRect)
-    {
-        source = *srcRect;
-    }
-    if (dstRect)
-    {
-        destination = *dstRect;
-    }
-    if (center)
-    {
-        point = *center;
-    }
-
-    SDL_FRect srcF, dstF;
-    SDL_FPoint centerF;
-    if (srcRect)
-        srcF = *srcRect;
-    if (dstRect)
-        dstF = *dstRect;
-    if (center)
-        centerF = *center;
-
-    return SDL_RenderTextureRotated(
-        renderer, texture, (srcRect) ? &srcF : nullptr,
-        (dstRect) ? &dstF : nullptr, angle, (center) ? &centerF : nullptr,
-        SDL_FLIP_NONE);
-}
-
-int GraphicsManager::DrawSDLGeometry(SDL_Texture *texture,
+int GraphicsManager::DrawSDLGeometry(SDL_Texture      *texture,
                                      const SDL_Vertex *vertices,
                                      int num_vertices, const int *indices,
                                      int num_indices)
@@ -170,6 +129,15 @@ SDL_Texture *GraphicsManager::createTexture(uint16_t w, uint16_t h)
     // 启用透明混合
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
     return texture;
+}
+
+std::shared_ptr<SDL_Texture> GraphicsManager::createTextureShared(uint16_t w,
+                                                                  uint16_t h)
+{
+    SDL_Texture *raw = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+                                         SDL_TEXTUREACCESS_TARGET, w, h);
+    SDL_SetTextureBlendMode(raw, SDL_BLENDMODE_BLEND);
+    return std::shared_ptr<SDL_Texture>(raw, SDL_DestroyTexture);
 }
 
 int GraphicsManager::setRenderTarget(SDL_Texture *texture)

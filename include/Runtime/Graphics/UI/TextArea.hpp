@@ -70,7 +70,6 @@ class TextArea : public UIElement
     bool m_shadowEnable = true;
     bool m_aligncenter  = false;
 
-    // bool m_valid = true; — 已提升到基类 m_textureDirty
     uint8_t m_shadowOffset = 2;
     uint8_t transparency   = 176;
 

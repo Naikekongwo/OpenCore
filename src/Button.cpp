@@ -96,12 +96,9 @@ void Button::Draw()
     if (!texture || !texture->get())
         return;
 
-    auto &GFX   = OpenCoreManagers::GFXManager.getInstance();
-    Rect  VRect = GFX.getSccissorRect();
+    Rect VRect = OpenCoreManagers::GFXManager.getInstance().getSccissorRect();
     if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
         return;
-
-    SDL_SetTextureAlphaMod(texture->get(), VState->getAlpha());
 
     auto frameIndex = (VState->getFrameIndex() > texture->Size())
                           ? 0
@@ -109,5 +106,6 @@ void Button::Draw()
 
     Rect srcRect = texture->getSubRect(frameIndex);
 
-    GFX.Draw(texture->get(), &srcRect, &dstRect, VState->getAngle(), NULL);
+    texture->Draw(&srcRect, &dstRect, VState->getAngle(), nullptr,
+                  static_cast<uint8_t>(VState->getAlpha()));
 }

@@ -86,7 +86,10 @@ class GraphicsManager
      */
     int setRenderTarget(SDL_Texture *texture);
 
+    [[deprecated("use createTextureShared instead")]]
     SDL_Texture *createTexture(uint16_t w, uint16_t h);
+
+    std::shared_ptr<SDL_Texture> createTextureShared(uint16_t w, uint16_t h);
 
     Rect getSccissorRect() const
     {
@@ -96,18 +99,7 @@ class GraphicsManager
         return window;
     }
 
-    /**
-     * @brief OpenCore的原生绘制方法
-     * @todo 纹理需要进行更原生的封装
-     * @param texture 纹理
-     * @param srcRect 源纹理的子矩形
-     * @param dstRect 将要渲染的目标平面上的选定矩形
-     * @param angle 纹理旋转角度
-     * @param center 纹理中心
-     * @return int 执行结果
-     */
-    int Draw(SDL_Texture *texture, const Rect *srcRect, const Rect *dstRect,
-             const double angle, const Point *center);
+    /** @brief 已废弃——纹理绘制请通过 Texture::Draw 进行。 */
 
     /**
      * @brief OpenCore的原生顶点渲染方法
@@ -137,11 +129,11 @@ class GraphicsManager
     std::shared_ptr<Texture> captureScreen();
 
   private:
-    SDL_Window *window;
+    SDL_Window   *window;
     SDL_Renderer *renderer;
 
     int TargetWindowHeight = 1080;
-    int TargetWindowWidth = 1920;
+    int TargetWindowWidth  = 1920;
 
     RenderViewport rView = RenderViewport::Fullscreen;
 };

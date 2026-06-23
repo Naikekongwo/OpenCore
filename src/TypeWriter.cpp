@@ -42,9 +42,9 @@ void TypeWriter::Draw()
     }
 
     // 在此处处理打字机效果
-    GFX.Draw(m_textureCache, nullptr, &dstRect, 0.0f, nullptr);
-
-    // <真正的绘制逻辑>
+    if (m_textureCache)
+        m_textureCache->Draw(nullptr, &dstRect, 0.0, nullptr,
+                             static_cast<uint8_t>(VState->getAlpha()));
 }
 
 void TypeWriter::parseEvents(Event *event, float totalTime)
@@ -126,13 +126,13 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
     if (!font)
         return false;
 
-    if (m_textureCache)
-        SDL_DestroyTexture(m_textureCache);
-    m_textureCache = GFX.createTexture(container.w, container.h);
-    if (!m_textureCache)
+    m_textureCache = std::make_shared<Texture>(
+        static_cast<uint16_t>(container.w), static_cast<uint16_t>(container.h),
+        size_t(1), size_t(1));
+    if (!m_textureCache || !m_textureCache->get())
         return false;
 
-    GFX.setRenderTarget(m_textureCache);
+    GFX.setRenderTarget(m_textureCache->get());
 
     SDL_SetRenderDrawBlendMode(GFX.getRenderer(), SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(GFX.getRenderer(), 0, 0, 0, 0);
@@ -244,14 +244,17 @@ bool TypeWriter::generateTexture(SDL_Texture *texture)
             s.y += m_shadowOffset;
 
             SDL_SetTextureColorMod(tex, 0, 0, 0);
-            SDL_SetTextureAlphaMod(tex, 180);
-            GFX.Draw(tex, nullptr, &s, 0.0f, nullptr);
-
+            auto shadowTex = std::make_shared<Texture>(
+                1, 1, std::shared_ptr<SDL_Texture>(tex, [](SDL_Texture *) {}));
+            shadowTex->Draw(nullptr, &s, 0.0f, nullptr, 180);
             SDL_SetTextureColorMod(tex, 255, 255, 255);
-            SDL_SetTextureAlphaMod(tex, 255);
         }
 
-        GFX.Draw(tex, nullptr, &dst, 0.0f, nullptr);
+        {
+            auto lineTex = std::make_shared<Texture>(
+                1, 1, std::shared_ptr<SDL_Texture>(tex, [](SDL_Texture *) {}));
+            lineTex->Draw(nullptr, &dst, 0.0f, nullptr);
+        }
 
         SDL_DestroyTexture(tex);
         SDL_DestroySurface(surf);

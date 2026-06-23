@@ -10,44 +10,33 @@ using std::unique_ptr;
 
 struct Texture
 {
-    /**
-     * @brief 构造纹理。
-     *        内部 SDL_Texture 必须不为空 —— 调用方需保证已通过
-     *        PackageManager::getTextureAsync 同步加载完成。
-     *
-     * @param x   列数（网格分割）
-     * @param y   行数
-     * @param tex SDL_Texture 智能指针
-     */
+    /** @brief 构造纹理。内部 SDL_Texture 必须不为空。 */
     Texture(size_t x, size_t y, std::shared_ptr<SDL_Texture> tex);
 
-    // 行数和列数
-    size_t xCount = 1;
-    size_t yCount = 1;
+    /** @brief 构造离屏纹理，向 GraphicsManager 请求 SDL_Texture。 */
+    Texture(uint16_t frameW, uint16_t frameH, size_t x, size_t y);
 
-    // 贴图的大小（单帧尺寸）
-    uint16_t width, height;
+    std::shared_ptr<SDL_Texture> texture;    ///< 材质
+    size_t                       xCount = 1; ///< 列数（网格分割）
+    size_t                       yCount = 1; ///< 行数
+    uint16_t                     width  = 0; ///< 单帧宽度
+    uint16_t                     height = 0; ///< 单帧高度
 
-    // 材质
-    std::shared_ptr<SDL_Texture> texture;
+    operator SDL_Texture *();
 
-    /**
-     * @brief 获取 SDL_Texture 指针。
-     */
-    SDL_Texture *get() const { return texture.get(); }
+    SDL_Texture *get() const;
 
-    // 隐式转换为 SDL_Texture*
-    operator SDL_Texture *() { return texture.get(); }
-
-    uint16_t Size() const noexcept { return xCount * yCount; }
-
-    float getWidthHeight() const noexcept
-    {
-        return static_cast<float>(width) / static_cast<float>(height);
-    }
-
+    void     QueryTexture(int &w, int &h) const;
+    void     QueryRawTexture(int &w, int &h) const;
+    float    getTextureRatio() const noexcept;
+    uint16_t Size() const noexcept;
     SDL_Rect getSubRect(size_t index);
-    Rect getSubRect(size_t startIndex, size_t endIndex);
-    /// @brief 以 startIndex 为左上角，提取 cols 列 × rows 行的子矩形
-    Rect getSubRect(size_t startIndex, uint8_t cols, uint8_t rows);
+
+    int Draw(const Rect *srcRect, const Rect *dstRect, double angle = 0.0,
+             const Point *center = nullptr, uint8_t alpha = 255);
+
+    /** @brief 绘制到另一个纹理（离屏渲染）。内部切换 RenderTarget。 */
+    int Draw(Texture *target, const Rect *srcRect, const Rect *dstRect,
+             double angle = 0.0, const Point *center = nullptr,
+             uint8_t alpha = 255);
 };
