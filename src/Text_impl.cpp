@@ -1,5 +1,6 @@
 #include "OpenCore.hpp"
 #include <SDL3_ttf/SDL_ttf.h>
+#include <vector>
 
 // ── 内部：surface → 绘制到 target ──
 static void blitText(Texture *target, const Rect *dstRect, SDL_Surface *surface,
@@ -66,6 +67,81 @@ static SDL_Surface *makeGradientLayer(SDL_Surface *mask, const SDL_Color &gradC)
     return dup;
 }
 
+// ── 内部：对 alpha 做盒模糊，生成柔和发光层 ──
+static SDL_Surface *makeGlowLayer(SDL_Surface *mask, const SDL_Color &glowC,
+                                  int radius)
+{
+    SDL_Surface *dup = SDL_DuplicateSurface(mask);
+    if (!dup)
+        return nullptr;
+
+    const SDL_PixelFormatDetails *fmt = SDL_GetPixelFormatDetails(dup->format);
+    int                           w = dup->w, h = dup->h;
+    int                           n = w * h;
+
+    SDL_LockSurface(dup);
+    auto *px = static_cast<uint32_t *>(dup->pixels);
+
+    // 1. 读取原始 alpha
+    std::vector<float> src(n), blur(n);
+    for (int i = 0; i < n; i++)
+    {
+        uint8_t r, g, b, a;
+        SDL_GetRGBA(px[i], fmt, nullptr, &r, &g, &b, &a);
+        src[i] = a / 255.0f;
+    }
+
+    // 2. 水平方向模糊
+    for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            float sum = 0;
+            int   cnt = 0;
+            for (int dx = -radius; dx <= radius; dx++)
+            {
+                int sx = x + dx;
+                if (sx >= 0 && sx < w)
+                {
+                    sum += src[y * w + sx];
+                    cnt++;
+                }
+            }
+            blur[y * w + x] = sum / cnt;
+        }
+
+    // 3. 垂直方向模糊
+    src.swap(blur);
+    for (int y = 0; y < h; y++)
+        for (int x = 0; x < w; x++)
+        {
+            float sum = 0;
+            int   cnt = 0;
+            for (int dy = -radius; dy <= radius; dy++)
+            {
+                int sy = y + dy;
+                if (sy >= 0 && sy < h)
+                {
+                    sum += src[sy * w + x];
+                    cnt++;
+                }
+            }
+            blur[y * w + x] = sum / cnt;
+        }
+
+    // 4. 写入最终像素
+    uint8_t glowA = glowC.a;
+    for (int i = 0; i < n; i++)
+    {
+        uint8_t newA = static_cast<uint8_t>(blur[i] * glowA);
+        if (newA == 0)
+            continue;
+        px[i] = SDL_MapRGBA(fmt, nullptr, glowC.r, glowC.g, glowC.b, newA);
+    }
+
+    SDL_UnlockSurface(dup);
+    return dup;
+}
+
 // ── Measure ──
 
 bool Text::Measure(string_view textContent, const TextAttribute &attr,
@@ -99,14 +175,29 @@ void Text::Draw(Texture *target, const Rect *dstRect, string_view textContent,
     auto &gfx  = GraphicsManager::getInstance();
     auto *rend = gfx.getRenderer();
 
+#pragma region 生成Text层蒙版
     // ── 生成白色 alpha 蒙版（所有层共用） ──
     SDL_Color    white = {255, 255, 255, 255};
     SDL_Surface *mask  = TTF_RenderText_Blended(font.get(), textContent.data(),
                                                 textContent.size(), white);
     if (!mask)
         return;
+#pragma endregion
 
-    // ── SHADOW ──
+#pragma region 外发光层 — 最底层（盒模糊产生柔和边缘）
+    if ((attr.option & RENDER_GLOW) && attr.glowColor.a > 0.01f)
+    {
+        SDL_Color    gc   = static_cast<SDL_Color>(attr.glowColor);
+        SDL_Surface *glow = makeGlowLayer(mask, gc, 4);
+        if (glow)
+        {
+            blitText(target, dstRect, glow, rend);
+            SDL_DestroySurface(glow);
+        }
+    }
+#pragma endregion
+
+#pragma region 阴影层
     if (attr.option & RENDER_SHADOW)
     {
         SDL_Surface *s = SDL_DuplicateSurface(mask);
@@ -120,12 +211,37 @@ void Text::Draw(Texture *target, const Rect *dstRect, string_view textContent,
             SDL_DestroySurface(s);
         }
     }
+#pragma endregion
 
-    // ── TEXT ──
+#pragma region 描边层
+    if ((attr.option & RENDER_BORDER) && attr.BorderSize > 0)
+    {
+        SDL_Color bc = static_cast<SDL_Color>(attr.borderColor);
+        int       bs = attr.BorderSize;
+        for (int dy = -bs; dy <= bs; dy += bs)
+            for (int dx = -bs; dx <= bs; dx += bs)
+            {
+                if (dx == 0 && dy == 0)
+                    continue;
+                SDL_Surface *s = SDL_DuplicateSurface(mask);
+                if (!s)
+                    continue;
+                colorizeMask(s, bc);
+                Rect r = *dstRect;
+                r.x += static_cast<float>(dx);
+                r.y += static_cast<float>(dy);
+                blitText(target, &r, s, rend);
+                SDL_DestroySurface(s);
+            }
+    }
+#pragma endregion
+
+#pragma region 生成TextSolid层
     colorizeMask(mask, static_cast<SDL_Color>(attr.color));
     blitText(target, dstRect, mask, rend);
+#pragma endregion
 
-    // ── GRADIENT（覆盖在 text 之上） ──
+#pragma region 渐变层 — 最上层
     if ((attr.option & RENDER_GRADIENT) && attr.gradientColor.a > 0.01f)
     {
         SDL_Surface *grad =
@@ -136,6 +252,7 @@ void Text::Draw(Texture *target, const Rect *dstRect, string_view textContent,
             SDL_DestroySurface(grad);
         }
     }
+#pragma endregion
 
     SDL_DestroySurface(mask);
 }

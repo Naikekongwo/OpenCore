@@ -90,3 +90,5 @@ class OpenCore_Vec2
         }
     }
 };
+
+using Vec2 = OpenCore_Vec2;
