@@ -14,6 +14,4 @@ void ToolMenu::parseEvents(Event *event, float totalTime)
     UIElement::parseEvents(event, totalTime);
 }
 
-void ToolMenu::Draw() { UIElement::Draw(); }
-
 bool ToolMenu::onDestroy() { return true; }

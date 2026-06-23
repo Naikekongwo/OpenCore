@@ -28,6 +28,7 @@ constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN;
 
 #include "Asset/PackageManager.hpp"
 #include "Core/Info/GameInfo.hpp"
+#include "Core/Math/OpenCore_Color.hpp"
 #include "Core/Math/OpenCore_Spiral.hpp"
 #include "Core/Math/OpenCore_Vec3.hpp"
 #include "Core/Math/OpenCore_Wave.hpp"

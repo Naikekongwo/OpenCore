@@ -76,6 +76,18 @@ void UIElement::onUpdate(float totalTime)
     {
         IDrawableObject::onUpdate(totalTime);
     }
+
+    if (m_textureDirty)
+    {
+        m_textureCache.reset();
+        SDL_Rect bounds = getLogicalBounds();
+        m_textureCache  = std::make_shared<Texture>(
+            static_cast<uint16_t>(bounds.w), static_cast<uint16_t>(bounds.h),
+            size_t(1), size_t(1));
+        if (m_textureCache && m_textureCache->get())
+            generateTexture(m_textureCache->get());
+        m_textureDirty = false;
+    }
 }
 
 void UIElement::parseEvents(Event *event, float totalTime)

@@ -14,16 +14,6 @@
 using std::string;
 
 /**
- * @enum BaseBackgroundStatus
- * @brief 背景资源准备状态。
- */
-enum class BaseBackgroundStatus
-{
-    empty, ///< 未生成缓存纹理
-    ready  ///< 缓存纹理已准备就绪
-};
-
-/**
  * @class BaseBackground
  * @brief 可九宫格拉伸的背景 UI 控件。
  *
@@ -44,8 +34,6 @@ class BaseBackground : public UIElement
     bool generateTexture(SDL_Texture *texture) override;
     void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;
-    void onEnter() override;
-    void onExit() override;
     void Draw() override;
 
     /**
@@ -55,7 +43,5 @@ class BaseBackground : public UIElement
     void setNativeScale(uint8_t scale);
 
   private:
-    uint8_t              nativeScale = 60; ///< 九宫格边角缩放基数（像素）
-    BaseBackgroundStatus status = BaseBackgroundStatus::empty; ///< 当前状态
-    shared_ptr<Texture>  m_cacheTexture;                       ///< 离屏缓存纹理
+    uint8_t nativeScale = 60; ///< 九宫格边角缩放基数（像素）
 };

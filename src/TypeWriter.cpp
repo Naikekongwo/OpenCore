@@ -92,12 +92,6 @@ void TypeWriter::onUpdate(float totalTime)
 
         status = TypeWriterStatus::Ready;
     }
-    if (m_textureDirty)
-    {
-        if (generateTexture(nullptr))
-            m_textureDirty = false;
-    }
-
     if (m_baseBackground)
     {
         m_baseBackground->onUpdate(totalTime);

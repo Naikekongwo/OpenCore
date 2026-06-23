@@ -75,9 +75,5 @@ class TextArea : public UIElement
 
     string m_textContent;
 
-    /**
-     * @brief 重新刷新纹理缓存
-     *
-     */
-    void refreshTextureCache();
+    bool generateTexture(SDL_Texture *texture) override;
 };

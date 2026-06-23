@@ -29,7 +29,6 @@ class ToolMenu : public UIElement
 
     void onUpdate(float totalTime) override;
     void parseEvents(Event *event, float totalTime) override;
-    void Draw() override;
     bool onDestroy() override;
 
   private:

@@ -14,31 +14,12 @@ BaseBackground::BaseBackground(const std::string &id, uint8_t layer,
 
 void BaseBackground::onUpdate(float totalTime)
 {
-    if (m_textureDirty)
-    {
-        m_cacheTexture.reset();
-        onEnter();
-        m_textureDirty = false;
-    }
-    if (status != BaseBackgroundStatus::ready)
-    {
-        onEnter();
-    }
+    UIElement::onUpdate(totalTime);
 }
-
-void BaseBackground::onEnter()
-{
-    SDL_Rect bounds = getLogicalBounds();
-    m_cacheTexture =
-        std::make_shared<Texture>(bounds.w, bounds.h, size_t(1), size_t(1));
-    generateTexture(m_cacheTexture->get());
-}
-
-void BaseBackground::onExit() { m_cacheTexture.reset(); }
 
 void BaseBackground::Draw()
 {
-    if (!m_cacheTexture || !m_cacheTexture->get())
+    if (!m_textureCache || !m_textureCache->get())
         return;
 
     Rect  logiRect = getLogicalBounds();
@@ -48,7 +29,7 @@ void BaseBackground::Draw()
     if (VState->getAlpha() > 0.0f && visible(logiRect, VRect))
     {
         Rect dstRect = getPhysicalBounds();
-        m_cacheTexture->Draw(nullptr, &dstRect, 0.0, nullptr,
+        m_textureCache->Draw(nullptr, &dstRect, 0.0, nullptr,
                              static_cast<uint8_t>(VState->getAlpha()));
     }
 }
@@ -62,7 +43,7 @@ void BaseBackground::parseEvents(Event *event, float totalTime)
 
 bool BaseBackground::generateTexture(SDL_Texture *target)
 {
-    if (!target || !m_cacheTexture)
+    if (!target || !m_textureCache)
         return false;
 
     if (!texture || !texture->get())
@@ -115,11 +96,10 @@ bool BaseBackground::generateTexture(SDL_Texture *target)
                 dstRect.h = nativeScale;
             }
 
-            texture->Draw(m_cacheTexture.get(), &srcRect, &dstRect, 0.0,
+            texture->Draw(m_textureCache.get(), &srcRect, &dstRect, 0.0,
                           nullptr);
         }
     }
 
-    status = BaseBackgroundStatus::ready;
     return true;
 }

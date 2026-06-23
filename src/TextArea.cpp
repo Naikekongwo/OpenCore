@@ -1,6 +1,7 @@
 #include "Core/Helpers/Debugger.hpp"
 #include "OpenCore.hpp"
 #include "Runtime/Animation/IAnimation.hpp"
+#include "Runtime/Graphics/IDrawableObject/Text.hpp"
 #include "Runtime/Graphics/IDrawableObject/Texture.hpp"
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_surface.h>
@@ -16,24 +17,10 @@ TextArea::TextArea(const string &id, uint8_t layer, std::string_view fontName)
     LOG("文本框创建，字体名称:{}", fontName);
 }
 
-void TextArea::onUpdate(float totalTime)
-{
-    UIElement::onUpdate(totalTime);
-
-    if (!isAnimeFinished())
-    {
-        refreshTextureCache();
-    }
-}
+void TextArea::onUpdate(float totalTime) { UIElement::onUpdate(totalTime); }
 
 void TextArea::Draw()
 {
-    if (m_textureDirty)
-    {
-        if (!m_textContent.empty())
-            refreshTextureCache();
-        m_textureDirty = false;
-    }
     // 检查是否需要显示
     if (m_textContent.empty())
     {
@@ -70,51 +57,27 @@ void TextArea::setFontSize(short fontSize)
     m_textureDirty = true;
 }
 
-void TextArea::refreshTextureCache()
+bool TextArea::generateTexture(SDL_Texture *target)
 {
-    Rect  loRect = getLogicalBounds();
-    auto &GFX    = GraphicsManager::getInstance();
+    if (!target)
+        return false;
+    auto &GFX = GraphicsManager::getInstance();
 
-    m_textureCache = std::make_shared<Texture>(static_cast<uint16_t>(loRect.w),
-                                               static_cast<uint16_t>(loRect.h),
-                                               size_t(1), size_t(1));
-    if (!m_textureCache || !m_textureCache->get())
-        return;
+    GFX.setRenderTarget(target);
+    GFX.setRenderTarget(nullptr);
 
-    GFX.setRenderTarget(m_textureCache->get());
+    TextAttribute attr;
+    attr.fontName = fontName;
+    attr.fontSize = m_fontSize;
 
-    auto font = OpenEngine::getInstance().getPackageManager()->getFont(
-        fontName, m_fontSize);
-    if (!font)
-    {
-        LOG("资源管理器查询字体对象的结果为空");
-        GFX.setRenderTarget(nullptr);
-        return;
-    }
+    int texW = 0, texH = 0;
+    Text::Measure(m_textContent, attr, texW, texH);
 
-    uint8_t textAlpha = VState->getAlpha();
-
-    SDL_Surface *text = TTF_RenderText_Blended(
-        font.get(), m_textContent.c_str(), m_textContent.length(),
-        {m_colorR, m_colorG, m_colorB, textAlpha});
-    SDL_Texture *rawBuffer =
-        SDL_CreateTextureFromSurface(GFX.getRenderer(), text);
-    SDL_DestroySurface(text);
-
-    if (!rawBuffer)
-    {
-        LOG("Failed to generate text texture");
-        GFX.setRenderTarget(nullptr);
-        return;
-    }
-
-    auto textTex = std::make_shared<Texture>(
-        1, 1, std::shared_ptr<SDL_Texture>(rawBuffer, SDL_DestroyTexture));
-
-    float texW = static_cast<float>(textTex->width);
-    float texH = static_cast<float>(textTex->height);
-
-    Rect dstRect = {0, 0, m_fontSize * (texW / texH), m_fontSize * 1.0f};
+    Rect loRect = getLogicalBounds();
+    Rect dstRect;
+    dstRect.h = static_cast<float>(m_fontSize);
+    dstRect.w =
+        (texH > 0) ? dstRect.h * (static_cast<float>(texW) / texH) : 0.0f;
 
     if (m_aligncenter)
     {
@@ -122,34 +85,22 @@ void TextArea::refreshTextureCache()
         dstRect.y = (loRect.h - dstRect.h) * 0.5f;
     }
 
+    float textAlpha = VState->getAlpha() / 255.0f;
+    attr.color  = Color(m_colorR / 255.0f, m_colorG / 255.0f, m_colorB / 255.0f,
+                        textAlpha);
+    attr.option = RENDER_TEXT;
     if (m_shadowEnable)
-    {
-        uint8_t      shadowAlpha   = VState->getAlpha() * transparency;
-        SDL_Surface *shadowSurface = TTF_RenderText_Blended(
-            font.get(), m_textContent.c_str(), m_textContent.length(),
-            {0, 0, 0, shadowAlpha});
+        attr.option =
+            static_cast<TextRenderOption>(attr.option | RENDER_SHADOW);
+    attr.option = static_cast<TextRenderOption>(attr.option | RENDER_GRADIENT);
+    attr.gradientColor = Color(0, 0, 1.0f, 1.0f);
 
-        SDL_Texture *rawShadow =
-            SDL_CreateTextureFromSurface(GFX.getRenderer(), shadowSurface);
-        SDL_DestroySurface(shadowSurface);
+    auto wrapper = std::make_shared<Texture>(
+        1, 1, std::shared_ptr<SDL_Texture>(target, [](SDL_Texture *) {}));
 
-        if (rawShadow)
-        {
-            auto shadowTex = std::make_shared<Texture>(
-                1, 1,
-                std::shared_ptr<SDL_Texture>(rawShadow, SDL_DestroyTexture));
-
-            Rect shadowRect = dstRect;
-            shadowRect.x += m_shadowOffset;
-            shadowRect.y += m_shadowOffset;
-
-            shadowTex->Draw(nullptr, &shadowRect, 0.0f, nullptr);
-        }
-    }
-
-    textTex->Draw(nullptr, &dstRect, 0.0f, nullptr);
-
-    GFX.setRenderTarget(nullptr);
+    Text tool;
+    tool.Draw(wrapper.get(), &dstRect, m_textContent, attr);
+    return true;
 }
 
 void TextArea::parseEvents(Event *event, float totalTime)

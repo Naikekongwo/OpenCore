@@ -5,7 +5,9 @@
 #define _ANIMATIONMANAGER_H_
 
 #include "Runtime/Animation/IAnimation.hpp"
+#include "Runtime/Graphics//IDrawableObject//Text.hpp"
 #include "Runtime/Graphics/IDrawableObject/Texture.hpp"
+
 
 #include "SDL3/SDL.h"
 
