@@ -4,6 +4,9 @@
  *
  * 提供可交互的按钮组件，支持三种状态（普通、悬停、按下），
  * 可绑定点击回调函数，并根据状态显示纹理的不同帧。
+ *
+ * @note 交互状态管理由基类 UIElement 统一处理，Button 只需关注
+ *       点击回调触发与纹理帧映射。
  */
 
 #ifndef _BUTTON_H_
@@ -11,26 +14,24 @@
 
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
+#include <SDL3/SDL_render.h>
 #include <functional>
 #include <memory>
 
-/**
- * @enum ButtonState
- * @brief 按钮的交互状态。
- */
-enum ButtonState
+enum class ButtonStyle
 {
-    Normal,  ///< 普通状态（未交互）
-    Hovered, ///< 鼠标悬停状态
-    Pressed  ///< 鼠标按下状态
+    Image,
+    Text,
+    Hybrid
 };
 
 /**
  * @class Button
  * @brief 可点击的按钮控件。
  *
- * 继承自 UIElement，根据鼠标事件改变状态，并自动切换纹理帧（纹理需包含三帧，
- * 按 Normal、Hovered、Pressed 顺序排列）。支持绑定点击回调函数。
+ * 继承自 UIElement，利用基类的 InteractionState 自动管理鼠标交互状态，
+ * 根据状态自动切换纹理帧（纹理需包含三帧，按 Normal、Hovered、Pressed
+ * 顺序排列）。支持绑定点击回调函数。
  */
 class Button : public UIElement
 {
@@ -44,7 +45,6 @@ class Button : public UIElement
      */
     Button(const std::string &id, uint8_t layer, shared_ptr<Texture> texture);
 
-    void parseEvents(Event *event, float totalTime) override;
     void Draw() override;
     void onUpdate(float totalTime) override;
 
@@ -52,12 +52,24 @@ class Button : public UIElement
      * @brief 设置按钮点击时的回调函数。
      * @param func 无参无返回值的回调函数。
      */
-    void setOnClick(std::function<void()> func) { onClick = std::move(func); }
+    void setOnClick(std::function<void()> func)
+    {
+        m_onClickCallback = std::move(func);
+    }
+
+    void setButtonStyle(ButtonStyle style) { m_buttonstyle = style; }
+    void setButtonText(string_view text) { m_textContent = text; }
+
+    bool generateTexture() override;
 
   protected:
-    ButtonState           State = ButtonState::Normal; ///< 当前按钮状态
-    std::function<void()> onClick;                     ///< 点击回调函数
-    short                 soundID = 1002;              ///< 点击时播放的音效 ID
+    void onClick(Event *event, const SDL_Point &mousePos) override;
+
+  private:
+    string      m_textContent;
+    ButtonStyle m_buttonstyle = ButtonStyle::Image; /// <按钮风格>
+
+    std::function<void()> m_onClickCallback; ///< 点击回调函数
 };
 
 #endif //_BUTTON_H_

@@ -31,7 +31,7 @@ class BaseBackground : public UIElement
      */
     BaseBackground(const string &id, uint8_t layer,
                    shared_ptr<Texture> texture);
-    bool generateTexture(SDL_Texture *texture) override;
+    bool generateTexture() override;
     void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;
     void Draw() override;

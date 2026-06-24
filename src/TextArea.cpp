@@ -54,11 +54,14 @@ void TextArea::setShadow(bool enableTag, int shadowOffset)
     m_textureDirty = true;
 }
 
-bool TextArea::generateTexture(SDL_Texture *target)
+bool TextArea::generateTexture()
 {
-    if (!target)
+    if (!m_textureCache || !m_textureCache->get())
         return false;
-    GraphicsManager::getInstance().setRenderTarget(target);
+
+    auto *raw = m_textureCache->get();
+
+    GraphicsManager::getInstance().setRenderTarget(raw);
     GraphicsManager::getInstance().setRenderTarget(nullptr);
 
     // 同步 VState 透明度到 attr
@@ -80,7 +83,7 @@ bool TextArea::generateTexture(SDL_Texture *target)
     }
 
     auto wrapper = std::make_shared<Texture>(
-        1, 1, std::shared_ptr<SDL_Texture>(target, [](SDL_Texture *) {}));
+        1, 1, std::shared_ptr<SDL_Texture>(raw, [](SDL_Texture *) {}));
 
     Text::Draw(wrapper.get(), &dstRect, m_textContent, m_textAttr);
     return true;

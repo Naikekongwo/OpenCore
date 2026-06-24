@@ -31,7 +31,7 @@ class TextArea : public UIElement
     }
 
   private:
-    bool generateTexture(SDL_Texture *texture) override;
+    bool generateTexture() override;
 
     TextAttribute m_textAttr;
     string        m_textContent;

@@ -88,7 +88,7 @@ class TypeWriter : public UIElement
      */
     void alignCenter(bool tag) { m_aligncenter = tag; }
 
-    bool generateTexture(SDL_Texture *texture) override;
+    bool generateTexture() override;
 
   private:
     string fontName   = "9001";

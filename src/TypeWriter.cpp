@@ -105,7 +105,7 @@ void TypeWriter::setShadow(bool enableTag, int shadowOffset)
     m_textureDirty = true;
 }
 
-bool TypeWriter::generateTexture(SDL_Texture *texture)
+bool TypeWriter::generateTexture()
 {
     m_parsedLines.clear();
 

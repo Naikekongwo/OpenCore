@@ -41,10 +41,12 @@ void BaseBackground::parseEvents(Event *event, float totalTime)
     UIElement::parseEvents(event, totalTime);
 }
 
-bool BaseBackground::generateTexture(SDL_Texture *target)
+bool BaseBackground::generateTexture()
 {
-    if (!target || !m_textureCache)
+    if (!m_textureCache || !m_textureCache->get())
         return false;
+
+    auto *raw = m_textureCache->get();
 
     if (!texture || !texture->get())
     {
@@ -53,7 +55,7 @@ bool BaseBackground::generateTexture(SDL_Texture *target)
     }
 
     float targetW, targetH;
-    SDL_GetTextureSize(target, &targetW, &targetH);
+    SDL_GetTextureSize(raw, &targetW, &targetH);
 
     Rect srcRect{};
     Rect dstRect{};

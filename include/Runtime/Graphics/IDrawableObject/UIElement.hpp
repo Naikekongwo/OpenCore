@@ -31,26 +31,74 @@ class UIElement : public IDrawableObject
     UIElement(const string &id, short layer, shared_ptr<Texture> texture);
     ~UIElement() override;
 
+    void onUpdate(float totalTime) override;
+    void parseEvents(Event *event, float totalTime) override;
+    void Draw() override;
+    bool onDestroy() override;
+
+    /**
+     * @brief 生成或更新 UI 元素的底层 SDL 纹理。
+     *        派生类应直接使用 m_textureCache 或 this->texture 进行渲染。
+     * @return true  表示生成成功；
+     * @return false 表示生成失败（派生类可按需实现）。
+     * @note 基类默认返回 false，需要具体控件覆盖实现。
+     */
+    virtual bool     generateTexture() { return false; }
     virtual SDL_Rect getLogicalBounds() override;
     virtual SDL_Rect getPhysicalBounds() override;
 
     void setBackgroundColor(Color color) { this->color = color; }
 
-    void onUpdate(float totalTime) override;
-    void parseEvents(Event *event, float totalTime) override;
-    void Draw() override;
+  protected:
+    /**
+     * @enum InteractionState
+     * @brief UI 元素的交互状态枚举。
+     */
+    enum class InteractionState
+    {
+        Normal,  ///< 无交互
+        Hovered, ///< 鼠标悬停
+        Pressed  ///< 鼠标按下
+    };
+
+    InteractionState m_interactionState =
+        InteractionState::Normal; ///< 当前交互状态
 
     /**
-     * @brief 生成或更新 UI 元素的底层 SDL 纹理。
-     * @param texture 指向 SDL_Texture 的指针，通常由渲染器创建。
-     * @return true  表示生成成功；
-     * @return false 表示生成失败（派生类可按需实现）。
-     * @note 基类默认返回 false，需要具体控件覆盖实现。
+     * @brief 鼠标首次进入元素区域时调用。
+     * @param event    当前事件对象。
+     * @param mousePos 鼠标在窗口中的坐标。
      */
-    virtual bool generateTexture(SDL_Texture *texture) { return false; }
-    bool         onDestroy() override;
+    virtual void onMouseEnter(Event *event, const SDL_Point &mousePos) {}
 
-  protected:
+    /**
+     * @brief 鼠标离开元素区域时调用（含按下拖出场景）。
+     * @param event    当前事件对象。
+     * @param mousePos 鼠标在窗口中的坐标。
+     */
+    virtual void onMouseExit(Event *event, const SDL_Point &mousePos) {}
+
+    /**
+     * @brief 鼠标在元素区域内按下时调用。
+     * @param event    当前事件对象。
+     * @param mousePos 鼠标在窗口中的坐标。
+     */
+    virtual void onMousePress(Event *event, const SDL_Point &mousePos) {}
+
+    /**
+     * @brief 鼠标在元素区域内释放时调用（不论是否触发点击）。
+     * @param event    当前事件对象。
+     * @param mousePos 鼠标在窗口中的坐标。
+     */
+    virtual void onMouseRelease(Event *event, const SDL_Point &mousePos) {}
+
+    /**
+     * @brief 一次完整的点击（在元素内按下并释放）时调用。
+     * @param event    当前事件对象。
+     * @param mousePos 鼠标在窗口中的坐标。
+     */
+    virtual void onClick(Event *event, const SDL_Point &mousePos) {}
+
     Color color          = None; /// <控件的背景色: 默认为透明>
     bool  m_textureDirty = true; /// <纹理缓存脏污标志>
 
