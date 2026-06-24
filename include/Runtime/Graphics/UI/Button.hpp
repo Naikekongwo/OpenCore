@@ -134,6 +134,9 @@ class Button : public UIElement
     void onClick(Event *event, const SDL_Point &mousePos) override;
 
   private:
+    /** @brief 获取可用帧数（优先 m_textureCache，退回到基类 texture） */
+    size_t getMaxFrames() const;
+
     string      m_textContent;
     ButtonStyle m_buttonstyle = ButtonStyle::Image; /// <按钮风格>
 

@@ -13,6 +13,15 @@ Button::Button(const std::string &id, uint8_t layer,
 {
 }
 
+size_t Button::getMaxFrames() const
+{
+    if (m_textureCache && m_textureCache->get())
+        return m_textureCache->Size();
+    if (texture && texture->get())
+        return texture->Size();
+    return 0;
+}
+
 void Button::onClick(Event *event, const SDL_Point &mousePos)
 {
     if (m_onClickCallback)
@@ -54,13 +63,7 @@ void Button::onUpdate(float totalTime)
         m_textureDirty = false;
     }
 
-    // 优先用 m_textureCache 确定帧数，退回到基类 texture
-    size_t maxFrames = 0;
-    if (m_textureCache && m_textureCache->get())
-        maxFrames = m_textureCache->Size();
-    else if (texture && texture->get())
-        maxFrames = texture->Size();
-
+    size_t maxFrames = getMaxFrames();
     if (maxFrames == 0)
         return;
 
@@ -81,12 +84,9 @@ void Button::Draw()
     if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
         return;
 
-    // 确定帧索引（优先用 m_textureCache 的帧数，退回到 texture）
-    size_t maxFrames = 0;
-    if (m_textureCache && m_textureCache->get())
-        maxFrames = m_textureCache->Size();
-    else if (texture && texture->get())
-        maxFrames = texture->Size();
+    size_t maxFrames = getMaxFrames();
+    if (maxFrames == 0)
+        return;
 
     auto frameIndex =
         (VState->getFrameIndex() > maxFrames) ? 0 : VState->getFrameIndex();
@@ -138,21 +138,20 @@ bool Button::generateTexture()
         return false;
     }
 
-    /// 准备基础文字属性（测量用，颜色不影响尺寸）
-    TextAttribute measureAttr = normal_attribute;
-    measureAttr.fontName      = "Font_Eng";
-    measureAttr.fontSize      = bounds.h * 0.9f;
-    measureAttr.BorderSize    = 1;
-    measureAttr.option        = static_cast<TextRenderOption>(
+    /// 构建共享文字属性基准（测量 + 三帧共用）
+    TextAttribute baseAttr = normal_attribute;
+    baseAttr.fontName      = "Font_Eng";
+    baseAttr.fontSize      = bounds.h * 0.9f;
+    baseAttr.BorderSize    = 1;
+    baseAttr.option        = static_cast<TextRenderOption>(
         RENDER_TEXT | RENDER_SHADOW | RENDER_GRADIENT | RENDER_BORDER |
         RENDER_GLOW);
-    measureAttr.shadowOffset   = {2, 2};
-    measureAttr.shadowGradient = true;
+    baseAttr.shadowOffset   = {2, 2};
+    baseAttr.shadowGradient = true;
 
-    /// 配置文字的属性
-    int W = 0;
-    int H = 0;
-    Text::Measure(m_textContent, measureAttr, W, H);
+    /// 测量文字尺寸
+    int W = 0, H = 0;
+    Text::Measure(m_textContent, baseAttr, W, H);
 
     if (W * H == 0)
     {
@@ -183,41 +182,27 @@ bool Button::generateTexture()
         return false;
     }
 
-    /// 用三种状态的类成员属性分别渲染三帧
-    auto drawWithAttr = [&](const TextAttribute &baseAttr, Rect &dr)
+    /// 循环渲染三帧：Normal / Hovered / Pressed
+    const TextAttribute *stateAttrs[3] = {&normal_attribute, &hovered_attribute,
+                                          &pressed_attribute};
+    float                yOffset       = (bounds.h - H) * 0.5f;
+
+    for (int i = 0; i < 3; i++)
     {
+        Rect rect    = textLayer->getSubRect(i);
+        Rect dstRect = {(rect.w - W) * 0.5f, yOffset, static_cast<float>(W),
+                        static_cast<float>(H)};
+
+        // 从状态属性中只覆盖颜色字段，其余从 baseAttr 继承
         TextAttribute attr = baseAttr;
-        attr.fontName      = "Font_Eng";
-        attr.fontSize      = bounds.h * 0.9f;
-        attr.BorderSize    = 1;
-        attr.option        = static_cast<TextRenderOption>(
-            RENDER_TEXT | RENDER_SHADOW | RENDER_GRADIENT | RENDER_BORDER |
-            RENDER_GLOW);
-        attr.shadowOffset   = {2, 2};
-        attr.shadowGradient = true;
-        Text::Draw(textLayer.get(), &dr, m_textContent, attr);
-    };
+        attr.color         = stateAttrs[i]->color;
+        attr.borderColor   = stateAttrs[i]->borderColor;
+        attr.glowColor     = stateAttrs[i]->glowColor;
+        attr.gradientColor = stateAttrs[i]->gradientColor;
+        Text::Draw(textLayer.get(), &dstRect, m_textContent, attr);
 
-    /// 获取三个Rect中的子Rect
-    Rect rect = textLayer->getSubRect(0);
-
-    Rect dstRect;
-    dstRect.x = (rect.w - W) * 0.5f;
-    dstRect.y = (rect.h - H) * 0.5f;
-    dstRect.w = W;
-    dstRect.h = H;
-
-    drawWithAttr(normal_attribute, dstRect);
-
-    rect      = textLayer->getSubRect(1);
-    dstRect.x = (rect.w - W) * 0.5f;
-    dstRect.y = dstRect.y + textLayer->height;
-    drawWithAttr(hovered_attribute, dstRect);
-
-    rect      = textLayer->getSubRect(2);
-    dstRect.x = (rect.w - W) * 0.5f;
-    dstRect.y = dstRect.y + textLayer->height;
-    drawWithAttr(pressed_attribute, dstRect);
+        yOffset += textLayer->height;
+    }
 
     /// 三层渲染完成，根据 Anchor 将 textLayer 合成到最终纹理上
     /// textLayer 宽度由文本内容决定，最终纹理宽度由控件逻辑宽度决定，
