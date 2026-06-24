@@ -31,6 +31,8 @@ void Symbol::onUpdate(float totalTime) { UIElement::onUpdate(totalTime); }
 
 void Symbol::Draw()
 {
+    UIElement::Draw();
+
     if (!texture)
         return;
 

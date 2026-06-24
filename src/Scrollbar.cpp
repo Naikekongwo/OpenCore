@@ -51,6 +51,8 @@ void Scrollbar::onEnter()
 
 void Scrollbar::Draw()
 {
+    UIElement::Draw();
+
     if (slideBar && baseBack)
     {
         ///< 都存在才会绘制

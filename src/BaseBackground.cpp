@@ -19,6 +19,8 @@ void BaseBackground::onUpdate(float totalTime)
 
 void BaseBackground::Draw()
 {
+    UIElement::Draw();
+
     if (!m_textureCache || !m_textureCache->get())
         return;
 

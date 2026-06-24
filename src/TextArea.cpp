@@ -19,6 +19,8 @@ void TextArea::onUpdate(float totalTime) { UIElement::onUpdate(totalTime); }
 
 void TextArea::Draw()
 {
+    UIElement::Draw();
+
     if (m_textContent.empty())
         return;
 

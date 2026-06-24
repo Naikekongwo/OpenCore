@@ -12,6 +12,8 @@
 #ifndef _BUTTON_H_
 #define _BUTTON_H_
 
+#include "Core/Math/OpenCore_Color.hpp"
+#include "Runtime/Graphics/IDrawableObject/Text.hpp"
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
 #include <SDL3/SDL_render.h>
@@ -24,6 +26,48 @@ enum class ButtonStyle
     Text,
     Hybrid
 };
+
+#pragma region 按钮字体的默认状态
+// 正常状态：文字白色亮丽，黑色渐变，白色外发光
+static const TextAttribute normal_attr{
+    static_cast<TextRenderOption>(RENDER_TEXT | RENDER_BORDER | RENDER_GLOW |
+                                  RENDER_SHADOW | RENDER_GRADIENT),
+    White,
+    Black,
+    White,
+    Black,
+    36,
+    "OpenCoreFont",
+    2,
+    true,
+    {2, 2}};
+// 悬浮状态：亮度降低，整体变灰
+static const TextAttribute hovered_attr{
+    static_cast<TextRenderOption>(RENDER_TEXT | RENDER_BORDER | RENDER_GLOW |
+                                  RENDER_SHADOW | RENDER_GRADIENT),
+    Color(0.65f, 0.65f, 0.65f, 1.0f),
+    Color(0.30f, 0.30f, 0.30f, 1.0f),
+    Color(0.65f, 0.65f, 0.65f, 1.0f),
+    Color(0.30f, 0.30f, 0.30f, 1.0f),
+    36,
+    "OpenCoreFont",
+    2,
+    true,
+    {2, 2}};
+// 按下状态：颜色反转，文字黑色，渐变白色，外发光黑色
+static const TextAttribute pressed_attr{
+    static_cast<TextRenderOption>(RENDER_TEXT | RENDER_BORDER | RENDER_GLOW |
+                                  RENDER_SHADOW | RENDER_GRADIENT),
+    Black,
+    White,
+    Black,
+    White,
+    36,
+    "OpenCoreFont",
+    2,
+    true,
+    {2, 2}};
+#pragma endregion
 
 /**
  * @class Button
@@ -57,8 +101,32 @@ class Button : public UIElement
         m_onClickCallback = std::move(func);
     }
 
-    void setButtonStyle(ButtonStyle style) { m_buttonstyle = style; }
-    void setButtonText(string_view text) { m_textContent = text; }
+    void setButtonStyle(ButtonStyle style)
+    {
+        m_buttonstyle  = style;
+        m_textureDirty = true;
+    }
+    void setButtonText(string_view text)
+    {
+        m_textContent  = text;
+        m_textureDirty = true;
+    }
+
+    void setNormalAttribute(const TextAttribute &attr)
+    {
+        normal_attribute = attr;
+        m_textureDirty   = true;
+    }
+    void setHoveredAttribute(const TextAttribute &attr)
+    {
+        hovered_attribute = attr;
+        m_textureDirty    = true;
+    }
+    void setPressedAttribute(const TextAttribute &attr)
+    {
+        pressed_attribute = attr;
+        m_textureDirty    = true;
+    }
 
     bool generateTexture() override;
 
@@ -70,6 +138,10 @@ class Button : public UIElement
     ButtonStyle m_buttonstyle = ButtonStyle::Image; /// <按钮风格>
 
     std::function<void()> m_onClickCallback; ///< 点击回调函数
+
+    TextAttribute normal_attribute  = normal_attr;
+    TextAttribute hovered_attribute = hovered_attr;
+    TextAttribute pressed_attribute = pressed_attr;
 };
 
 #endif //_BUTTON_H_

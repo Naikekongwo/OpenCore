@@ -17,6 +17,8 @@ void CheckBox::refreshStatus()
 
 void CheckBox::Draw()
 {
+    UIElement::Draw();
+
     if (Img)
     {
         refreshStatus();

@@ -45,11 +45,7 @@ void Button::onUpdate(float totalTime)
 
         if (m_textureCache && m_textureCache->get())
         {
-            if (generateTexture())
-            {
-                // 将生成的离屏纹理替换为显示纹理，Draw() 才能看到
-                texture = m_textureCache;
-            }
+            generateTexture();
         }
         else
         {
@@ -58,13 +54,19 @@ void Button::onUpdate(float totalTime)
         m_textureDirty = false;
     }
 
-    if (!texture)
+    // 优先用 m_textureCache 确定帧数，退回到基类 texture
+    size_t maxFrames = 0;
+    if (m_textureCache && m_textureCache->get())
+        maxFrames = m_textureCache->Size();
+    else if (texture && texture->get())
+        maxFrames = texture->Size();
+
+    if (maxFrames == 0)
         return;
-    int maxFrame = texture->Size();
 
     int stateIndex = static_cast<int>(m_interactionState);
 
-    if (stateIndex >= maxFrame)
+    if (static_cast<size_t>(stateIndex) >= maxFrames)
         stateIndex = 0;
 
     VState->frameIndex = stateIndex;
@@ -72,23 +74,42 @@ void Button::onUpdate(float totalTime)
 
 void Button::Draw()
 {
+    UIElement::Draw();
+
     Rect dstRect = getLogicalBounds();
-
-    if (!texture || !texture->get())
-        return;
-
-    Rect VRect = OpenCoreManagers::GFXManager.getInstance().getSccissorRect();
+    Rect VRect   = OpenCoreManagers::GFXManager.getInstance().getSccissorRect();
     if (VState->getAlpha() <= 0.0f || !visible(dstRect, VRect))
         return;
 
-    auto frameIndex = (VState->getFrameIndex() > texture->Size())
-                          ? 0
-                          : VState->getFrameIndex();
+    // 确定帧索引（优先用 m_textureCache 的帧数，退回到 texture）
+    size_t maxFrames = 0;
+    if (m_textureCache && m_textureCache->get())
+        maxFrames = m_textureCache->Size();
+    else if (texture && texture->get())
+        maxFrames = texture->Size();
 
-    Rect srcRect = texture->getSubRect(frameIndex);
+    auto frameIndex =
+        (VState->getFrameIndex() > maxFrames) ? 0 : VState->getFrameIndex();
 
-    texture->Draw(&srcRect, &dstRect, VState->getAngle(), nullptr,
-                  static_cast<uint8_t>(VState->getAlpha()));
+    // 绘制基座纹理（Image / Hybrid 模式使用）
+    if (texture && texture->get())
+    {
+        Rect srcRect = texture->getSubRect(frameIndex);
+        texture->Draw(&srcRect, &dstRect, VState->getAngle(), nullptr,
+                      static_cast<uint8_t>(VState->getAlpha()));
+    }
+
+    /// <绘制文字层（Text / Hybrid 模式）>
+    if (m_buttonstyle == ButtonStyle::Image)
+        return;
+
+    if (!m_textureCache || !m_textureCache->get())
+        return;
+
+    Rect srcRectText = m_textureCache->getSubRect(frameIndex);
+
+    m_textureCache->Draw(&srcRectText, &dstRect, VState->getAngle(), nullptr,
+                         static_cast<uint8_t>(VState->getAlpha()));
 }
 
 bool Button::generateTexture()
@@ -117,24 +138,21 @@ bool Button::generateTexture()
         return false;
     }
 
-    TextAttribute attr;
-    attr.fontName      = "Font_Eng";
-    attr.fontSize      = bounds.h * 0.9f;
-    attr.BorderSize    = 1;
-    attr.borderColor   = Black;
-    attr.color         = White;
-    attr.glowColor     = White;
-    attr.gradientColor = Black;
-    attr.option = static_cast<TextRenderOption>(RENDER_TEXT | RENDER_SHADOW |
-                                                RENDER_GRADIENT |
-                                                RENDER_BORDER | RENDER_GLOW);
-    attr.shadowOffset   = {2, 2};
-    attr.shadowGradient = true;
+    /// 准备基础文字属性（测量用，颜色不影响尺寸）
+    TextAttribute measureAttr = normal_attribute;
+    measureAttr.fontName      = "Font_Eng";
+    measureAttr.fontSize      = bounds.h * 0.9f;
+    measureAttr.BorderSize    = 1;
+    measureAttr.option        = static_cast<TextRenderOption>(
+        RENDER_TEXT | RENDER_SHADOW | RENDER_GRADIENT | RENDER_BORDER |
+        RENDER_GLOW);
+    measureAttr.shadowOffset   = {2, 2};
+    measureAttr.shadowGradient = true;
 
     /// 配置文字的属性
     int W = 0;
     int H = 0;
-    Text::Measure(m_textContent, attr, W, H);
+    Text::Measure(m_textContent, measureAttr, W, H);
 
     if (W * H == 0)
     {
@@ -165,6 +183,21 @@ bool Button::generateTexture()
         return false;
     }
 
+    /// 用三种状态的类成员属性分别渲染三帧
+    auto drawWithAttr = [&](const TextAttribute &baseAttr, Rect &dr)
+    {
+        TextAttribute attr = baseAttr;
+        attr.fontName      = "Font_Eng";
+        attr.fontSize      = bounds.h * 0.9f;
+        attr.BorderSize    = 1;
+        attr.option        = static_cast<TextRenderOption>(
+            RENDER_TEXT | RENDER_SHADOW | RENDER_GRADIENT | RENDER_BORDER |
+            RENDER_GLOW);
+        attr.shadowOffset   = {2, 2};
+        attr.shadowGradient = true;
+        Text::Draw(textLayer.get(), &dr, m_textContent, attr);
+    };
+
     /// 获取三个Rect中的子Rect
     Rect rect = textLayer->getSubRect(0);
 
@@ -174,17 +207,17 @@ bool Button::generateTexture()
     dstRect.w = W;
     dstRect.h = H;
 
-    Text::Draw(textLayer.get(), &dstRect, m_textContent, attr);
+    drawWithAttr(normal_attribute, dstRect);
 
     rect      = textLayer->getSubRect(1);
     dstRect.x = (rect.w - W) * 0.5f;
     dstRect.y = dstRect.y + textLayer->height;
-    Text::Draw(textLayer.get(), &dstRect, m_textContent, attr);
+    drawWithAttr(hovered_attribute, dstRect);
 
     rect      = textLayer->getSubRect(2);
     dstRect.x = (rect.w - W) * 0.5f;
     dstRect.y = dstRect.y + textLayer->height;
-    Text::Draw(textLayer.get(), &dstRect, m_textContent, attr);
+    drawWithAttr(pressed_attribute, dstRect);
 
     /// 三层渲染完成，根据 Anchor 将 textLayer 合成到最终纹理上
     /// textLayer 宽度由文本内容决定，最终纹理宽度由控件逻辑宽度决定，

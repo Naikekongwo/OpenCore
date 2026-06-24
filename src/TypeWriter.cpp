@@ -22,6 +22,8 @@ TypeWriter::TypeWriter(string_view id, uint8_t layer, std::string_view fontName)
 
 void TypeWriter::Draw()
 {
+    UIElement::Draw();
+
     if (!m_textureCache || m_textureDirty)
         return;
 

@@ -12,6 +12,8 @@ void FrameCounter::parseEvents(Event *event, float totalTime) {}
 
 void FrameCounter::Draw() // 这个帧数应该是常态显示的吧，所以未添加可见判断
 {
+    UIElement::Draw();
+
     // 懒加载字体（首次 Draw 时从 PackageManager 加载）
     if (!font)
     {
