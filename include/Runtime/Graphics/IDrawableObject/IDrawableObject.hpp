@@ -155,6 +155,15 @@ class IDrawableObject
      */
     void setPosition(float x, float y);
     /**
+     * @brief 强制按相对位置设置（不做绝对像素自动判断）。
+     *        x/y 直接作为父容器宽高的倍数，即使 > 1.0f（超出父容器边界）
+     *        也保持相对语义，例如 PositeR(1.5f, 0.5f) 表示位于父容器
+     *        右侧 1.5 倍宽度、垂直居中处。
+     * @param x 水平位置（父容器宽度的倍数）。
+     * @param y 垂直位置（父容器高度的倍数）。
+     */
+    void setPositeRelative(float x, float y);
+    /**
      * @brief 设置父容器对象。
      * @param parentContainer 父对象的指针。
      */
@@ -203,7 +212,8 @@ class IDrawableObject
     int                          magnetFactor = 0;    ///< 磁吸因子（像素）
     bool absolutePosite = true; ///< 位置是否基于绝对坐标（否则为相对父容器）
     IDrawableObject *parentContainer = nullptr; ///< 父容器指针
-    bool scaleIsRelative_ = false; ///< 是否强制相对缩放模式（ScaleR）
+    bool scaleIsRelative_    = false; ///< 是否强制相对缩放模式（ScaleR）
+    bool positionIsRelative_ = false; ///< 是否强制相对位置模式（PositeR）
 
     float scaleArgs_[2] = {0}; ///< setScale 最近一次调用的原始 w, h
 
@@ -213,6 +223,13 @@ class IDrawableObject
      * @param h 高度参数。
      */
     void applyScale(float w, float h);
+
+    /**
+     * @brief 应用位置核心逻辑（按 positionIsRelative_ 决定相对/自动判断模式）。
+     * @param x 水平位置参数。
+     * @param y 垂直位置参数。
+     */
+    void applyPosition(float x, float y);
 };
 
 #endif //_IDRAWABLE_H_

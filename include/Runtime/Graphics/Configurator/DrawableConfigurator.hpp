@@ -37,6 +37,15 @@ class DrawableConfigurator
     DrawableConfigurator &Anchor(AnchorPoint anchor);
     DrawableConfigurator &Posite(float xPercent, float yPercent);
 
+    /**
+     * @brief 强制按相对位置设置（不做绝对像素自动判断）。
+     *        xPercent/yPercent 直接作为父容器宽高的倍数，即使 > 1.0f
+     *        也保持相对语义（可定位到父容器边界之外）。
+     * @param xPercent 水平位置（父容器宽度的倍数）。
+     * @param yPercent 垂直位置（父容器高度的倍数）。
+     */
+    DrawableConfigurator &PositeR(float xPercent, float yPercent);
+
     DrawableConfigurator &Sequence(bool sequential);
 
     DrawableConfigurator &Parent(IDrawableObject *parent);

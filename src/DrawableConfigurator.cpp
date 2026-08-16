@@ -26,6 +26,13 @@ DrawableConfigurator &DrawableConfigurator::Posite(float xPercent,
     return *this;
 }
 
+DrawableConfigurator &DrawableConfigurator::PositeR(float xPercent,
+                                                    float yPercent)
+{
+    obj_p->setPositeRelative(xPercent, yPercent);
+    return *this;
+}
+
 DrawableConfigurator &DrawableConfigurator::Sequence(bool sequential)
 {
     obj_p->setSequential(sequential);

@@ -23,6 +23,18 @@ void IDrawableObject::setAnchor(AnchorPoint anchor) { VState->Anchor = anchor; }
 
 void IDrawableObject::setPosition(float x, float y)
 {
+    positionIsRelative_ = false; // 自动判断模式
+    applyPosition(x, y);
+}
+
+void IDrawableObject::setPositeRelative(float x, float y)
+{
+    positionIsRelative_ = true; // 强制相对模式
+    applyPosition(x, y);
+}
+
+void IDrawableObject::applyPosition(float x, float y)
+{
     SDL_Rect parentRect{
         0, 0,
         OpenEngine::getInstance().getGameInfo()->_graphicsInfo.resolutionWidth,
@@ -35,9 +47,19 @@ void IDrawableObject::setPosition(float x, float y)
         parentRect = parentContainer->getLogicalBounds();
     }
 
-    // 自动判断：|值| > 1.0f 视为绝对像素，否则视为相对百分比
-    float absX = (x > 1.0f || x < -1.0f) ? x : parentRect.x + x * parentRect.w;
-    float absY = (y > 1.0f || y < -1.0f) ? y : parentRect.y + y * parentRect.h;
+    float absX, absY;
+    if (positionIsRelative_)
+    {
+        // 强制相对：x/y 直接作为父容器宽高的倍数（可 >1.0 表示超出边界）
+        absX = parentRect.x + x * parentRect.w;
+        absY = parentRect.y + y * parentRect.h;
+    }
+    else
+    {
+        // 自动判断：|值| > 1.0f 视为绝对像素，否则视为相对百分比
+        absX = (x > 1.0f || x < -1.0f) ? x : parentRect.x + x * parentRect.w;
+        absY = (y > 1.0f || y < -1.0f) ? y : parentRect.y + y * parentRect.h;
+    }
 
     VState->Position[0] = absX;
     VState->Position[1] = absY;
