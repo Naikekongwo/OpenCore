@@ -26,6 +26,14 @@ class DrawableConfigurator
 
     DrawableConfigurator &Scale(float w, float h);
 
+    /**
+     * @brief 强制按相对尺寸缩放（不做绝对像素自动判断）。
+     *        w/h 直接作为父容器尺寸的倍数，即使 > 1.0f 也保持相对语义。
+     * @param w 宽度（父容器宽度的倍数，0 表示按纹理宽高比自动计算）。
+     * @param h 高度（父容器高度的倍数，0 表示按纹理宽高比自动计算）。
+     */
+    DrawableConfigurator &ScaleR(float w, float h);
+
     DrawableConfigurator &Anchor(AnchorPoint anchor);
     DrawableConfigurator &Posite(float xPercent, float yPercent);
 

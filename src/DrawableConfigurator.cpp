@@ -7,6 +7,12 @@ DrawableConfigurator &DrawableConfigurator::Scale(float w, float h)
     return *this;
 }
 
+DrawableConfigurator &DrawableConfigurator::ScaleR(float w, float h)
+{
+    obj_p->setScaleRelative(w, h);
+    return *this;
+}
+
 DrawableConfigurator &DrawableConfigurator::Anchor(AnchorPoint anchor)
 {
     obj_p->setAnchor(anchor);

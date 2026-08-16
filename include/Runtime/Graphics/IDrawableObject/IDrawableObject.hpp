@@ -133,6 +133,14 @@ class IDrawableObject
      */
     void setScale(float w, float h);
     /**
+     * @brief 强制按相对尺寸设置缩放比例（不做绝对像素自动判断）。
+     *        w/h 直接作为父容器尺寸的倍数，即使 > 1.0f 也保持相对语义，
+     *        例如 ScaleR(1.1f, 0.0f) 表示宽度为父容器的 1.1 倍、高度按纹理宽高比。
+     * @param w 宽度（父容器宽度的倍数）。
+     * @param h 高度（父容器高度的倍数，0 表示按纹理宽高比自动计算）。
+     */
+    void setScaleRelative(float w, float h);
+    /**
      * @brief 设置锚点位置（决定位置坐标的参考点，九宫格形状，用于旋转缩放）。
      * @param anchor 锚点枚举值（例如左上、中心等）。
      */
@@ -194,8 +202,16 @@ class IDrawableObject
     int magnetFactor = 0;                      ///< 磁吸因子（像素）
     bool absolutePosite = true; ///< 位置是否基于绝对坐标（否则为相对父容器）
     IDrawableObject *parentContainer = nullptr; ///< 父容器指针
+    bool scaleIsRelative_ = false; ///< 是否强制相对缩放模式（ScaleR）
 
     float scaleArgs_[2] = {0}; ///< setScale 最近一次调用的原始 w, h
+
+    /**
+     * @brief 应用缩放核心逻辑（按 scaleIsRelative_ 决定相对/自动判断模式）。
+     * @param w 宽度参数。
+     * @param h 高度参数。
+     */
+    void applyScale(float w, float h);
 };
 
 #endif //_IDRAWABLE_H_

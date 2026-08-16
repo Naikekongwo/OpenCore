@@ -107,6 +107,18 @@ SDL_Rect IDrawableObject::getLogicalBounds()
 
 void IDrawableObject::setScale(float w, float h)
 {
+    scaleIsRelative_ = false; // 自动判断模式
+    applyScale(w, h);
+}
+
+void IDrawableObject::setScaleRelative(float w, float h)
+{
+    scaleIsRelative_ = true; // 强制相对模式
+    applyScale(w, h);
+}
+
+void IDrawableObject::applyScale(float w, float h)
+{
     SDL_Rect parentRect{
         0, 0,
         OpenEngine::getInstance().getGameInfo()->_graphicsInfo.resolutionWidth,
@@ -119,9 +131,19 @@ void IDrawableObject::setScale(float w, float h)
         parentRect = parentContainer->getLogicalBounds();
     }
 
-    // 自动判断：|值| > 1.0f 视为绝对像素，否则视为相对（父容器尺寸的倍数）
-    float relW = (w > 1.0f || w < -1.0f) ? w / parentRect.w : w;
-    float relH = (h > 1.0f || h < -1.0f) ? h / parentRect.h : h;
+    float relW, relH;
+    if (scaleIsRelative_)
+    {
+        // 强制相对模式：w/h 直接作为父容器尺寸的倍数
+        relW = w;
+        relH = h;
+    }
+    else
+    {
+        // 自动判断：|值| > 1.0f 视为绝对像素，否则视为相对（父容器尺寸的倍数）
+        relW = (w > 1.0f || w < -1.0f) ? w / parentRect.w : w;
+        relH = (h > 1.0f || h < -1.0f) ? h / parentRect.h : h;
+    }
 
     // 保存原始参数，供 changeTexture 重算使用
     scaleArgs_[0] = w;
@@ -170,8 +192,9 @@ void IDrawableObject::changeTexture(shared_ptr<Texture> newTexture)
     if (newTexture)
     {
         texture = newTexture;
-        // 按之前决定的相对坐标（如 w=1.0, h=0 → 横向铺满）配合新纹理尺寸重算
-        setScale(scaleArgs_[0], scaleArgs_[1]);
+        // 按之前决定的相对坐标（如 w=1.0, h=0 → 横向铺满）配合新纹理尺寸重算，
+        // 保留原缩放模式（Scale 自动 / ScaleR 强制相对）
+        applyScale(scaleArgs_[0], scaleArgs_[1]);
     }
     else
     {
