@@ -88,8 +88,8 @@ void CheckBox::onEnter()
         Img->Configure()
             .Parent(this)
             .Anchor(AnchorPoint::Center)
-            .Posite(0.5f, 0.5f)
-            .Scale(1.0f, 1.0f);
+            .PositeR(0.5f, 0.5f)
+            .ScaleR(1.0f, 1.0f);
 
         refreshStatus();
         status = CheckBoxStatus::Ready;

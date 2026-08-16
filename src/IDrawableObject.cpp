@@ -23,7 +23,7 @@ void IDrawableObject::setAnchor(AnchorPoint anchor) { VState->Anchor = anchor; }
 
 void IDrawableObject::setPosition(float x, float y)
 {
-    positionIsRelative_ = false; // 自动判断模式
+    positionIsRelative_ = false; // 绝对像素模式
     applyPosition(x, y);
 }
 
@@ -50,15 +50,15 @@ void IDrawableObject::applyPosition(float x, float y)
     float absX, absY;
     if (positionIsRelative_)
     {
-        // 强制相对：x/y 直接作为父容器宽高的倍数（可 >1.0 表示超出边界）
+        // 强制相对（PositeR）：x/y 直接作为父容器宽高的倍数（可 >1.0 表示超出边界）
         absX = parentRect.x + x * parentRect.w;
         absY = parentRect.y + y * parentRect.h;
     }
     else
     {
-        // 自动判断：|值| > 1.0f 视为绝对像素，否则视为相对百分比
-        absX = (x > 1.0f || x < -1.0f) ? x : parentRect.x + x * parentRect.w;
-        absY = (y > 1.0f || y < -1.0f) ? y : parentRect.y + y * parentRect.h;
+        // 绝对像素（Posite）：x/y 直接作为像素坐标，不做任何自动判断
+        absX = x;
+        absY = y;
     }
 
     VState->Position[0] = absX;
@@ -129,7 +129,7 @@ SDL_Rect IDrawableObject::getLogicalBounds()
 
 void IDrawableObject::setScale(float w, float h)
 {
-    scaleIsRelative_ = false; // 自动判断模式
+    scaleIsRelative_ = false; // 绝对像素模式
     applyScale(w, h);
 }
 
@@ -153,42 +153,47 @@ void IDrawableObject::applyScale(float w, float h)
         parentRect = parentContainer->getLogicalBounds();
     }
 
-    float relW, relH;
-    if (scaleIsRelative_)
-    {
-        // 强制相对模式：w/h 直接作为父容器尺寸的倍数
-        relW = w;
-        relH = h;
-    }
-    else
-    {
-        // 自动判断：|值| > 1.0f 视为绝对像素，否则视为相对（父容器尺寸的倍数）
-        relW = (w > 1.0f || w < -1.0f) ? w / parentRect.w : w;
-        relH = (h > 1.0f || h < -1.0f) ? h / parentRect.h : h;
-    }
-
     // 保存原始参数，供 changeTexture 重算使用
     scaleArgs_[0] = w;
     scaleArgs_[1] = h;
 
     float wph = 1.0f;
-    if (relW * relH == 0.0f)
+    if (scaleIsRelative_)
     {
-        // 固定宽高比模式 —— 纹理必须持有 SDL_Texture（本版本构造时已同步加载）
-        wph = texture->getTextureRatio();
-        // Ensure that not both parameters are zero!
-        absWidth =
-            (relW == 0.0f) ? relH * parentRect.h * wph : parentRect.w * relW;
-        absHeight =
-            (relH == 0.0f) ? (relW * parentRect.w) / wph : parentRect.h * relH;
-
-        LOG("元素为固定宽高比 ID:{}, {}, {}, {}", id.c_str(), absWidth,
-            absHeight, wph);
+        // 相对模式（ScaleR）：w/h 是父容器宽高的倍数
+        if (w * h == 0.0f)
+        {
+            // 固定宽高比模式 —— 纹理必须持有 SDL_Texture
+            wph = texture->getTextureRatio();
+            absWidth =
+                (w == 0.0f) ? h * parentRect.h * wph : parentRect.w * w;
+            absHeight =
+                (h == 0.0f) ? (w * parentRect.w) / wph : parentRect.h * h;
+            LOG("元素为固定宽高比 ID:{}, {}, {}, {}", id.c_str(), absWidth,
+                absHeight, wph);
+        }
+        else
+        {
+            absWidth  = w * parentRect.w;
+            absHeight = h * parentRect.h;
+        }
     }
     else
     {
-        absWidth  = relW * parentRect.w;
-        absHeight = relH * parentRect.h;
+        // 绝对像素模式（Scale）：w/h 直接作为宽高，0 表示按纹理宽高比
+        if (w * h == 0.0f)
+        {
+            wph = texture->getTextureRatio();
+            absWidth  = (w == 0.0f) ? h * wph : w;
+            absHeight = (h == 0.0f) ? w / wph : h;
+            LOG("元素为固定宽高比 ID:{}, {}, {}, {}", id.c_str(), absWidth,
+                absHeight, wph);
+        }
+        else
+        {
+            absWidth  = w;
+            absHeight = h;
+        }
     }
 }
 

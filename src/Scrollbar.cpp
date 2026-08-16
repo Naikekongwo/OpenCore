@@ -28,14 +28,14 @@ void Scrollbar::onEnter()
         slideBar->Configure()
             .Anchor(AnchorPoint::Center)
             .Parent(this)
-            .Posite(0.5f, 0.5f)
-            .Scale(0.0f, 1.2f)
+            .PositeR(0.5f, 0.5f)
+            .ScaleR(0.0f, 1.2f)
             .Sequence(true);
 
         baseBack->Configure()
             .Parent(this)
-            .Posite(0.5f, 0.5f)
-            .Scale(1.0f, 1.0f)
+            .PositeR(0.5f, 0.5f)
+            .ScaleR(1.0f, 1.0f)
             .Sequence(true)
             .Anchor(AnchorPoint::Center);
 
@@ -69,7 +69,7 @@ void Scrollbar::onUpdate(float totalTime)
     }
 }
 
-void Scrollbar::UpdateBar() { slideBar->setPosition(*value, 0.5f); }
+void Scrollbar::UpdateBar() { slideBar->setPositeRelative(*value, 0.5f); }
 
 void Scrollbar::parseEvents(Event *event, float totalTime)
 {

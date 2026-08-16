@@ -88,8 +88,8 @@ void TypeWriter::onUpdate(float totalTime)
             m_baseBackground->Configure()
                 .Parent(this)
                 .Anchor(AnchorPoint::Center)
-                .Scale(1.0f, 1.0f)
-                .Posite(0.5f, 0.5f);
+                .ScaleR(1.0f, 1.0f)
+                .PositeR(0.5f, 0.5f);
         }
 
         status = TypeWriterStatus::Ready;
