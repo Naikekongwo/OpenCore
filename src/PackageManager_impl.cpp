@@ -50,7 +50,31 @@ PackageManager::PackageManager(string_view pName, ResourceInfo resInfo)
     auto packageOCData = fs::path(reinterpret_cast<const char8_t *>(
         (string("data//") + string(packageName) + string("_00.ocdata"))
             .c_str()));
-    if (fs::exists(packageOCData))
+
+    if (!resourceInfo.packageOnly)
+    {
+        // 开发模式（packageOnly=false）：每次启动删除旧资源包与打包清单，
+        // 强制从当前注册清单重新打包，避免陈旧的 .ocdata 被错误复用。
+        // 正式发布（packageOnly=true）时保留并使用随包发布的资源包。
+        if (fs::exists(packageOCData))
+        {
+            fs::remove(packageOCData);
+            LOG("开发模式：删除旧资源包，启动后将重新打包");
+        }
+        auto packedManifestFile = getManifestPath(packageName, true);
+        if (fs::exists(packedManifestFile))
+        {
+            fs::remove(packedManifestFile);
+        }
+
+        packedMode = false;
+        fstream newManifest;
+        newManifest.open(packageManifestFile, ios::out);
+        newManifest.close();
+
+        LOG("初始化成功，清单文件已生成到 {}", packageManifestFile.string());
+    }
+    else if (fs::exists(packageOCData))
     {
         packedMode = true;
         LOG("初始化成功，已加载已启用的资源包清单 {}",
@@ -58,19 +82,10 @@ PackageManager::PackageManager(string_view pName, ResourceInfo resInfo)
     }
     else
     {
-        if (resourceInfo.packageOnly)
-        {
-            LOG("错误：资源包模式要求存在 .ocdata 文件，但未找到 {}",
-                packageOCData.string());
-            throw runtime_error(
-                "packageOnly mode enabled but .ocdata file not found.");
-        }
-
-        fstream newManifest;
-        newManifest.open(packageManifestFile, ios::out);
-        newManifest.close();
-
-        LOG("初始化成功，清单文件已生成到 {}", packageManifestFile.string());
+        LOG("错误：资源包模式要求存在 .ocdata 文件，但未找到 {}",
+            packageOCData.string());
+        throw runtime_error(
+            "packageOnly mode enabled but .ocdata file not found.");
     }
 }
 
