@@ -7,8 +7,8 @@ TextArea::TextArea(const string &id, uint8_t layer, std::string_view fontName)
 {
     m_textAttr.fontName = fontName;
     // 默认风格：白色文字 + 黑色阴影，无描边、无内部渐变、无外发光
-    m_textAttr.option = static_cast<TextRenderOption>(RENDER_TEXT |
-                                                      RENDER_SHADOW);
+    m_textAttr.option =
+        static_cast<TextRenderOption>(RENDER_TEXT | RENDER_SHADOW);
     m_textAttr.gradientColor = None;
     m_textAttr.glowColor     = None;
     m_textAttr.borderColor   = Color(0.5f, 0.5f, 0.5f, 1.0f);
