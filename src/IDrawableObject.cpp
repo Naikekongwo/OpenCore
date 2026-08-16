@@ -50,7 +50,8 @@ void IDrawableObject::applyPosition(float x, float y)
     float absX, absY;
     if (positionIsRelative_)
     {
-        // 强制相对（PositeR）：x/y 直接作为父容器宽高的倍数（可 >1.0 表示超出边界）
+        // 强制相对（PositeR）：x/y 直接作为父容器宽高的倍数（可 >1.0
+        // 表示超出边界）
         absX = parentRect.x + x * parentRect.w;
         absY = parentRect.y + y * parentRect.h;
     }
@@ -164,9 +165,8 @@ void IDrawableObject::applyScale(float w, float h)
         if (w * h == 0.0f)
         {
             // 固定宽高比模式 —— 纹理必须持有 SDL_Texture
-            wph = texture->getTextureRatio();
-            absWidth =
-                (w == 0.0f) ? h * parentRect.h * wph : parentRect.w * w;
+            wph      = texture->getTextureRatio();
+            absWidth = (w == 0.0f) ? h * parentRect.h * wph : parentRect.w * w;
             absHeight =
                 (h == 0.0f) ? (w * parentRect.w) / wph : parentRect.h * h;
             LOG("元素为固定宽高比 ID:{}, {}, {}, {}", id.c_str(), absWidth,
@@ -183,7 +183,7 @@ void IDrawableObject::applyScale(float w, float h)
         // 绝对像素模式（Scale）：w/h 直接作为宽高，0 表示按纹理宽高比
         if (w * h == 0.0f)
         {
-            wph = texture->getTextureRatio();
+            wph       = texture->getTextureRatio();
             absWidth  = (w == 0.0f) ? h * wph : w;
             absHeight = (h == 0.0f) ? w / wph : h;
             LOG("元素为固定宽高比 ID:{}, {}, {}, {}", id.c_str(), absWidth,
