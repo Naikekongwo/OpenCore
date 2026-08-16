@@ -205,8 +205,8 @@ void Text::Draw(Texture *target, const Rect *dstRect, string_view textContent,
         {
             colorizeMask(s, {0, 0, 0, 180});
             Rect r = *dstRect;
-            r.x += 2.0f;
-            r.y += 2.0f;
+            r.x += attr.shadowOffset.x;
+            r.y += attr.shadowOffset.y;
             blitText(target, &r, s, rend);
             SDL_DestroySurface(s);
         }

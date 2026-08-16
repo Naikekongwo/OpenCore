@@ -6,12 +6,13 @@ TextArea::TextArea(const string &id, uint8_t layer, std::string_view fontName)
     : UIElement(id, layer, nullptr)
 {
     m_textAttr.fontName = fontName;
-    m_textAttr.option   = static_cast<TextRenderOption>(
-        RENDER_TEXT | RENDER_SHADOW | RENDER_GRADIENT | RENDER_BORDER |
-        RENDER_GLOW);
-    m_textAttr.gradientColor = Color(0, 0, 1.0f, 1.0f);
-    m_textAttr.glowColor     = White;
-    m_textAttr.BorderSize    = 2;
+    // 默认风格：白色文字 + 黑色阴影，无描边、无内部渐变、无外发光
+    m_textAttr.option = static_cast<TextRenderOption>(RENDER_TEXT |
+                                                      RENDER_SHADOW);
+    m_textAttr.gradientColor = None;
+    m_textAttr.glowColor     = None;
+    m_textAttr.borderColor   = Color(0.5f, 0.5f, 0.5f, 1.0f);
+    m_textAttr.BorderSize    = 0;
     m_textureDirty           = false;
 }
 
@@ -52,6 +53,9 @@ void TextArea::setShadow(bool enableTag, int shadowOffset)
         enableTag
             ? static_cast<TextRenderOption>(m_textAttr.option | RENDER_SHADOW)
             : static_cast<TextRenderOption>(m_textAttr.option & ~RENDER_SHADOW);
+
+    // 阴影偏移（像素），供 Text::Draw 渲染使用
+    m_textAttr.shadowOffset = Vec2(static_cast<float>(shadowOffset));
 
     m_textureDirty = true;
 }
