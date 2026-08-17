@@ -17,6 +17,7 @@
 
 #include "Core/Math/OpenCore_Color.hpp"
 #include "Core/Math/OpenCore_Rect.hpp"
+#include <cmath>
 #include <string>
 
 #include <cstdarg>
@@ -91,6 +92,20 @@ class GraphicsManager
         window.w = TargetWindowWidth;
         window.h = TargetWindowHeight;
         return window;
+    }
+
+    /// 设计基准宽度（1920×1080 基准的宽度方向），相对字号换算基准
+    static constexpr int kDesignWidth = 1920;
+
+    /**
+     * @brief 设计基准字号 → 当前逻辑分辨率字号（按宽度方向缩放）。
+     * @param designSize 1920 设计基准宽度下所见字号
+     * @return 换算后的逻辑像素字号
+     */
+    short designFontSize(short designSize) const noexcept
+    {
+        return static_cast<short>(std::round(static_cast<float>(designSize) *
+                                             TargetWindowWidth / kDesignWidth));
     }
 
     /**

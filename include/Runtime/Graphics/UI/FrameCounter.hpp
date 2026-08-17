@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
+#include "Runtime/Graphics/Manager/GraphicsManager.hpp"
 #include <SDL3_ttf/SDL_ttf.h>
 
 /**
@@ -36,10 +37,11 @@ class FrameCounter : public UIElement
         fontName = name;
         font.reset();
     }
-    /// 设置字体大小（磅值）
+    /// 设置字体大小（设计基准字号，内部按逻辑分辨率自动换算）
     void setFontSize(int size)
     {
-        fontSize = size;
+        fontSize = GraphicsManager::getInstance().designFontSize(
+            static_cast<short>(size));
         font.reset();
     }
 

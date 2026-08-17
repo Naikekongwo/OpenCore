@@ -70,7 +70,8 @@ void TypeWriter::setText(string_view textContent)
 
 void TypeWriter::setFontSize(short fontSize)
 {
-    m_fontSize     = fontSize;
+    // setFontSize 接收设计基准字号，内部按逻辑分辨率自动换算
+    m_fontSize     = GraphicsManager::getInstance().designFontSize(fontSize);
     m_textureDirty = true;
 }
 

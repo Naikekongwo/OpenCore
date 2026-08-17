@@ -44,8 +44,10 @@ void TextArea::setText(string_view textContent)
 
 void TextArea::setFontSize(short fontSize)
 {
-    m_textAttr.fontSize = fontSize;
-    m_textureDirty      = true;
+    // setFontSize 接收设计基准字号，内部按逻辑分辨率自动换算
+    m_textAttr.fontSize =
+        GraphicsManager::getInstance().designFontSize(fontSize);
+    m_textureDirty = true;
 }
 
 void TextArea::setShadow(bool enableTag, int shadowOffset)
