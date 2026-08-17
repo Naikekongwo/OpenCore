@@ -28,8 +28,7 @@ class ImageBoard : public UIElement
      * @param layer   渲染图层（值越小越靠后）。
      * @param texture 关联的纹理智能指针（不能为空）。
      */
-    ImageBoard(std::string_view id, uint8_t layer,
-               shared_ptr<Texture> texture);
+    ImageBoard(std::string_view id, uint8_t layer, shared_ptr<Texture> texture);
 
     void Draw() override;
 };

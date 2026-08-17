@@ -27,7 +27,7 @@ struct VisualState
     // 帧容量
     // 帧引索
     uint8_t frameCapacity = 0;
-    uint8_t frameIndex = 0;
+    uint8_t frameIndex    = 0;
 
     // 不透明度
     float transparency = 1.0f;
@@ -44,8 +44,8 @@ struct VisualState
     AnchorPoint Anchor = AnchorPoint::Center;
 
     // 调用函数
-    float getAlpha() const { return transparency * 255.0f; }
-    float getAngle() const { return angle; }
+    float  getAlpha() const { return transparency * 255.0f; }
+    float  getAngle() const { return angle; }
     size_t getFrameIndex() const { return frameIndex; }
 };
 
@@ -55,13 +55,13 @@ class IAnimation
     virtual ~IAnimation() = default;
 
     // 设置/获取动画名称
-    void setName(std::string_view n) { name = n; }
+    void               setName(std::string_view n) { name = n; }
     const std::string &getName() const { return name; }
 
     virtual void onUpdate(float totalTime, VisualState &state) = 0;
-    virtual bool isFinished() const = 0;
-    virtual void reset(float totalTime, VisualState &state) = 0;
-    virtual bool isLoop() = 0;
+    virtual bool isFinished() const                            = 0;
+    virtual void reset(float totalTime, VisualState &state)    = 0;
+    virtual bool isLoop()                                      = 0;
 
   private:
     std::string name; // 动画名称

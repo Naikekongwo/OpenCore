@@ -3,9 +3,9 @@
 #include <memory>
 
 CollectionAnimation::CollectionAnimation(AnimationPipeline *parentPipeline,
-                                         bool isParalle)
+                                         bool               isParalle)
 {
-    AnimeManager = std::make_unique<AnimationManager>();
+    AnimeManager     = std::make_unique<AnimationManager>();
     this->parentPipe = parentPipeline;
 
     Parallel = isParalle;
