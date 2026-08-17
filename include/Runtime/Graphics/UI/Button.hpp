@@ -87,7 +87,7 @@ class Button : public UIElement
      * @param texture 按钮纹理（应包含至少三帧，顺序为 Normal, Hovered,
      * Pressed）。
      */
-    Button(const std::string &id, uint8_t layer, shared_ptr<Texture> texture);
+    Button(std::string_view id, uint8_t layer, shared_ptr<Texture> texture);
 
     void Draw() override;
     void onUpdate(float totalTime) override;

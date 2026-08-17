@@ -2,7 +2,7 @@
 #include "OpenCore.hpp"
 #include <memory>
 
-Scrollbar::Scrollbar(const string &id, short layer,
+Scrollbar::Scrollbar(std::string_view id, short layer,
                      std::string_view backTexName, std::string_view buttTexName)
     : UIElement(id, layer, nullptr)
 {

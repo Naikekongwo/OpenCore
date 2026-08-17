@@ -4,7 +4,7 @@
 #include "Runtime/Animation/AnimationPipeline.hpp"
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
-ImageBoard::ImageBoard(const std::string &id, uint8_t layer,
+ImageBoard::ImageBoard(std::string_view id, uint8_t layer,
                        shared_ptr<Texture> texture)
     : UIElement(id, layer, texture)
 {

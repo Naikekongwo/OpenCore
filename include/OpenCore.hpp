@@ -49,7 +49,7 @@ inline GraphicsManager &GFXManager = GraphicsManager::getInstance();
 #include "World/Stage/StageManager.hpp"
 
 template <typename T>
-unique_ptr<T> UI(const std::string &id, uint8_t layer,
+unique_ptr<T> UI(std::string_view id, uint8_t layer,
                  std::string_view textureName, uint8_t frameX, uint8_t frameY);
 
 #include <memory>

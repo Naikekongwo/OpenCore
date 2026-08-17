@@ -25,13 +25,13 @@ class FrameCounter : public UIElement
      * @param id      唯一标识符。
      * @param layer   渲染图层。
      */
-    FrameCounter(const std::string &id, uint8_t layer);
+    FrameCounter(std::string_view id, uint8_t layer);
     void parseEvents(Event *event, float totalTime) override;
     void Draw() override;
     void onUpdate(float totalTime) override;
 
     /// 设置字体名称（对应 PackageManager 中注册的资源名）
-    void setFontName(const std::string &name)
+    void setFontName(std::string_view name)
     {
         fontName = name;
         font.reset();

@@ -1,6 +1,6 @@
 #include "OpenCore.hpp"
 
-ToolMenu::ToolMenu(const string &id, short layer)
+ToolMenu::ToolMenu(std::string_view id, short layer)
     : UIElement(id, layer, nullptr)
 {
 }

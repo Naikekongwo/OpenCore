@@ -54,13 +54,13 @@ class ElementManager
 
     void onDestroy();
 
-    bool removeElement(const std::string &id);
+    bool removeElement(std::string_view id);
 
     bool PushElement(unique_ptr<IDrawableObject> element);
 
-    IDrawableObject *find(const std::string &id) const;
+    IDrawableObject *find(std::string_view id) const;
 
-    unique_ptr<IDrawableObject> getElement(const std::string &id);
+    unique_ptr<IDrawableObject> getElement(std::string_view id);
 
     template <typename Func> void forEachElement(Func &&func)
     {

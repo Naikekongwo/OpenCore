@@ -2,7 +2,7 @@
 #include "Runtime/Graphics/IDrawableObject/Text.hpp"
 #include "Runtime/Graphics/IDrawableObject/Texture.hpp"
 
-TextArea::TextArea(const string &id, uint8_t layer, std::string_view fontName)
+TextArea::TextArea(std::string_view id, uint8_t layer, std::string_view fontName)
     : UIElement(id, layer, nullptr)
 {
     m_textAttr.fontName = fontName;

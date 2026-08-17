@@ -11,9 +11,13 @@ CollectionAnimation::CollectionAnimation(AnimationPipeline *parentPipeline,
     Parallel = isParalle;
 }
 
+CollectionAnimation::~CollectionAnimation() = default;
+
 AnimationPipeline *CollectionAnimation::Begin()
 {
-    return new AnimationPipeline(AnimeManager.get(), parentPipe);
+    m_subPipeline =
+        std::make_unique<AnimationPipeline>(AnimeManager.get(), parentPipe);
+    return m_subPipeline.get();
 }
 
 void CollectionAnimation::onUpdate(float totalTime, VisualState &state)

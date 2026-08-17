@@ -2,7 +2,7 @@
 #include "OpenCore.hpp"
 #include <algorithm>
 
-IDrawableObject *ElementManager::find(const std::string &id) const
+IDrawableObject *ElementManager::find(std::string_view id) const
 {
     for (auto &element : Elements)
     {
@@ -62,13 +62,13 @@ void ElementManager::onRender()
     }
 }
 
-unique_ptr<IDrawableObject> ElementManager::getElement(const std::string &id)
+unique_ptr<IDrawableObject> ElementManager::getElement(std::string_view id)
 {
     if (find(id) == nullptr)
     {
         LOG("获取元素失败，因为其不存在 元素ID: {} "
             "because we cannot find it.",
-            id.c_str());
+            std::string(id).c_str());
         return nullptr;
     }
 
@@ -87,7 +87,7 @@ unique_ptr<IDrawableObject> ElementManager::getElement(const std::string &id)
 
 void ElementManager::onDestroy() { Elements.clear(); }
 
-bool ElementManager::removeElement(const std::string &id)
+bool ElementManager::removeElement(std::string_view id)
 {
     if (!find(id))
     {

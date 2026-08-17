@@ -1,7 +1,7 @@
 
 #include "OpenCore.hpp"
 
-FrameCounter::FrameCounter(const std::string &id, uint8_t layer)
+FrameCounter::FrameCounter(std::string_view id, uint8_t layer)
     : UIElement(id, layer, nullptr)
 {
     this->VState       = std::make_unique<VisualState>();

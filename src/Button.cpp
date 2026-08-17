@@ -7,8 +7,7 @@
 #include <SDL3/SDL_render.h>
 #include <memory>
 
-Button::Button(const std::string &id, uint8_t layer,
-               shared_ptr<Texture> texture)
+Button::Button(std::string_view id, uint8_t layer, shared_ptr<Texture> texture)
     : UIElement(id, layer, texture)
 {
 }
@@ -99,7 +98,7 @@ void Button::Draw()
                       static_cast<uint8_t>(VState->getAlpha()));
     }
 
-    /// <绘制文字层（Text / Hybrid 模式）>
+    // 绘制文字层（Text / Hybrid 模式）
     if (m_buttonstyle == ButtonStyle::Image)
         return;
 
@@ -114,7 +113,7 @@ void Button::Draw()
 
 bool Button::generateTexture()
 {
-    /// 纹理的重建只会出现在需要文字的按钮风格
+    // 纹理重建只出现在需要文字的按钮风格
     if (m_buttonstyle == ButtonStyle::Image)
         return true;
 
@@ -138,7 +137,8 @@ bool Button::generateTexture()
         return false;
     }
 
-    /// 构建共享文字属性基准（测量 + 三帧共用）
+#pragma region 测量并生成文字纹理
+    // 共享文字属性基准（测量 + 三帧共用）
     TextAttribute baseAttr = normal_attribute;
     baseAttr.fontName      = "Font_Eng";
     baseAttr.fontSize      = bounds.h * 0.9f;
@@ -149,7 +149,7 @@ bool Button::generateTexture()
     baseAttr.shadowOffset   = {2, 2};
     baseAttr.shadowGradient = true;
 
-    /// 测量文字尺寸
+    // 测量文字尺寸
     int W = 0, H = 0;
     Text::Measure(m_textContent, baseAttr, W, H);
 
@@ -159,7 +159,7 @@ bool Button::generateTexture()
         return false;
     }
 
-    /// 通过计算的W,H，得到纹理的大小(以H优先，W尽力拓展即可
+    // 由文字宽高比按控件高度换算纹理宽度
     float ratio                = (W * 1.0f) / H;
     float textLayerBoundsWidth = ratio * bounds.h;
 
@@ -169,7 +169,7 @@ bool Button::generateTexture()
         return false;
     }
 
-    /// 构造纹理（离屏 3 帧）
+    // 构造离屏 3 帧纹理
     auto textLayer = std::make_shared<Texture>(
         static_cast<uint16_t>(textLayerBoundsWidth),
         static_cast<uint16_t>(bounds.h), size_t(1), size_t(3));
@@ -182,7 +182,7 @@ bool Button::generateTexture()
         return false;
     }
 
-    /// 循环渲染三帧：Normal / Hovered / Pressed
+    // 逐帧渲染 Normal / Hovered / Pressed
     const TextAttribute *stateAttrs[3] = {&normal_attribute, &hovered_attribute,
                                           &pressed_attribute};
     float                yOffset       = (bounds.h - H) * 0.5f;
@@ -204,11 +204,9 @@ bool Button::generateTexture()
         yOffset += textLayer->height;
     }
 
-    /// 三层渲染完成，根据 Anchor 将 textLayer 合成到最终纹理上
-    /// textLayer 宽度由文本内容决定，最终纹理宽度由控件逻辑宽度决定，
-    /// 通过 Anchor 确定 textLayer 在最终纹理帧中的水平对齐位置。
+#pragma endregion
 
-    // 根据 Anchor 计算 textLayer 在帧内的水平偏移
+    // 按 Anchor 计算 textLayer 在最终帧内的水平偏移
     float offsetX = 0.0f;
     switch (VState->Anchor)
     {

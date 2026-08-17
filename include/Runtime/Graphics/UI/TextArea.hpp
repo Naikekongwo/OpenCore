@@ -13,7 +13,7 @@ using std::unique_ptr;
 class TextArea : public UIElement
 {
   public:
-    TextArea(const string &id, uint8_t layer, std::string_view fontName);
+    TextArea(std::string_view id, uint8_t layer, std::string_view fontName);
 
     void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;

@@ -62,7 +62,7 @@ struct ResourceNode
     int          endIndex   = 0; // 此参数不由外部显式注册
     float expireTime = 0.0f;     // 此参数与序列化、反序列化无关（不储存到本地）
 
-    /// 序列化为一行字符串（CSV格式）
+    /** @brief 序列化为一行字符串（CSV 格式） */
     string serialize() const
     {
         string typeStr;
@@ -82,7 +82,7 @@ struct ResourceNode
                std::to_string(startIndex) + "," + std::to_string(endIndex);
     }
 
-    /// 从一行字符串反序列化
+    /** @brief 从一行字符串反序列化 */
     static ResourceNode deserialize(string_view line)
     {
         ResourceNode node;
@@ -170,25 +170,25 @@ class PackageManager final
     void onUpdate();
     void onDestroy();
 
-    /// 清除内存中加载的所有资源缓存
+    /** @brief 清除内存中加载的所有资源缓存 */
     void clearCache();
 
-    /// 注册计时器
+    /** @brief 注册计时器 */
     void setTimer(Timer *timer) { this->timer = timer; }
 
-    /// 注册相关信息的方法
+    /** @brief 注册资源/元信息的方法 */
     bool registerTextureMeta(TextureMeta meta);
     bool registerResource(ResourceType rType, string_view name,
                           string_view filePath);
     bool registerResource(ResourceNode resource);
     bool registerResources(initializer_list<ResourceNode> resources);
 
-    /// Package中的元资源获取方法
+    /** @brief Package 中的元资源获取方法 */
     shared_ptr<SDL_Texture> getTexture(string_view name);
     shared_ptr<SDL_Texture> getTextureAsync(string_view name);
     shared_ptr<TTF_Font>    getFont(string_view name, int ptsize);
 
-    /// 注册信息的资源获取方法
+    /** @brief 注册信息的资源获取方法 */
     optional<TextureMeta> queryTextureMeta(string_view name) const;
     shared_ptr<Texture>   getTextureObject(string_view name);
     shared_ptr<Texture>   getTextureObject(TextureMeta meta);
@@ -199,52 +199,47 @@ class PackageManager final
     Timer       *timer      = nullptr;
     ResourceInfo resourceInfo;
 
-    /// 注册信息缓存
-    /// 资源节点的注册缓存
-    /// 纹理包装类元数据的缓存
+    // 注册信息缓存：资源节点 + 纹理元数据
     vector<ResourceNode>                    resourceManifestBuffer;
     std::unordered_map<string, TextureMeta> metaRegistry_;
 
-    /// 资源元数据缓存区域
-    /// 纹理区域
-    /// 字体区域
+    // 资源缓存：纹理 / 字体
     std::unordered_map<string, shared_ptr<SDL_Texture>> textureCache_;
     std::unordered_map<string, shared_ptr<TTF_Font>>    fontCache_;
 
-    /// 纹理包装的数据缓存区域
+    // 纹理包装数据缓存
     std::unordered_map<string, shared_ptr<Texture>> textureObjCache_;
 
-    /// 资源加载过程缓存区域
-    /// 用以保证幂等性，防止多次加载资源
+    // 资源加载过程缓存（保证幂等，防止重复加载）
     std::unordered_map<string, std::shared_future<void>> pendingTextures_;
     std::unordered_map<string, std::shared_future<void>> pendingFonts_;
 
-    /// 缓存区域的锁
+    // 缓存锁
     std::mutex cacheMutex_;
 
-    /// 常量定义
+    // 常量
     static constexpr float EVICT_TTL   = 10.0f; // 清单条目过期时间
     static constexpr float GC_INTERVAL = 20.0f; // 整体淘汰回收间隔（2倍 TTL）
 
-    /// 上一次调用GC系统的时间
+    // 上次 GC 时间
     float lastGcTime_ = 0.0f;
 
-    /// 垃圾回收方法
+    /** @brief 淘汰过期缓存条目 */
     void evictStaleEntries();
 
     bool contains(ResourceNode target, bool nameOnly = false);
     bool generatePackage(const path &manifestPath, bool cleanup = true);
 
-    /// 辅助方法：用于获取当前应用的清单文件路径
+    /** @brief 获取当前应用的清单文件路径 */
     static path getManifestPath(string_view packageName, bool packed);
 
-    /// 查询对应的ResourceNode的方法
+    /** @brief 查询对应的 ResourceNode */
     ResourceNode *findNode(string_view name);
 
-    /// 从Package中读取二进制数据
+    /** @brief 从 Package 中读取二进制数据 */
     std::vector<char> extractResourceData(const ResourceNode &node);
 
-    /// 异步加载资源的方法
+    /** @brief 异步加载资源 */
     std::shared_future<void> requestTextureLoad(string_view name);
     std::shared_future<void> requestFontLoad(string_view name, int ptsize);
 };

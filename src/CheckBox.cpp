@@ -2,7 +2,8 @@
 #include "OpenCore.hpp"
 #include <SDL3/SDL_events.h>
 
-CheckBox::CheckBox(const string &id, short layer, shared_ptr<Texture> texture)
+CheckBox::CheckBox(std::string_view id, short layer,
+                   shared_ptr<Texture> texture)
     : UIElement(id, layer, texture)
 {
 }

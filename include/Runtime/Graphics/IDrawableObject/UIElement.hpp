@@ -28,7 +28,7 @@ class UIElement : public IDrawableObject
      * @param layer   渲染图层（值越小越靠后）。
      * @param texture 关联的纹理智能指针（可为空，例如纯容器控件）。
      */
-    UIElement(const string &id, short layer, shared_ptr<Texture> texture);
+    UIElement(std::string_view id, short layer, shared_ptr<Texture> texture);
     ~UIElement() override;
 
     void onUpdate(float totalTime) override;

@@ -188,7 +188,8 @@ void UIElement::parseEvents(Event *event, float totalTime)
     }
 }
 
-UIElement::UIElement(const string &id, short layer, shared_ptr<Texture> texture)
+UIElement::UIElement(std::string_view id, short layer,
+                     shared_ptr<Texture> texture)
 {
     this->id    = id;
     this->layer = layer;
@@ -197,7 +198,7 @@ UIElement::UIElement(const string &id, short layer, shared_ptr<Texture> texture)
     {
         LOG("UIElement id {} encountered a empty texture, but relax, for some "
             "element have child element it's ok to init without texture.",
-            id.c_str());
+            std::string(id).c_str());
     }
     else
     {

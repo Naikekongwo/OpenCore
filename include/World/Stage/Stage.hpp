@@ -84,8 +84,8 @@ class Stage
     void      setStageType(StageType stageType) { this->stageType = stageType; }
 
     // 元素传送相关
-    bool transferElementTo(Stage *destStage, const std::string &id);
-    bool transferElementFrom(Stage *srcStage, const std::string &id);
+    bool transferElementTo(Stage *destStage, std::string_view id);
+    bool transferElementFrom(Stage *srcStage, std::string_view id);
 
     // 临时获取ElementManager
     ElementManager *getElementManager() const { return Elements.get(); }

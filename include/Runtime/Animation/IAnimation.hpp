@@ -55,7 +55,7 @@ class IAnimation
     virtual ~IAnimation() = default;
 
     // 设置/获取动画名称
-    void setName(const std::string &n) { name = n; }
+    void setName(std::string_view n) { name = n; }
     const std::string &getName() const { return name; }
 
     virtual void onUpdate(float totalTime, VisualState &state) = 0;

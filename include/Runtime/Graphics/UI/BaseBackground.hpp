@@ -29,7 +29,7 @@ class BaseBackground : public UIElement
      * @param layer   渲染图层。
      * @param texture 原始纹理（将被分割为 3x3 网格）。
      */
-    BaseBackground(const string &id, uint8_t layer,
+    BaseBackground(std::string_view id, uint8_t layer,
                    shared_ptr<Texture> texture);
     bool generateTexture() override;
     void parseEvents(Event *event, float totalTime) override;

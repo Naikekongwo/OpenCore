@@ -24,7 +24,7 @@ struct ToolMenuOption
 class ToolMenu : public UIElement
 {
   public:
-    ToolMenu(const string &id, short layer);
+    ToolMenu(std::string_view id, short layer);
     ~ToolMenu() override;
 
     void onUpdate(float totalTime) override;

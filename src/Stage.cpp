@@ -2,12 +2,12 @@
 #include "OpenCore.hpp"
 #include <string>
 
-bool Stage::transferElementFrom(Stage *srcStage, const std::string &id)
+bool Stage::transferElementFrom(Stage *srcStage, std::string_view id)
 {
     return srcStage->transferElementTo(this, id);
 }
 
-bool Stage::transferElementTo(Stage *destStage, const std::string &id)
+bool Stage::transferElementTo(Stage *destStage, std::string_view id)
 {
     auto srcElements = this->getElementManager();
     auto dstElements = destStage->getElementManager();

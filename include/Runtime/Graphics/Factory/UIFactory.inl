@@ -15,7 +15,7 @@ inline shared_ptr<Texture> GetTextureByName(std::string_view name)
 
 // 通用版本
 template <typename T>
-inline unique_ptr<T> UI(const std::string &id, uint8_t layer,
+inline unique_ptr<T> UI(std::string_view id, uint8_t layer,
                         std::string_view textureName, uint8_t frameX,
                         uint8_t frameY)
 {
@@ -27,7 +27,7 @@ inline unique_ptr<T> UI(const std::string &id, uint8_t layer,
 
 template <>
 inline unique_ptr<FrameCounter>
-UI<FrameCounter>(const std::string &id, uint8_t layer,
+UI<FrameCounter>(std::string_view id, uint8_t layer,
                  std::string_view textureName, uint8_t reserve0,
                  uint8_t reserve1)
 {
@@ -36,7 +36,7 @@ UI<FrameCounter>(const std::string &id, uint8_t layer,
 
 template <>
 inline unique_ptr<BaseBackground>
-UI<BaseBackground>(const std::string &id, uint8_t layer,
+UI<BaseBackground>(std::string_view id, uint8_t layer,
                    std::string_view textureName, uint8_t reserve0,
                    uint8_t reserve1)
 {
@@ -45,7 +45,7 @@ UI<BaseBackground>(const std::string &id, uint8_t layer,
 }
 
 template <>
-inline unique_ptr<CheckBox> UI<CheckBox>(const std::string &id, uint8_t layer,
+inline unique_ptr<CheckBox> UI<CheckBox>(std::string_view id, uint8_t layer,
                                          std::string_view textureName,
                                          uint8_t reserve1, uint8_t reserve0)
 {
@@ -53,7 +53,7 @@ inline unique_ptr<CheckBox> UI<CheckBox>(const std::string &id, uint8_t layer,
 }
 
 template <>
-inline unique_ptr<TextArea> UI<TextArea>(const std::string &id, uint8_t layer,
+inline unique_ptr<TextArea> UI<TextArea>(std::string_view id, uint8_t layer,
                                          std::string_view fontName,
                                          uint8_t reserve1, uint8_t reserve0)
 {
@@ -62,7 +62,7 @@ inline unique_ptr<TextArea> UI<TextArea>(const std::string &id, uint8_t layer,
 
 template <>
 inline unique_ptr<TypeWriter>
-UI<TypeWriter>(const std::string &id, uint8_t layer, std::string_view fontName,
+UI<TypeWriter>(std::string_view id, uint8_t layer, std::string_view fontName,
                uint8_t reserve1, uint8_t reserve0)
 {
     return std::make_unique<TypeWriter>(id, layer, fontName);

@@ -45,7 +45,7 @@ class Scrollbar : public UIElement
      * @param backTexName  背景纹理的资源名称。
      * @param buttTexName  滑块纹理的资源名称。
      */
-    Scrollbar(const string &id, short layer, std::string_view backTexName,
+    Scrollbar(std::string_view id, short layer, std::string_view backTexName,
               std::string_view buttTexName);
     void parseEvents(Event *event, float totalTime) override;
     void onUpdate(float totalTime) override;

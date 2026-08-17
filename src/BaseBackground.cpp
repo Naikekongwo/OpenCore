@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <memory>
 
-BaseBackground::BaseBackground(const std::string &id, uint8_t layer,
+BaseBackground::BaseBackground(std::string_view id, uint8_t layer,
                                shared_ptr<Texture> texture)
     : UIElement(id, layer, texture)
 {
