@@ -138,9 +138,10 @@ bool Button::generateTexture()
     }
 
 #pragma region 测量并生成文字纹理
-    // 共享文字属性基准（测量 + 三帧共用）
+    // 共享文字属性基准（测量 + 三帧共用），字体名取自 normal_attribute，
+    // 可由 setNormalAttribute() 指定（例如 AozoraFont）
     TextAttribute baseAttr = normal_attribute;
-    baseAttr.fontName      = "Font_Eng";
+    baseAttr.fontName      = normal_attribute.fontName;
     baseAttr.fontSize      = bounds.h * 0.9f;
     baseAttr.BorderSize    = 1;
     baseAttr.option        = static_cast<TextRenderOption>(
