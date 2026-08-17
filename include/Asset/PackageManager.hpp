@@ -1,12 +1,6 @@
 /**
  * @file PackageManager.hpp
- * @author your name (you@domain.com)
- * @brief 资源包管理器类
- * @version 0.1
- * @date 2026-06-15
- *
- * @copyright Copyright (c) 2026
- *
+ * @brief 资源包管理器（OpenCore 26.1 引入）
  */
 #pragma once
 
@@ -45,9 +39,42 @@ using std::filesystem::path;
 enum ResourceType
 {
     RscTexture,
-    RscMusic,
-    RscFont
+    RscAudio, // 原 RscMusic 更名，统一音频资源
+    RscFont,
+    RscAsset // 通用二进制资源（JSON/配置/着色器/脚本等）
 };
+
+/** @brief 资源类型与清单字符串的映射（CSV 序列化，新增类型只需在此各加一项） */
+inline string_view resourceTypeToString(ResourceType type)
+{
+    switch (type)
+    {
+    case RscTexture:
+        return "Texture";
+    case RscAudio:
+        return "Audio";
+    case RscFont:
+        return "Font";
+    case RscAsset:
+        return "Asset";
+    }
+    return "";
+}
+
+/** @brief 清单字符串 → 资源类型，未知类型返回 nullopt */
+[[nodiscard]] inline optional<ResourceType>
+resourceTypeFromString(string_view str)
+{
+    if (str == "Texture")
+        return RscTexture;
+    if (str == "Audio")
+        return RscAudio;
+    if (str == "Font")
+        return RscFont;
+    if (str == "Asset")
+        return RscAsset;
+    return std::nullopt;
+}
 
 /**
  * @brief 资源节点，用于保存索引文件
@@ -65,21 +92,9 @@ struct ResourceNode
     /** @brief 序列化为一行字符串（CSV 格式） */
     string serialize() const
     {
-        string typeStr;
-        switch (rType)
-        {
-        case RscTexture:
-            typeStr = "Texture";
-            break;
-        case RscMusic:
-            typeStr = "Music";
-            break;
-        case RscFont:
-            typeStr = "Font";
-            break;
-        }
-        return typeStr + "," + name + "," + filePath + "," +
-               std::to_string(startIndex) + "," + std::to_string(endIndex);
+        return string(resourceTypeToString(rType)) + "," + name + "," +
+               filePath + "," + std::to_string(startIndex) + "," +
+               std::to_string(endIndex);
     }
 
     /** @brief 从一行字符串反序列化 */
@@ -100,12 +115,8 @@ struct ResourceNode
             string(line.substr(thirdComma + 1, fourthComma - thirdComma - 1)));
         node.endIndex = std::stoi(string(line.substr(fourthComma + 1)));
 
-        if (typeStr == "Texture")
-            node.rType = RscTexture;
-        else if (typeStr == "Music")
-            node.rType = RscMusic;
-        else if (typeStr == "Font")
-            node.rType = RscFont;
+        if (auto type = resourceTypeFromString(typeStr))
+            node.rType = *type;
 
         return node;
     }
@@ -188,6 +199,14 @@ class PackageManager final
     shared_ptr<SDL_Texture> getTextureAsync(string_view name);
     shared_ptr<TTF_Font>    getFont(string_view name, int ptsize);
 
+    /** @brief 通用二进制资源获取（RscAsset） */
+    shared_ptr<vector<char>> getAsset(string_view name);
+    shared_ptr<vector<char>> getAssetAsync(string_view name);
+
+    /** @brief 音频资源获取（RscAudio，返回原始字节供解码） */
+    shared_ptr<vector<char>> getAudio(string_view name);
+    shared_ptr<vector<char>> getAudioAsync(string_view name);
+
     /** @brief 注册信息的资源获取方法 */
     optional<TextureMeta> queryTextureMeta(string_view name) const;
     shared_ptr<Texture>   getTextureObject(string_view name);
@@ -203,9 +222,10 @@ class PackageManager final
     vector<ResourceNode>                    resourceManifestBuffer;
     std::unordered_map<string, TextureMeta> metaRegistry_;
 
-    // 资源缓存：纹理 / 字体
-    std::unordered_map<string, shared_ptr<SDL_Texture>> textureCache_;
-    std::unordered_map<string, shared_ptr<TTF_Font>>    fontCache_;
+    // 资源缓存：纹理 / 字体 / 通用二进制（Asset/Audio）
+    std::unordered_map<string, shared_ptr<SDL_Texture>>  textureCache_;
+    std::unordered_map<string, shared_ptr<TTF_Font>>     fontCache_;
+    std::unordered_map<string, shared_ptr<vector<char>>> dataCache_;
 
     // 纹理包装数据缓存
     std::unordered_map<string, shared_ptr<Texture>> textureObjCache_;
@@ -213,6 +233,7 @@ class PackageManager final
     // 资源加载过程缓存（保证幂等，防止重复加载）
     std::unordered_map<string, std::shared_future<void>> pendingTextures_;
     std::unordered_map<string, std::shared_future<void>> pendingFonts_;
+    std::unordered_map<string, std::shared_future<void>> pendingData_;
 
     // 缓存锁
     std::mutex cacheMutex_;
@@ -242,4 +263,10 @@ class PackageManager final
     /** @brief 异步加载资源 */
     std::shared_future<void> requestTextureLoad(string_view name);
     std::shared_future<void> requestFontLoad(string_view name, int ptsize);
+    std::shared_future<void> requestDataLoad(string_view  name,
+                                             ResourceType rType);
+
+    /** @brief 通用二进制资源获取核心（缓存 → 异步加载） */
+    shared_ptr<vector<char>> getData(string_view name, ResourceType rType,
+                                     bool blocking);
 };
