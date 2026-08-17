@@ -7,7 +7,7 @@ SDL_Rect UIElement::getLogicalBounds()
 {
     if (!VState)
     {
-        LOG("UIElement::getLogicalBounds() failed: VState is nullptr");
+        LOG("VState 为空，无法获取逻辑碰撞箱");
         return SDL_Rect{0, 0, 0, 0};
     }
 
@@ -196,8 +196,7 @@ UIElement::UIElement(std::string_view id, short layer,
 
     if (!texture)
     {
-        LOG("UIElement id {} encountered a empty texture, but relax, for some "
-            "element have child element it's ok to init without texture.",
+        LOG("元素 {} 使用空纹理初始化（部分容器类元素允许）",
             std::string(id).c_str());
     }
     else

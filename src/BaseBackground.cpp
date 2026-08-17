@@ -52,7 +52,7 @@ bool BaseBackground::generateTexture()
 
     if (!texture || !texture->get())
     {
-        LOG("BaseBackground::generateTexture() 纹理尚未加载");
+        LOG("纹理尚未加载");
         return false;
     }
 

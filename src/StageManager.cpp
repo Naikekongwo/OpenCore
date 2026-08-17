@@ -6,8 +6,7 @@ void StageManager::changeStage(unique_ptr<Stage> newStage)
 {
     if (!newStage)
     {
-        LOG("StageManager::changeStage encountered a nulllptr in "
-            "pushing stage.");
+        LOG("场景切换收到空指针");
         return;
     }
     commandQueue.push(std::make_unique<StageCommand>(
@@ -78,7 +77,7 @@ void StageManager::processCommandQueue()
             break;
 
         case StageCommandType::Remove:
-            LOG("Removing stage at index %zu", index);
+            LOG("移除索引 {} 处的场景", index);
             if (stageContainer[index])
             {
                 stageContainer[index]->onExit();

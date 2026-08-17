@@ -66,9 +66,7 @@ unique_ptr<IDrawableObject> ElementManager::getElement(std::string_view id)
 {
     if (find(id) == nullptr)
     {
-        LOG("获取元素失败，因为其不存在 元素ID: {} "
-            "because we cannot find it.",
-            std::string(id).c_str());
+        LOG("获取元素失败，元素 ID {}", std::string(id).c_str());
         return nullptr;
     }
 

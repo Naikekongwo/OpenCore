@@ -28,7 +28,7 @@ bool GraphicsManager::Init()
 
     if (!TTF_Init())
     {
-        LOG("TTF_Init Error: {}", SDL_GetError());
+        LOG("TTF 初始化失败: {}", SDL_GetError());
         return false;
     }
 
@@ -51,8 +51,7 @@ void GraphicsManager::refreshWindowProperties()
 
     if (!gameInfo)
     {
-        LOG("GraphicsManager::Window Encountered a null pointer for game "
-            "info!");
+        LOG("游戏信息为空指针");
         return;
     }
 
@@ -98,18 +97,18 @@ void GraphicsManager::refreshWindowProperties()
 void GraphicsManager::CleanUp()
 {
     if (!renderer)
-        LOG("failed to destroy a null renderer.");
+        LOG("渲染器为空，无法销毁");
     else
         SDL_DestroyRenderer(renderer);
 
     if (!window)
-        LOG("failed to destroy a null window.");
+        LOG("窗口为空，无法销毁");
     else
         SDL_DestroyWindow(window);
 
-    LOG("has reseted the scale system.");
+    LOG("已重置缩放系统");
 
-    LOG("manage to quit the SDL.");
+    LOG("已退出 SDL");
     SDL_Quit();
 }
 
@@ -135,7 +134,7 @@ int GraphicsManager::setRenderTarget(SDL_Texture *texture)
 {
     if (SDL_SetRenderTarget(renderer, texture) != 0)
     {
-        LOG("Failed to set render target: {}", SDL_GetError());
+        LOG("设置渲染目标失败: {}", SDL_GetError());
         return -1;
     }
 
@@ -166,7 +165,7 @@ shared_ptr<Texture> GraphicsManager::captureScreen()
     SDL_Surface *surface = SDL_RenderReadPixels(renderer, nullptr);
     if (!surface)
     {
-        LOG("captureScreen: SDL_RenderReadPixels failed: {}", SDL_GetError());
+        LOG("截屏读取像素失败: {}", SDL_GetError());
         return nullptr;
     }
 
@@ -175,8 +174,7 @@ shared_ptr<Texture> GraphicsManager::captureScreen()
 
     if (!sdlTex)
     {
-        LOG("captureScreen: SDL_CreateTextureFromSurface failed: {}",
-            SDL_GetError());
+        LOG("截屏创建纹理失败: {}", SDL_GetError());
         return nullptr;
     }
 

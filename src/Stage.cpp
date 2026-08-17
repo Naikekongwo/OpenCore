@@ -14,8 +14,7 @@ bool Stage::transferElementTo(Stage *destStage, std::string_view id)
     if (srcElements->find(id) == nullptr)
     {
         // 本场景不存在该元素
-        LOG("Stage::transferE... failed to transfer a element to certain "
-            "stage because it didn't exist.");
+        LOG("元素不存在，转移失败");
         return false;
     }
     if (dstElements->find(id) == nullptr)
@@ -29,8 +28,7 @@ bool Stage::transferElementTo(Stage *destStage, std::string_view id)
 
 void Stage::onDestroy()
 {
-    LOG("Stage::onDestroy() The {} stage is going to destroy.",
-        (uint8_t)stageType);
+    LOG("场景 {} 正在销毁", (uint8_t)stageType);
     Elements.reset();
 }
 

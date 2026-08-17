@@ -7,7 +7,7 @@ Texture::Texture(size_t x, size_t y, shared_ptr<SDL_Texture> tex)
 {
     if (!texture)
     {
-        LOG("Texture::Texture() 错误：SDL_Texture 为空，使用后备尺寸");
+        LOG("SDL_Texture 为空，使用后备尺寸");
         width  = 1;
         height = 1;
         return;
@@ -22,7 +22,7 @@ Texture::Texture(size_t x, size_t y, shared_ptr<SDL_Texture> tex)
 
     if (xCount == 0 || yCount == 0)
     {
-        LOG("Texture::Texture() 网格参数非法，使用默认值 1x1");
+        LOG("网格参数非法，使用默认值 1x1");
         xCount = 1;
         yCount = 1;
     }
@@ -47,7 +47,7 @@ Texture::Texture(uint16_t frameW, uint16_t frameH, size_t x, size_t y)
 
     if (!texture)
     {
-        LOG("Texture::Texture(off-screen) 创建失败 ({}x{})", totalW, totalH);
+        LOG("离屏纹理创建失败 ({}x{})", totalW, totalH);
         return;
     }
 
@@ -60,7 +60,7 @@ SDL_Rect Texture::getSubRect(size_t index)
     static const SDL_Rect emptyRect{0, 0, 0, 0};
     if (index < 0 || index >= Size())
     {
-        LOG("Texture::getSubRect() index out of range: {}", index);
+        LOG("帧索引越界: {}", index);
         return emptyRect;
     }
 
