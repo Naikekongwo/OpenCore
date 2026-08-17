@@ -24,13 +24,6 @@
 
 struct Texture;
 
-enum class RenderViewport
-{
-    Fullscreen,
-    Left,
-    Right,
-};
-
 /**
  * @brief 图形模块
  * @todo 急需加入视窗裁切的相关方法
@@ -120,8 +113,6 @@ class GraphicsManager
 
     int TargetWindowHeight = 1080;
     int TargetWindowWidth  = 1920;
-
-    RenderViewport rView = RenderViewport::Fullscreen;
 };
 
 #endif //_GFXCORE_H_

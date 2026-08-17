@@ -12,17 +12,6 @@
 #ifndef _OPENCORE_H_
 #define _OPENCORE_H_
 
-enum DebugFlags
-{
-    DEBUG_OFF        = 0,
-    DEBUG_WATERWAVE  = 1 << 0, // 0x01
-    DEBUG_MAIN       = 1 << 1, // 0x02
-    DEBUG_PASS_VIDEO = 1 << 2, // 0x04
-    DEBUG_COPYRIGHT  = 1 << 3
-};
-
-constexpr int DEBUG_MODE = DEBUG_COPYRIGHT | DEBUG_MAIN;
-
 #include "Core/Macros.hpp"
 #include "Core/Timer.hpp"
 
