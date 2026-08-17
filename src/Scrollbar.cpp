@@ -67,6 +67,11 @@ void Scrollbar::onUpdate(float totalTime)
     {
         slideBar->onUpdate(totalTime);
     }
+
+    if (baseBack)
+    {
+        baseBack->onUpdate(totalTime);
+    }
 }
 
 void Scrollbar::UpdateBar() { slideBar->setPositeRelative(*value, 0.5f); }

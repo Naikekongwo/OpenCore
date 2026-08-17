@@ -59,6 +59,13 @@ bool BaseBackground::generateTexture()
     float targetW, targetH;
     SDL_GetTextureSize(raw, &targetW, &targetH);
 
+    // 源纹理强制按 3x3 划分，不依赖纹理自身登记的网格
+    // （同一纹理可能两用：普通显示时按登记网格，作 BaseBackground 时必须 3x3）
+    float srcW, srcH;
+    SDL_GetTextureSize(texture->get(), &srcW, &srcH);
+    srcW /= 3.0f;
+    srcH /= 3.0f;
+
     Rect srcRect{};
     Rect dstRect{};
 
@@ -66,7 +73,7 @@ bool BaseBackground::generateTexture()
     {
         for (int col = 0; col < 3; col++)
         {
-            srcRect = texture->getSubRect(row * 3 + col);
+            srcRect = Rect{col * srcW, row * srcH, srcW, srcH};
 
             if (col == 0)
             {
