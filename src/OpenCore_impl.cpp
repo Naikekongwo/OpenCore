@@ -31,7 +31,7 @@ bool OpenEngine::Initialize()
     // 初始化线程管理器
     ThrManager.start(2, 8);
 
-    packageManager = std::make_unique<PackageManager>(gameInfo->gameName,
+    packageManager = std::make_unique<PackageManager>(gameInfo->gameCode,
                                                       gameInfo->_resourceInfo);
 
     packageManager->setTimer(timer.get());
@@ -182,7 +182,7 @@ bool OpenEngine::GameRegistry(unique_ptr<GameInfo> gameInfo)
     }
 
     LOG("游戏名称: {} , 版本 {}.{}, 已经成功的注册到引擎中",
-        gameInfo->gameName.c_str(), gameInfo->version_major,
+        gameInfo->gameCode.c_str(), gameInfo->version_major,
         gameInfo->version_minor);
 
     this->gameInfo = std::move(gameInfo);

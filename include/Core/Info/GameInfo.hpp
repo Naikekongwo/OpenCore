@@ -17,6 +17,7 @@ class Stage;
 struct GameInfo
 {
     string gameName = "openengine-game";
+    string gameCode = "openengine";
 
     uint8_t version_major = 1;
     uint8_t version_minor = 0;
