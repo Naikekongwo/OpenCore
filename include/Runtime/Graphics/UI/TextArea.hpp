@@ -22,7 +22,25 @@ class TextArea : public UIElement
     void setText(string_view textContent);
     void setFontSize(short fontSize);
     void setShadow(bool enableTag, int shadowOffset);
-    void alignCenter(bool tag) { m_aligncenter = tag; }
+
+    /**
+     * @brief 设置文字对齐方式（九宫格：水平 × 垂直，沿用 AnchorPoint）。
+     * @param align 对齐锚点（默认 TopLeft，与旧版不居中对齐行为一致）。
+     */
+    void align(AnchorPoint align)
+    {
+        m_align        = align;
+        m_textureDirty = true;
+    }
+
+    /**
+     * @brief 便捷方法：是否水平垂直居中。
+     * @deprecated 请使用 align(AnchorPoint::Center)。
+     */
+    void alignCenter(bool tag)
+    {
+        m_align = tag ? AnchorPoint::Center : AnchorPoint::TopLeft;
+    }
 
     void setTextColor(uint8_t r, uint8_t g, uint8_t b)
     {
@@ -45,7 +63,7 @@ class TextArea : public UIElement
 
     TextAttribute m_textAttr;
     string        m_textContent;
-    bool          m_aligncenter = false;
+    AnchorPoint   m_align = AnchorPoint::TopLeft; ///< 文字对齐方式（默认左上）
 
     float transparency = 0.69f; ///< 阴影透明度系数
 };

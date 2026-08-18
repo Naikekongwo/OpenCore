@@ -85,10 +85,44 @@ bool TextArea::generateTexture()
     dstRect.w =
         (texH > 0) ? dstRect.h * (static_cast<float>(texW) / texH) : 0.0f;
 
-    if (m_aligncenter)
+    // 水平对齐（左 / 中 / 右）
+    switch (m_align)
     {
+    case AnchorPoint::TopLeft:
+    case AnchorPoint::MiddleLeft:
+    case AnchorPoint::BottomLeft:
+        dstRect.x = 0.0f;
+        break;
+    case AnchorPoint::TopCenter:
+    case AnchorPoint::Center:
+    case AnchorPoint::BottomCenter:
         dstRect.x = (loRect.w - dstRect.w) * 0.5f;
+        break;
+    case AnchorPoint::TopRight:
+    case AnchorPoint::MiddleRight:
+    case AnchorPoint::BottomRight:
+        dstRect.x = loRect.w - dstRect.w;
+        break;
+    }
+
+    // 垂直对齐（上 / 中 / 下）
+    switch (m_align)
+    {
+    case AnchorPoint::TopLeft:
+    case AnchorPoint::TopCenter:
+    case AnchorPoint::TopRight:
+        dstRect.y = 0.0f;
+        break;
+    case AnchorPoint::MiddleLeft:
+    case AnchorPoint::Center:
+    case AnchorPoint::MiddleRight:
         dstRect.y = (loRect.h - dstRect.h) * 0.5f;
+        break;
+    case AnchorPoint::BottomLeft:
+    case AnchorPoint::BottomCenter:
+    case AnchorPoint::BottomRight:
+        dstRect.y = loRect.h - dstRect.h;
+        break;
     }
 
     auto wrapper = std::make_shared<Texture>(
