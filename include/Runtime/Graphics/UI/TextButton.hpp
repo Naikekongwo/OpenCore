@@ -15,6 +15,7 @@
 #define _TEXTBUTTON_H_
 
 #include "Core/Math/OpenCore_Color.hpp"
+#include "Runtime/Animation/IAnimation.hpp"
 #include "Runtime/Graphics/IDrawableObject/Text.hpp"
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
@@ -132,6 +133,16 @@ class TextButton : public UIElement
         m_textureDirty     = true;
     }
 
+    /**
+     * @brief 设置按钮内部文字贴图的对齐方式（水平 × 垂直，沿用 AnchorPoint）。
+     * @param align 对齐锚点（默认 Center）。
+     */
+    void align(AnchorPoint align)
+    {
+        m_textAlign    = align;
+        m_textureDirty = true;
+    }
+
     bool generateTexture() override;
 
   protected:
@@ -152,6 +163,8 @@ class TextButton : public UIElement
     TextAttribute m_normalAttribute  = kTextButtonNormalAttr;
     TextAttribute m_hoveredAttribute = kTextButtonHoveredAttr;
     TextAttribute m_pressedAttribute = kTextButtonPressedAttr;
+
+    AnchorPoint m_textAlign = AnchorPoint::Center; ///< 文字对齐方式（默认居中）
 };
 
 #endif //_TEXTBUTTON_H_

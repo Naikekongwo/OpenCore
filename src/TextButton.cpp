@@ -128,9 +128,30 @@ bool TextButton::generateTexture()
         return false;
     }
 
-    // 由文字宽高比按控件高度换算纹理宽度
-    float ratio                = (W * 1.0f) / H;
-    float textLayerBoundsWidth = ratio * bounds.h;
+    // 按按钮尺寸缩放字号：文字行高（含行距）超出按钮高度、或宽度超出时，
+    // 按比例缩小字号重新测量，使文字完整放入三帧、不被裁剪（按高度缩放）
+    if (W > bounds.w || H > bounds.h)
+    {
+        float scaleX = bounds.w / static_cast<float>(W);
+        float scaleY = bounds.h / static_cast<float>(H);
+        float scale  = scaleX < scaleY ? scaleX : scaleY;
+
+        baseAttr.fontSize = static_cast<int>(baseAttr.fontSize * scale);
+        if (baseAttr.fontSize < 1)
+            baseAttr.fontSize = 1;
+
+        Text::Measure(m_textContent, baseAttr, W, H);
+        if (W * H == 0)
+        {
+            LOG("文字测量面积为0（缩放字号后）");
+            return false;
+        }
+    }
+
+    // 文字层宽度取文字实际像素宽度（不超过按钮宽度）
+    float textLayerBoundsWidth = static_cast<float>(W);
+    if (textLayerBoundsWidth > bounds.w)
+        textLayerBoundsWidth = bounds.w;
 
     if (textLayerBoundsWidth <= 0.0f)
     {
@@ -154,7 +175,27 @@ bool TextButton::generateTexture()
     // 逐帧渲染 Normal / Hovered / Pressed
     const TextAttribute *stateAttrs[3] = {
         &m_normalAttribute, &m_hoveredAttribute, &m_pressedAttribute};
-    float yOffset = (bounds.h - H) * 0.5f;
+
+    // 帧内文字垂直对齐（上 / 中 / 下），由 m_textAlign 决定
+    float yOffset = 0.0f;
+    switch (m_textAlign)
+    {
+    case AnchorPoint::MiddleLeft:
+    case AnchorPoint::Center:
+    case AnchorPoint::MiddleRight:
+        yOffset = (bounds.h - H) * 0.5f;
+        break;
+    case AnchorPoint::BottomLeft:
+    case AnchorPoint::BottomCenter:
+    case AnchorPoint::BottomRight:
+        yOffset = bounds.h - H;
+        break;
+    default: // Top 系列
+        yOffset = 0.0f;
+        break;
+    }
+    if (yOffset < 0.0f)
+        yOffset = 0.0f;
 
     for (int i = 0; i < 3; i++)
     {
@@ -175,9 +216,9 @@ bool TextButton::generateTexture()
 
 #pragma endregion
 
-    // 按 Anchor 计算 textLayer 在最终帧内的水平偏移
+    // 文字贴图水平对齐（左 / 中 / 右），由 m_textAlign 决定
     float offsetX = 0.0f;
-    switch (VState->Anchor)
+    switch (m_textAlign)
     {
     case AnchorPoint::TopLeft:
     case AnchorPoint::MiddleLeft:
