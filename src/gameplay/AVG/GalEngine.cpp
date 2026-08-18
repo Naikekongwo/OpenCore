@@ -43,13 +43,13 @@ void GalEngine::initializeComponents()
 
     Elements->PushElement(std::move(title));
 
-    auto msgPn = UI<ImageBoard>("msgPn", 99, "messagePanel", 1, 1);
+    // auto msgPn = UI<ImageBoard>("msgPn", 99, "messagePanel", 1, 1);
 
-    msgPn->Configure()
-        .Parent(nullptr)
-        .Anchor(AnchorPoint::BottomCenter)
-        .PositeR(0.5f, 0.95f)
-        .ScaleR(0.9f, 0.0f)
-        .Follow(10);
-    Elements->PushElement(std::move(msgPn));
+    // msgPn->Configure()
+    //     .Parent(nullptr)
+    //     .Anchor(AnchorPoint::BottomCenter)
+    //     .PositeR(0.5f, 0.95f)
+    //     .ScaleR(0.9f, 0.0f)
+    //     .Follow(10);
+    // Elements->PushElement(std::move(msgPn));
 }
