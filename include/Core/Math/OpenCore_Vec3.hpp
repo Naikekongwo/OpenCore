@@ -1,6 +1,6 @@
 /**
  * @file OpenCore_Vec3.hpp
- * @author your name (you@domain.com)
+ * @author Naikekongwo
  * @brief OpenCore引擎定义的三维向量计算类
  * @version 0.1
  * @date 2026-04-23

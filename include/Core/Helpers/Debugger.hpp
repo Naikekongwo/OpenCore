@@ -1,6 +1,6 @@
 /**
  * @file Debugger.hpp
- * @author your name (you@domain.com)
+ * @author Naikekongwo
  * @brief 调试相关，会打印日志
  * @version 0.1
  * @date 2026-04-25
@@ -34,11 +34,11 @@ inline void AutoLog(const source_location &location, const char *fmt,
 #if defined(LOG_ENABLED)
     string msgBody = vformat(fmt, std::make_format_args(args...));
 
-    string funcName = location.function_name();
+    string funcName  = location.function_name();
     size_t leftLimit = funcName.find_last_of('\(');
-    string leftPart = funcName.substr(0, leftLimit);
+    string leftPart  = funcName.substr(0, leftLimit);
     size_t funcStart = leftPart.find_last_of(' ');
-    string prefix = format(
+    string prefix    = format(
         "{}() ", funcName.substr(funcStart + 1, leftLimit - funcStart - 1));
 
     // 删除类型名称得到方法名称，作为前缀

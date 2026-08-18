@@ -1,6 +1,6 @@
 /**
  * @file EventManager.hpp
- * @author your name (you@domain.com)
+ * @author Naikekongwo
  * @brief 事件管理器
  * @version 0.1
  * @date 2026-04-23
@@ -11,8 +11,8 @@
 #pragma once
 #include <SDL3/SDL.h>
 
-
-enum class InputMode {
+enum class InputMode
+{
     KeyboardMouse,
     Gamepad
 };
@@ -30,7 +30,7 @@ class Event
 
     // 提供对原始 SDL_Event 的访问（当需要指针或修改时使用）
     const SDL_Event &GetSDLEvent() const { return m_sdlEvent; }
-    SDL_Event &GetSDLEvent() { return m_sdlEvent; }
+    SDL_Event       &GetSDLEvent() { return m_sdlEvent; }
 
   private:
     SDL_Event m_sdlEvent;
@@ -64,25 +64,21 @@ class EventManager
 
     bool GetAllowtoDivertMod() const;
 
-    void SetAllowtoDivertMod( bool allowtoDivertMod);
+    void SetAllowtoDivertMod(bool allowtoDivertMod);
 
     // 在事件循环结束后调用，根据本帧标志更新 m_inputMode
     void EndFrame();
 
-
-
-
   private:
-    EventManager() = default;
-    ~EventManager() = default;
-    EventManager(const EventManager &) = delete;
+    EventManager()                                = default;
+    ~EventManager()                               = default;
+    EventManager(const EventManager &)            = delete;
     EventManager &operator=(const EventManager &) = delete;
     // 根据事件类型更新 m_inputMode
-    void UpdateInputMode(const Event& event);
-    InputMode m_inputMode = InputMode::KeyboardMouse;  // 默认键鼠模式
-    int allowtoDivertMod = 0; // 允许切换输入模式(默认不允许，1为允许)
+    void      UpdateInputMode(const Event &event);
+    InputMode m_inputMode      = InputMode::KeyboardMouse; // 默认键鼠模式
+    int       allowtoDivertMod = 0; // 允许切换输入模式(默认不允许，1为允许)
     // 帧标志：本帧是否有对应设备事件
-    bool m_hasKMEvent = false;   // Keyboard/Mouse
+    bool m_hasKMEvent      = false; // Keyboard/Mouse
     bool m_hasGamepadEvent = false;
-
 };

@@ -1,6 +1,6 @@
 /**
  * @file TypeWriter.hpp
- * @author your name (you@domain.com)
+ * @author Naikekongwo
  * @brief 文本框体
  * @version 0.1
  * @date 2026-04-25

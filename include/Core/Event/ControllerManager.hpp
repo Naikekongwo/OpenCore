@@ -1,6 +1,6 @@
 /**
  * @file ControllerManager.hpp
- * @author your name (you@domain.com)
+ * @author Naikekongwo
  * @brief 手柄管理器
  * @version 0.1
  * @date 2026-04-23
@@ -25,9 +25,8 @@ class ControllerManager
     void HandleEvent(const SDL_Event &event);
 
     // 玩家输入查询（玩家索引从 0 开始，若玩家未连接返回默认值）
-    bool IsButtonPressed(int playerIndex,
-                         SDL_GamepadButton button) const;
-    Uint8 GetButton(int playerIndex, SDL_GamepadButton button) const;
+    bool   IsButtonPressed(int playerIndex, SDL_GamepadButton button) const;
+    Uint8  GetButton(int playerIndex, SDL_GamepadButton button) const;
     Sint16 GetAxis(int playerIndex, SDL_GamepadAxis axis) const;
 
     // 获取玩家对应的控制器指针（用于高级操作，如震动）
@@ -44,17 +43,17 @@ class ControllerManager
     size_t GetConnectedPlayerCount() const;
 
   private:
-    ControllerManager() = default;
-    ~ControllerManager() = default;
-    ControllerManager(const ControllerManager &) = delete;
+    ControllerManager()                                     = default;
+    ~ControllerManager()                                    = default;
+    ControllerManager(const ControllerManager &)            = delete;
     ControllerManager &operator=(const ControllerManager &) = delete;
 
     struct ControllerInfo
     {
-        SDL_Gamepad *controller;
+        SDL_Gamepad   *controller;
         SDL_JoystickID instanceId;
-        Uint8 buttonState[SDL_GAMEPAD_BUTTON_COUNT];
-        Sint16 axisState[SDL_GAMEPAD_AXIS_COUNT];
+        Uint8          buttonState[SDL_GAMEPAD_BUTTON_COUNT];
+        Sint16         axisState[SDL_GAMEPAD_AXIS_COUNT];
     };
 
     mutable std::shared_mutex rw_mutex_; // 保护 m_players 和 m_instanceToPlayer
