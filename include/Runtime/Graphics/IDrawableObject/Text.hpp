@@ -35,7 +35,7 @@ struct TextAttribute
 
     int    fontSize   = 36;             /// <字体大小>
     string fontName   = "OpenCoreFont"; /// <字体名称>
-    int    BorderSize = 10;             /// <描边像素>
+    int    borderSize = 10;             /// <描边像素>
 
     bool shadowGradient = true;        /// <阴影边缘柔化>
     Vec2 shadowOffset{0.005f, 0.005f}; /// <阴影偏移>

@@ -61,6 +61,14 @@ inline unique_ptr<TextArea> UI<TextArea>(std::string_view id, uint8_t layer,
 }
 
 template <>
+inline unique_ptr<TextButton> UI<TextButton>(std::string_view id, uint8_t layer,
+                                             std::string_view text,
+                                             uint8_t reserve1, uint8_t reserve0)
+{
+    return std::make_unique<TextButton>(id, layer, text);
+}
+
+template <>
 inline unique_ptr<TypeWriter> UI<TypeWriter>(std::string_view id, uint8_t layer,
                                              std::string_view fontName,
                                              uint8_t reserve1, uint8_t reserve0)

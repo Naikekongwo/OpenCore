@@ -214,10 +214,10 @@ void Text::Draw(Texture *target, const Rect *dstRect, string_view textContent,
 #pragma endregion
 
 #pragma region 描边层
-    if ((attr.option & RENDER_BORDER) && attr.BorderSize > 0)
+    if ((attr.option & RENDER_BORDER) && attr.borderSize > 0)
     {
         SDL_Color bc = static_cast<SDL_Color>(attr.borderColor);
-        int       bs = attr.BorderSize;
+        int       bs = attr.borderSize;
         for (int dy = -bs; dy <= bs; dy += bs)
             for (int dx = -bs; dx <= bs; dx += bs)
             {

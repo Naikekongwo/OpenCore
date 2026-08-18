@@ -13,7 +13,7 @@ TextArea::TextArea(std::string_view id, uint8_t layer,
     m_textAttr.gradientColor = None;
     m_textAttr.glowColor     = None;
     m_textAttr.borderColor   = Color(0.5f, 0.5f, 0.5f, 1.0f);
-    m_textAttr.BorderSize    = 0;
+    m_textAttr.borderSize    = 0;
     m_textureDirty           = false;
 }
 

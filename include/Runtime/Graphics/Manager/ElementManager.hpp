@@ -22,6 +22,7 @@
 #include "Runtime/Graphics/UI/Scrollbar.hpp"
 #include "Runtime/Graphics/UI/Symbol.hpp"
 #include "Runtime/Graphics/UI/TextArea.hpp"
+#include "Runtime/Graphics/UI/TextButton.hpp"
 #include "Runtime/Graphics/UI/ToolMenu.hpp"
 #include "Runtime/Graphics/UI/TypeWriter.hpp"
 

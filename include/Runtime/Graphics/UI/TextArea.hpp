@@ -30,6 +30,16 @@ class TextArea : public UIElement
         m_textureDirty   = true;
     }
 
+    /**
+     * @brief 直接设置完整文字属性（字体、渲染选项、颜色、渐变、描边、阴影）。
+     * @note 之后调用 setFontSize() 可单独覆盖字号。
+     */
+    void setAttribute(const TextAttribute &attr)
+    {
+        m_textAttr     = attr;
+        m_textureDirty = true;
+    }
+
   private:
     bool generateTexture() override;
 
