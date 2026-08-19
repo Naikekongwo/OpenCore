@@ -30,7 +30,6 @@ bool ElementManager::PushElement(unique_ptr<IDrawableObject> element)
                   [](const unique_ptr<IDrawableObject> &a,
                      const unique_ptr<IDrawableObject> &b)
                   { return a->getLayer() < b->getLayer(); });
-        LOG("成功向元素控制器列表中加入了 {}", id.c_str());
         return true;
     }
 

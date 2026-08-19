@@ -7,4 +7,4 @@
 
 // #include "UI/MessagePanel.hpp"
 
-#include "Stage/GalEngine.hpp"
+#include "Stage/VisualNovelStage.hpp"

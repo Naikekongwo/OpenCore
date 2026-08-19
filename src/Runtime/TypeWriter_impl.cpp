@@ -16,8 +16,6 @@ TypeWriter::TypeWriter(string_view id, uint8_t layer, std::string_view fontName)
     : UIElement(id.data(), layer, nullptr)
 {
     this->fontName = fontName;
-
-    LOG("初始化成功，ID {}, 字体名称 {}", id.data(), fontName);
 }
 
 void TypeWriter::Draw()

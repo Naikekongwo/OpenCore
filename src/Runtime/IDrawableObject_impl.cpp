@@ -1,8 +1,9 @@
 
-#include "Runtime/Graphics/IDrawableObject/IDrawableObject.hpp"
 #include "OpenCore.hpp"
+#include "Runtime/Graphics/IDrawableObject/IDrawableObject.hpp"
 #include <cstdint>
 #include <optional>
+
 
 void IDrawableObject::setSequential(bool sequential)
 {
@@ -199,8 +200,7 @@ void IDrawableObject::applyScale(float w, float h)
 
 AnimationPipeline IDrawableObject::Animate()
 {
-    // return AnimationPipeline(AnimeManager.get());
-    // 上面是系统管线
+    // 绑定元素自身动画管理器，无父级管线
     return AnimationPipeline(AnimeManager.get(), nullptr);
 }
 

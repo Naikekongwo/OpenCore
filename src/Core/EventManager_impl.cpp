@@ -9,16 +9,9 @@ EventManager &EventManager::GetInstance()
     return instance;
 }
 
-bool EventManager::Init()
-{
-    // SDL_StartTextInput();
-    return true;
-}
+bool EventManager::Init() { return true; }
 
-void EventManager::Shutdown()
-{
-    // SDL_StopTextInput();
-}
+void EventManager::Shutdown() {}
 
 bool EventManager::PollEvent(Event &event)
 {
@@ -84,15 +77,17 @@ void EventManager::UpdateInputMode(const Event &event)
         return;
     }
     Uint32 type = event.GetType();
-    if (type == SDL_EVENT_GAMEPAD_AXIS_MOTION || type == SDL_EVENT_GAMEPAD_BUTTON_DOWN ||
-        type == SDL_EVENT_GAMEPAD_BUTTON_UP || type == SDL_EVENT_GAMEPAD_ADDED ||
-        type == SDL_EVENT_GAMEPAD_REMOVED ||
+    if (type == SDL_EVENT_GAMEPAD_AXIS_MOTION ||
+        type == SDL_EVENT_GAMEPAD_BUTTON_DOWN ||
+        type == SDL_EVENT_GAMEPAD_BUTTON_UP ||
+        type == SDL_EVENT_GAMEPAD_ADDED || type == SDL_EVENT_GAMEPAD_REMOVED ||
         type == SDL_EVENT_GAMEPAD_REMAPPED)
     {
         m_hasGamepadEvent = true;
     }
     else if (type == SDL_EVENT_KEY_DOWN || type == SDL_EVENT_KEY_UP ||
-             type == SDL_EVENT_MOUSE_MOTION || type == SDL_EVENT_MOUSE_BUTTON_DOWN ||
+             type == SDL_EVENT_MOUSE_MOTION ||
+             type == SDL_EVENT_MOUSE_BUTTON_DOWN ||
              type == SDL_EVENT_MOUSE_BUTTON_UP || type == SDL_EVENT_MOUSE_WHEEL)
     {
         m_hasKMEvent = true;
@@ -111,6 +106,6 @@ void EventManager::EndFrame()
         m_inputMode = InputMode::KeyboardMouse;
     // 两者都有或都没有 → 不改变
 
-    m_hasKMEvent = false;
+    m_hasKMEvent      = false;
     m_hasGamepadEvent = false;
 }

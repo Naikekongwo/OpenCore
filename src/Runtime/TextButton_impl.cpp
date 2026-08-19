@@ -83,6 +83,9 @@ void TextButton::Draw()
 
     Rect srcRectText = m_textureCache->getSubRect(stateIndex);
 
+    if (magnetFactor != 0.0f)
+        dstRect = magnetRect(dstRect);
+
     m_textureCache->Draw(&srcRectText, &dstRect, VState->getAngle(), nullptr,
                          static_cast<uint8_t>(VState->getAlpha()));
 }

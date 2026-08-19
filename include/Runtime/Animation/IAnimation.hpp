@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <string>
+#include <string_view>
 
 // VisualState 动画状态
 // 他会返回一系列的状态信息
@@ -55,8 +56,8 @@ class IAnimation
     virtual ~IAnimation() = default;
 
     // 设置/获取动画名称
-    void               setName(std::string_view n) { name = n; }
-    const std::string &getName() const { return name; }
+    void             setName(std::string_view n) { name = n; }
+    std::string_view getName() const { return name; }
 
     virtual void onUpdate(float totalTime, VisualState &state) = 0;
     virtual bool isFinished() const                            = 0;
