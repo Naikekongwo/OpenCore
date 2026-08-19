@@ -194,6 +194,20 @@ class PackageManager final
     bool registerResource(ResourceNode resource);
     bool registerResources(initializer_list<ResourceNode> resources);
 
+    /**
+     * @brief 注册整个文件夹（仅扫描直接子文件，不递归子目录），按扩展名自动推断资源类型
+     * @details 遍历 folderPath 下的直接文件，以「文件名（去扩展名）」作为资源名注册，
+     *          并根据扩展名自动归类：
+     *          - 图片（.png/.jpg/.jpeg/.bmp/.webp/.gif）→ RscTexture
+     *          - 音频（.mp3/.ogg/.wav/.flac）           → RscAudio
+     *          - 字体（.ttf/.otf）                      → RscFont
+     *          未知扩展名的文件会被跳过；不同子目录下同名文件以先注册者为准
+     *          （与 registerResource 的 contains 去重行为一致）。
+     * @param folderPath 待注册的文件夹路径
+     * @return 所有文件注册成功（含跳过未知类型）返回 true
+     */
+    bool registerFolder(string_view folderPath);
+
     /** @brief Package 中的元资源获取方法 */
     shared_ptr<SDL_Texture> getTexture(string_view name);
     shared_ptr<SDL_Texture> getTextureAsync(string_view name);

@@ -1,6 +1,7 @@
 #include "Asset/PackageManager.hpp"
 #include "OpenCore.hpp"
 #include <algorithm>
+#include <cctype>
 #include <cstdint>
 #include <cstring>
 #include <exception>
@@ -143,6 +144,85 @@ bool PackageManager::registerResources(initializer_list<ResourceNode> resources)
     {
         result = result && registerResource(entry);
     }
+    return result;
+}
+
+// ──────────────────────────────────────────────
+//  registerFolder — 注册整个文件夹（递归），按扩展名自动推断资源类型
+// ──────────────────────────────────────────────
+bool PackageManager::registerFolder(string_view folderPath)
+{
+    if (packageName.empty())
+    {
+        LOG("包名为空，无法确定清单位置");
+        return false;
+    }
+
+    if (packedMode)
+    {
+        LOG("资源包模式下清单为只读");
+        return false;
+    }
+
+    // 使用 char8_t* 构造函数确保 UTF-8 路径在 Windows 上正确转换
+    fs::path root(reinterpret_cast<const char8_t *>(string(folderPath).c_str()));
+
+    error_code ec;
+    if (!fs::exists(root, ec) || !fs::is_directory(root, ec))
+    {
+        LOG("注册文件夹失败：路径不存在或不是文件夹 {}", root.string());
+        return false;
+    }
+
+    bool result = true;
+    fs::directory_iterator it(root, ec);
+    fs::directory_iterator end;
+
+    while (it != end)
+    {
+        const fs::directory_entry &entry = *it;
+
+        if (entry.is_regular_file(ec))
+        {
+            const fs::path &file = entry.path();
+
+            // 扩展名转小写后按类型归类（大小写不敏感）
+            std::string ext = file.extension().string();
+            std::transform(ext.begin(), ext.end(), ext.begin(),
+                           [](unsigned char c) { return std::tolower(c); });
+
+            ResourceType rType;
+            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" ||
+                ext == ".bmp" || ext == ".webp" || ext == ".gif")
+            {
+                rType = RscTexture;
+            }
+            else if (ext == ".mp3" || ext == ".ogg" || ext == ".wav" ||
+                     ext == ".flac")
+            {
+                rType = RscAudio;
+            }
+            else if (ext == ".ttf" || ext == ".otf")
+            {
+                rType = RscFont;
+            }
+            else
+            {
+                // 未知扩展名跳过
+                ++it;
+                continue;
+            }
+
+            // 以文件名（去扩展名）作为资源名注册
+            std::string name = file.stem().string();
+            result = registerResource(rType, name, file.string()) && result;
+        }
+
+        it.increment(ec);
+    }
+
+    LOG("注册文件夹完成：{}，共 {} 项", root.string(),
+        static_cast<int>(result));
     return result;
 }
 
