@@ -19,6 +19,18 @@
 #define BTN_HISTORY "btn_history"
 #define NAMETAG "nameTag"
 
+// 关于文字游戏状态的定义
+enum class VisualStageStatus
+{
+    Free,
+    Ready,
+    Communicating,
+    Selecting,
+    ForceWaiting
+};
+
+class ScriptEngine;
+
 /**
  * @class VisualNovelStage
  * @brief AVG（视觉小说）游戏的基础场景。
@@ -37,4 +49,11 @@ class VisualNovelStage : public OverlayStage
     bool parseEvents(Event *event) override;
 
     void initializeComponents() override;
+
+    // 获取当前的操作状态
+    VisualStageStatus getStatus() { return stageStatus; }
+
+  protected:
+    VisualStageStatus stageStatus = VisualStageStatus::Free;
+    // unique_ptr<ScriptEngine> scriptEngine;
 };

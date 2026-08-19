@@ -1,11 +1,12 @@
-#include "Gameplay/AVG/Stage/VisualNovelStage.hpp"
 #include "Core/Math/OpenCore_Color.hpp"
-#include "Gameplay/AVG/AVGUtils.hpp"
+#include "Gameplay/AVG/OpenCoreAVGModule.hpp"
+#include "Gameplay/AVG/Stage/VisualNovelStage.hpp"
 #include "OpenCore.hpp"
 #include "Runtime/Animation/IAnimation.hpp"
 #include "Runtime/Graphics/IDrawableObject/Text.hpp"
 #include "Runtime/Graphics/UI/ImageBoard.hpp"
 #include "Runtime/Graphics/UI/TextButton.hpp"
+
 
 namespace
 {
