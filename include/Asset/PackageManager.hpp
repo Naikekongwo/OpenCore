@@ -195,8 +195,10 @@ class PackageManager final
     bool registerResources(initializer_list<ResourceNode> resources);
 
     /**
-     * @brief 注册整个文件夹（仅扫描直接子文件，不递归子目录），按扩展名自动推断资源类型
-     * @details 遍历 folderPath 下的直接文件，以「文件名（去扩展名）」作为资源名注册，
+     * @brief
+     * 注册整个文件夹（仅扫描直接子文件，不递归子目录），按扩展名自动推断资源类型
+     * @details 遍历 folderPath
+     * 下的直接文件，以「文件名（去扩展名）」作为资源名注册，
      *          并根据扩展名自动归类：
      *          - 图片（.png/.jpg/.jpeg/.bmp/.webp/.gif）→ RscTexture
      *          - 音频（.mp3/.ogg/.wav/.flac）           → RscAudio

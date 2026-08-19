@@ -165,7 +165,8 @@ bool PackageManager::registerFolder(string_view folderPath)
     }
 
     // 使用 char8_t* 构造函数确保 UTF-8 路径在 Windows 上正确转换
-    fs::path root(reinterpret_cast<const char8_t *>(string(folderPath).c_str()));
+    fs::path root(
+        reinterpret_cast<const char8_t *>(string(folderPath).c_str()));
 
     error_code ec;
     if (!fs::exists(root, ec) || !fs::is_directory(root, ec))
@@ -174,7 +175,7 @@ bool PackageManager::registerFolder(string_view folderPath)
         return false;
     }
 
-    bool result = true;
+    bool                   result = true;
     fs::directory_iterator it(root, ec);
     fs::directory_iterator end;
 
