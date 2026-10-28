@@ -2,6 +2,9 @@
 #include "OpenCore.hpp"
 #include <memory>
 
+namespace OpenUI
+{
+
 Scrollbar::Scrollbar(std::string_view id, short layer,
                      std::string_view backTexName, std::string_view buttTexName)
     : UIElement(id, layer, nullptr)
@@ -146,3 +149,5 @@ void Scrollbar::onExit()
     baseBack.reset();
     value.reset();
 }
+
+} // namespace OpenUI

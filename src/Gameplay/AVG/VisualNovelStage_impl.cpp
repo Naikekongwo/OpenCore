@@ -14,7 +14,7 @@ namespace
 const Color kUiBlue{0.20f, 0.45f, 0.85f, 1.0f};
 
 // 原型样式：统一三态为纯白字，避免默认 Hovered 变灰干扰（纯样式，无交互反馈）
-void applyPrototypeStyle(TextButton *btn)
+void applyPrototypeStyle(OpenUI::TextButton *btn)
 {
     btn->setBackgroundColor(kUiBlue);
 
@@ -48,7 +48,7 @@ bool VisualNovelStage::parseEvents(Event *event)
 void VisualNovelStage::initializeComponents()
 {
     // ── 姓名框（标题栏）：贴在对话框上边缘、靠左，显示说话人姓名 ──
-    auto namePlate = UI<TextButton>(NAMETAG, 99, "海己", 0, 0);
+    auto namePlate = UI<OpenUI::TextButton>(NAMETAG, 99, "海己", 0, 0);
     applyPrototypeStyle(namePlate.get());
     namePlate->Configure()
         .Parent(nullptr)
@@ -59,7 +59,7 @@ void VisualNovelStage::initializeComponents()
     Elements->PushElement(std::move(namePlate));
 
     // ── 对话框（message panel，暂时用 ImageBoard 承载）──
-    auto msgPn = UI<ImageBoard>(MSG_PANEL, 98, "messagePanel", 1, 1);
+    auto msgPn = UI<OpenUI::ImageBoard>(MSG_PANEL, 98, "messagePanel", 1, 1);
 
     msgPn->Configure()
         .Parent(nullptr)
@@ -71,7 +71,7 @@ void VisualNovelStage::initializeComponents()
     Elements->PushElement(std::move(msgPn));
 
     // ── 底部按钮排：存档 / 加载 / 历史记录（靠右下角紧密排列）──
-    auto saveBtn = UI<TextButton>(BTN_SAVE, 100, "存档", 0, 0);
+    auto saveBtn = UI<OpenUI::TextButton>(BTN_SAVE, 100, "存档", 0, 0);
     applyPrototypeStyle(saveBtn.get());
     saveBtn->Configure()
         .Parent(nullptr)
@@ -81,7 +81,7 @@ void VisualNovelStage::initializeComponents()
         .Follow(10);
     Elements->PushElement(std::move(saveBtn));
 
-    auto loadBtn = UI<TextButton>(BTN_LOAD, 100, "加载", 0, 0);
+    auto loadBtn = UI<OpenUI::TextButton>(BTN_LOAD, 100, "加载", 0, 0);
     applyPrototypeStyle(loadBtn.get());
     loadBtn->Configure()
         .Parent(nullptr)
@@ -91,7 +91,7 @@ void VisualNovelStage::initializeComponents()
         .Follow(10);
     Elements->PushElement(std::move(loadBtn));
 
-    auto historyBtn = UI<TextButton>(BTN_HISTORY, 100, "历史记录", 0, 0);
+    auto historyBtn = UI<OpenUI::TextButton>(BTN_HISTORY, 100, "历史记录", 0, 0);
     applyPrototypeStyle(historyBtn.get());
     historyBtn->Configure()
         .Parent(nullptr)

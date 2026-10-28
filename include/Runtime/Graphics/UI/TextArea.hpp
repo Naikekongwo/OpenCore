@@ -10,6 +10,9 @@
 using std::string;
 using std::unique_ptr;
 
+namespace OpenUI
+{
+
 class TextArea : public UIElement
 {
   public:
@@ -67,3 +70,5 @@ class TextArea : public UIElement
 
     float transparency = 0.69f; ///< 阴影透明度系数
 };
+
+} // namespace OpenUI

@@ -11,6 +11,9 @@
 #include "Runtime/Graphics/Manager/GraphicsManager.hpp"
 #include <SDL3_ttf/SDL_ttf.h>
 
+namespace OpenUI
+{
+
 /**
  * @class FrameCounter
  * @brief 帧率显示器。
@@ -52,3 +55,5 @@ class FrameCounter : public UIElement
     int                  fontSize = 16;         ///< 字体大小
     shared_ptr<TTF_Font> font;                  ///< 缓存的字体指针
 };
+
+} // namespace OpenUI

@@ -9,6 +9,9 @@ using std::function;
 using std::string;
 using std::vector;
 
+namespace OpenUI
+{
+
 struct ToolMenuChild
 {
     string           tagName;
@@ -34,3 +37,5 @@ class ToolMenu : public UIElement
   private:
     vector<ToolMenuOption> options;
 };
+
+} // namespace OpenUI

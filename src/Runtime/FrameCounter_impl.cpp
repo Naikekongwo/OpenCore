@@ -1,6 +1,9 @@
 
 #include "OpenCore.hpp"
 
+namespace OpenUI
+{
+
 FrameCounter::FrameCounter(std::string_view id, uint8_t layer)
     : UIElement(id, layer, nullptr)
 {
@@ -57,3 +60,5 @@ void FrameCounter::onUpdate(float totalTime)
 
     UIElement::onUpdate(totalTime);
 }
+
+} // namespace OpenUI

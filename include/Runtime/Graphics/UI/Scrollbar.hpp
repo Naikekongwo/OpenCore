@@ -14,6 +14,9 @@ using std::make_shared;
 using std::shared_ptr;
 using std::string;
 
+namespace OpenUI
+{
+
 /**
  * @enum ScrollStatus
  * @brief 滑动条的交互状态。
@@ -85,3 +88,5 @@ class Scrollbar : public UIElement
     shared_ptr<float>          value;                 ///< 绑定的数值（0~1）
     ScrollStatus status = ScrollStatus::Creating;     ///< 当前交互状态
 };
+
+} // namespace OpenUI

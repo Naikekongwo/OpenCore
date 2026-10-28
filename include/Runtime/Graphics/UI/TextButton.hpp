@@ -23,6 +23,9 @@
 #include <functional>
 #include <memory>
 
+namespace OpenUI
+{
+
 #pragma region 按钮字体的默认状态
 // 正常状态：文字白色亮丽，黑色渐变，白色外发光
 inline const TextAttribute kTextButtonNormalAttr{
@@ -109,7 +112,7 @@ class TextButton : public UIElement
     /**
      * @brief 设置正常状态文字属性（渲染选项、颜色、发光、渐变等）。
      * @note 渲染选项（option）会全局作用于三个状态；
-     *       字号不在此生效——文字尺寸始终按按钮实际高度自适应。
+     *       字号由 setFontSize() 控制，未设置时按按钮高度自适应。
      */
     void setNormalAttribute(const TextAttribute &attr)
     {
@@ -143,6 +146,17 @@ class TextButton : public UIElement
         m_textureDirty = true;
     }
 
+    /**
+     * @brief 设置按钮文字字号（设计基准字号，换算方式同 TextArea）。
+     * @param designFontSize 设计基准字号，<= 0 表示恢复按按钮高度自适应。
+     */
+    void setFontSize(short designFontSize);
+
+    /**
+     * @brief 设置三态背景色。不调用时保持 UIElement 的单色背景。
+     */
+    void setStateBackgroundColors(Color normal, Color hovered, Color pressed);
+
     bool generateTexture() override;
 
   protected:
@@ -165,6 +179,13 @@ class TextButton : public UIElement
     TextAttribute m_pressedAttribute = kTextButtonPressedAttr;
 
     AnchorPoint m_textAlign = AnchorPoint::Center; ///< 文字对齐方式（默认居中）
+
+    short m_designFontSize       = 0;     ///< 显式字号（设计基准）
+    bool  m_useExplicitFontSize  = false; ///< 是否使用显式字号
+    bool  m_hasStateBackgrounds  = false; ///< 是否启用三态背景色
+    Color m_stateBackgrounds[3] = {None, None, None}; ///< Normal/Hovered/Pressed
 };
+
+} // namespace OpenUI
 
 #endif //_TEXTBUTTON_H_

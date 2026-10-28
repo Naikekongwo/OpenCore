@@ -19,6 +19,9 @@
  * 所有 UI 控件都应直接或间接继承此类。它基于 IDrawableObject 提供的视觉状态
  * （位置、缩放、锚点）实现了标准的逻辑/物理碰撞箱计算，并声明了纹理生成接口。
  */
+namespace OpenUI
+{
+
 class UIElement : public IDrawableObject
 {
   public:
@@ -47,7 +50,26 @@ class UIElement : public IDrawableObject
     virtual SDL_Rect getLogicalBounds() override;
     virtual SDL_Rect getPhysicalBounds() override;
 
-    void setBackgroundColor(Color color) { this->color = color; }
+#pragma region 背景样式
+    void setBackgroundColor(Color color);
+    Color getBackgroundColor() const { return m_backgroundColor; }
+
+    /**
+     * @brief 设置圆角半径（相对逻辑画面高度，0 表示方角）
+     * @note 只有 ImageBoard 会把圆角用于裁剪自身内容，其余控件只作用于背景。
+     */
+    void  setCornerRadius(float heightRatio);
+    float getCornerRadius() const { return m_cornerRadius; }
+
+    void setBorderColor(Color color);
+    Color getBorderColor() const { return m_borderColor; }
+
+    /**
+     * @brief 设置描边宽度（相对逻辑画面高度，0 表示无描边）
+     */
+    void  setBorderWidth(float heightRatio);
+    float getBorderWidth() const { return m_borderWidth; }
+#pragma endregion
 
   protected:
     /**
@@ -99,10 +121,30 @@ class UIElement : public IDrawableObject
      */
     virtual void onClick(Event *event, const SDL_Point &mousePos) {}
 
-    Color color          = None; /// <控件的背景色: 默认为透明>
-    bool  m_textureDirty = true; /// <纹理缓存脏污标志>
+    Color m_backgroundColor = None; ///< 背景填充色
+    float m_cornerRadius    = 0.0f; ///< 圆角半径（相对逻辑画面高度）
+    Color m_borderColor     = None; ///< 描边颜色
+    float m_borderWidth     = 0.0f; ///< 描边宽度（相对逻辑画面高度）
+    bool  m_textureDirty    = true; ///< 纹理缓存脏污标志
 
     shared_ptr<Texture> m_textureCache; ///< 离屏纹理缓存
+
+    /// 圆角半径换算成逻辑像素
+    float cornerRadiusPixels() const;
+    /// 描边宽度换算成逻辑像素
+    float borderWidthPixels() const;
+    /// 是否配置了可见描边
+    bool hasVisibleBorder() const;
+
+  private:
+    void drawBackground();
+    void ensureBackgroundCache(const SDL_Rect &bounds, float radiusPx,
+                               float borderPx);
+
+    shared_ptr<Texture> m_backgroundCache; ///< 圆角背景缓存
+    bool m_backgroundDirty = true;         ///< 背景缓存脏污标志
 };
+
+} // namespace OpenUI
 
 #endif //_UIELEMENT_H_

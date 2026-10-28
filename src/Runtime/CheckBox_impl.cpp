@@ -2,6 +2,9 @@
 #include "OpenCore.hpp"
 #include <SDL3/SDL_events.h>
 
+namespace OpenUI
+{
+
 CheckBox::CheckBox(std::string_view id, short layer,
                    shared_ptr<Texture> texture)
     : UIElement(id, layer, texture)
@@ -106,3 +109,5 @@ bool CheckBox::onDestroy()
 
     return true;
 }
+
+} // namespace OpenUI

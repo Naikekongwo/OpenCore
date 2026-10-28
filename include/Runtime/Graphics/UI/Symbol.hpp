@@ -4,6 +4,9 @@
 #include "Runtime/Graphics/IDrawableObject/IDrawableObject.hpp"
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
+namespace OpenUI
+{
+
 enum SymbolType : int
 {
     SYMBOL_QUESTION,
@@ -27,3 +30,5 @@ class Symbol : public UIElement
   private:
     SymbolType m_symbolType = SYMBOL_QUESTION;
 };
+
+} // namespace OpenUI

@@ -13,6 +13,9 @@
 
 using std::string;
 
+namespace OpenUI
+{
+
 /**
  * @class BaseBackground
  * @brief 可九宫格拉伸的背景 UI 控件。
@@ -45,3 +48,5 @@ class BaseBackground : public UIElement
   private:
     uint8_t nativeScale = 60; ///< 九宫格边角缩放基数（像素）
 };
+
+} // namespace OpenUI

@@ -15,6 +15,9 @@
 using std::shared_ptr;
 using std::string;
 
+namespace OpenUI
+{
+
 /**
  * @enum CheckBoxStatus
  * @brief 复选框的内部状态机。
@@ -67,3 +70,5 @@ class CheckBox : public UIElement
         std::make_shared<bool>(false); ///< 绑定的布尔值（默认 false）
     CheckBoxStatus status = CheckBoxStatus::Creating; ///< 当前状态
 };
+
+} // namespace OpenUI

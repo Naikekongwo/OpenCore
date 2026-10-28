@@ -2,7 +2,7 @@
 
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
-class Character : public UIElement
+class Character : public OpenUI::UIElement
 {
 };
 

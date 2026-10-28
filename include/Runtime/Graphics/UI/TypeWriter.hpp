@@ -24,6 +24,9 @@ using std::string_view;
 using std::unique_ptr;
 using std::vector;
 
+namespace OpenUI
+{
+
 enum class TypeWriterMode
 {
     TypeWriter,
@@ -115,3 +118,5 @@ class TypeWriter : public UIElement
 
     bool m_enableBackground = false;
 };
+
+} // namespace OpenUI

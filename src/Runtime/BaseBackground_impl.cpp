@@ -5,6 +5,9 @@
 #include <cstddef>
 #include <memory>
 
+namespace OpenUI
+{
+
 BaseBackground::BaseBackground(std::string_view id, uint8_t layer,
                                shared_ptr<Texture> texture)
     : UIElement(id, layer, texture)
@@ -114,3 +117,5 @@ bool BaseBackground::generateTexture()
 
     return true;
 }
+
+} // namespace OpenUI

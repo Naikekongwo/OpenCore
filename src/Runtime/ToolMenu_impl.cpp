@@ -1,5 +1,8 @@
 #include "OpenCore.hpp"
 
+namespace OpenUI
+{
+
 ToolMenu::ToolMenu(std::string_view id, short layer)
     : UIElement(id, layer, nullptr)
 {
@@ -15,3 +18,5 @@ void ToolMenu::parseEvents(Event *event, float totalTime)
 }
 
 bool ToolMenu::onDestroy() { return true; }
+
+} // namespace OpenUI

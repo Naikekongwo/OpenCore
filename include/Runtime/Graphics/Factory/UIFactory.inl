@@ -26,52 +26,66 @@ inline unique_ptr<T> UI(std::string_view id, uint8_t layer,
 }
 
 template <>
-inline unique_ptr<FrameCounter>
-UI<FrameCounter>(std::string_view id, uint8_t layer,
-                 std::string_view textureName, uint8_t reserve0,
-                 uint8_t reserve1)
+inline unique_ptr<OpenUI::FrameCounter>
+UI<OpenUI::FrameCounter>(std::string_view id, uint8_t layer,
+                         std::string_view textureName, uint8_t reserve0,
+                         uint8_t reserve1)
 {
-    return std::make_unique<FrameCounter>(id, layer);
+    return std::make_unique<OpenUI::FrameCounter>(id, layer);
 }
 
 template <>
-inline unique_ptr<BaseBackground>
-UI<BaseBackground>(std::string_view id, uint8_t layer,
-                   std::string_view textureName, uint8_t reserve0,
-                   uint8_t reserve1)
+inline unique_ptr<OpenUI::BaseBackground>
+UI<OpenUI::BaseBackground>(std::string_view id, uint8_t layer,
+                           std::string_view textureName, uint8_t reserve0,
+                           uint8_t reserve1)
 {
-    return std::make_unique<BaseBackground>(id, layer,
-                                            GetTextureByName(textureName));
+    return std::make_unique<OpenUI::BaseBackground>(id, layer,
+                                                    GetTextureByName(textureName));
 }
 
 template <>
-inline unique_ptr<CheckBox> UI<CheckBox>(std::string_view id, uint8_t layer,
-                                         std::string_view textureName,
-                                         uint8_t reserve1, uint8_t reserve0)
+inline unique_ptr<OpenUI::CheckBox>
+UI<OpenUI::CheckBox>(std::string_view id, uint8_t layer,
+                     std::string_view textureName, uint8_t reserve1,
+                     uint8_t reserve0)
 {
-    return std::make_unique<CheckBox>(id, layer, GetTextureByName(textureName));
+    return std::make_unique<OpenUI::CheckBox>(id, layer,
+                                              GetTextureByName(textureName));
 }
 
 template <>
-inline unique_ptr<TextArea> UI<TextArea>(std::string_view id, uint8_t layer,
-                                         std::string_view fontName,
-                                         uint8_t reserve1, uint8_t reserve0)
+inline unique_ptr<OpenUI::Panel>
+UI<OpenUI::Panel>(std::string_view id, uint8_t layer,
+                  std::string_view reserveTexture, uint8_t reserve1,
+                  uint8_t reserve0)
 {
-    return std::make_unique<TextArea>(id, layer, fontName);
+    return std::make_unique<OpenUI::Panel>(id, layer);
 }
 
 template <>
-inline unique_ptr<TextButton> UI<TextButton>(std::string_view id, uint8_t layer,
-                                             std::string_view text,
-                                             uint8_t reserve1, uint8_t reserve0)
+inline unique_ptr<OpenUI::TextArea>
+UI<OpenUI::TextArea>(std::string_view id, uint8_t layer,
+                     std::string_view fontName, uint8_t reserve1,
+                     uint8_t reserve0)
 {
-    return std::make_unique<TextButton>(id, layer, text);
+    return std::make_unique<OpenUI::TextArea>(id, layer, fontName);
 }
 
 template <>
-inline unique_ptr<TypeWriter> UI<TypeWriter>(std::string_view id, uint8_t layer,
-                                             std::string_view fontName,
-                                             uint8_t reserve1, uint8_t reserve0)
+inline unique_ptr<OpenUI::TextButton>
+UI<OpenUI::TextButton>(std::string_view id, uint8_t layer,
+                       std::string_view text, uint8_t reserve1,
+                       uint8_t reserve0)
 {
-    return std::make_unique<TypeWriter>(id, layer, fontName);
+    return std::make_unique<OpenUI::TextButton>(id, layer, text);
+}
+
+template <>
+inline unique_ptr<OpenUI::TypeWriter>
+UI<OpenUI::TypeWriter>(std::string_view id, uint8_t layer,
+                       std::string_view fontName, uint8_t reserve1,
+                       uint8_t reserve0)
+{
+    return std::make_unique<OpenUI::TypeWriter>(id, layer, fontName);
 }

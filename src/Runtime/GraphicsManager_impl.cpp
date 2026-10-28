@@ -133,7 +133,7 @@ std::shared_ptr<SDL_Texture> GraphicsManager::createTextureShared(uint16_t w,
 
 int GraphicsManager::setRenderTarget(SDL_Texture *texture)
 {
-    if (SDL_SetRenderTarget(renderer, texture) != 0)
+    if (!SDL_SetRenderTarget(renderer, texture))
     {
         LOG("设置渲染目标失败: {}", SDL_GetError());
         return -1;

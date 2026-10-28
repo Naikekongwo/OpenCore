@@ -19,6 +19,7 @@
 #include "Runtime/Graphics/UI/CheckBox.hpp"
 #include "Runtime/Graphics/UI/FrameCounter.hpp"
 #include "Runtime/Graphics/UI/ImageBoard.hpp"
+#include "Runtime/Graphics/UI/Panel.hpp"
 #include "Runtime/Graphics/UI/Scrollbar.hpp"
 #include "Runtime/Graphics/UI/Symbol.hpp"
 #include "Runtime/Graphics/UI/TextArea.hpp"

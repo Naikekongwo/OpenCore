@@ -5,7 +5,7 @@
 
 using std::vector;
 
-class CharacterRoom : public UIElement
+class CharacterRoom : public OpenUI::UIElement
 {
   public:
   private:

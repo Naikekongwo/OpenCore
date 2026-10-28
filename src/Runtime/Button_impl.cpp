@@ -7,6 +7,9 @@
 #include <SDL3/SDL_render.h>
 #include <memory>
 
+namespace OpenUI
+{
+
 Button::Button(std::string_view id, uint8_t layer, shared_ptr<Texture> texture)
     : UIElement(id, layer, texture)
 {
@@ -68,3 +71,5 @@ void Button::Draw()
     texture->Draw(&srcRect, &dstRect, VState->getAngle(), nullptr,
                   static_cast<uint8_t>(VState->getAlpha()));
 }
+
+} // namespace OpenUI

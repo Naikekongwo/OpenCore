@@ -2,6 +2,9 @@
 #include "Runtime/Graphics/IDrawableObject/Text.hpp"
 #include "Runtime/Graphics/IDrawableObject/Texture.hpp"
 
+namespace OpenUI
+{
+
 TextArea::TextArea(std::string_view id, uint8_t layer,
                    std::string_view fontName)
     : UIElement(id, layer, nullptr)
@@ -136,3 +139,5 @@ void TextArea::parseEvents(Event *event, float totalTime)
 {
     UIElement::parseEvents(event, totalTime);
 }
+
+} // namespace OpenUI

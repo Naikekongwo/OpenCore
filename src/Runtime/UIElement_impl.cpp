@@ -2,6 +2,22 @@
 #include "OpenCore.hpp"
 #include "Runtime/Animation/IAnimation.hpp"
 #include "Runtime/Animation/Manager/AnimationManager.hpp"
+#include "Runtime/Graphics/UI/RoundedRect.hpp"
+
+#include <algorithm>
+
+namespace OpenUI
+{
+
+namespace
+{
+
+bool SameColor(const Color &a, const Color &b)
+{
+    return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
+}
+
+} // namespace
 
 SDL_Rect UIElement::getLogicalBounds()
 {
@@ -61,11 +77,16 @@ SDL_Rect UIElement::getLogicalBounds()
 
 SDL_Rect UIElement::getPhysicalBounds() { return getLogicalBounds(); }
 
-UIElement::~UIElement() { m_textureCache.reset(); }
+UIElement::~UIElement()
+{
+    m_textureCache.reset();
+    m_backgroundCache.reset();
+}
 
 bool UIElement::onDestroy()
 {
     m_textureCache.reset();
+    m_backgroundCache.reset();
     IDrawableObject::onDestroy();
     return true;
 }
@@ -205,11 +226,144 @@ UIElement::UIElement(std::string_view id, short layer,
     }
 }
 
-void UIElement::Draw()
+void UIElement::Draw() { drawBackground(); }
+
+void UIElement::setBackgroundColor(Color value)
 {
-    if (color.a != 0)
-    {
-        SDL_Rect bounds = getLogicalBounds();
-        GraphicsManager::getInstance().FillRect(bounds, color);
-    }
+    if (SameColor(m_backgroundColor, value))
+        return;
+
+    m_backgroundColor = value;
+    m_backgroundDirty = true;
 }
+
+void UIElement::setCornerRadius(float heightRatio)
+{
+    const float clamped = std::clamp(heightRatio, 0.0f, 0.5f);
+    if (m_cornerRadius == clamped)
+        return;
+
+    m_cornerRadius    = clamped;
+    m_backgroundDirty = true;
+}
+
+void UIElement::setBorderColor(Color value)
+{
+    if (SameColor(m_borderColor, value))
+        return;
+
+    m_borderColor     = value;
+    m_backgroundDirty = true;
+}
+
+void UIElement::setBorderWidth(float heightRatio)
+{
+    const float clamped = std::clamp(heightRatio, 0.0f, 0.5f);
+    if (m_borderWidth == clamped)
+        return;
+
+    m_borderWidth     = clamped;
+    m_backgroundDirty = true;
+}
+
+float UIElement::cornerRadiusPixels() const
+{
+    const float logicalHeight =
+        static_cast<float>(OpenCoreManagers::GFXManager.getSccissorRect().h);
+    return m_cornerRadius * logicalHeight;
+}
+
+float UIElement::borderWidthPixels() const
+{
+    const float logicalHeight =
+        static_cast<float>(OpenCoreManagers::GFXManager.getSccissorRect().h);
+    return m_borderWidth * logicalHeight;
+}
+
+bool UIElement::hasVisibleBorder() const
+{
+    return m_borderWidth > 0.0f && m_borderColor.a > 0.001f;
+}
+
+void UIElement::drawBackground()
+{
+    const bool hasBorder = hasVisibleBorder();
+    const bool hasFill   = m_backgroundColor.a > 0.001f;
+    if (!hasFill && !hasBorder)
+        return;
+
+    const SDL_Rect bounds = getLogicalBounds();
+    if (bounds.w <= 0 || bounds.h <= 0)
+        return;
+
+    const float radiusPx = cornerRadiusPixels();
+    const float borderPx = hasBorder ? borderWidthPixels() : 0.0f;
+
+    // 方角且无描边：保持原来的单次填充，不为整屏背景分配离屏纹理
+    if (radiusPx <= 0.0f && borderPx <= 0.0f)
+    {
+        OpenCoreManagers::GFXManager.FillRect(Rect(bounds), m_backgroundColor);
+        return;
+    }
+
+    // 方角描边：四条边直接铺，避免为纯矩形生成缓存
+    if (radiusPx <= 0.0f)
+    {
+        if (hasFill)
+            OpenCoreManagers::GFXManager.FillRect(Rect(bounds), m_backgroundColor);
+
+        const float bw = std::min(borderPx,
+                                  std::min(static_cast<float>(bounds.w),
+                                           static_cast<float>(bounds.h)) *
+                                      0.5f);
+        const float x = static_cast<float>(bounds.x);
+        const float y = static_cast<float>(bounds.y);
+        const float w = static_cast<float>(bounds.w);
+        const float h = static_cast<float>(bounds.h);
+
+        OpenCoreManagers::GFXManager.FillRect(
+            Rect{x, y, w, bw}, m_borderColor);
+        OpenCoreManagers::GFXManager.FillRect(
+            Rect{x, y + h - bw, w, bw}, m_borderColor);
+        OpenCoreManagers::GFXManager.FillRect(
+            Rect{x, y + bw, bw, h - bw * 2.0f}, m_borderColor);
+        OpenCoreManagers::GFXManager.FillRect(
+            Rect{x + w - bw, y + bw, bw, h - bw * 2.0f}, m_borderColor);
+        return;
+    }
+
+    ensureBackgroundCache(bounds, radiusPx, borderPx);
+    if (!m_backgroundCache || !m_backgroundCache->get())
+        return;
+
+    Rect dst(bounds);
+    m_backgroundCache->Draw(nullptr, &dst, 0.0, nullptr,
+                            static_cast<uint8_t>(VState->getAlpha()));
+}
+
+void UIElement::ensureBackgroundCache(const SDL_Rect &bounds, float radiusPx,
+                                      float borderPx)
+{
+    const bool sizeMatches =
+        m_backgroundCache && m_backgroundCache->width == bounds.w &&
+        m_backgroundCache->height == bounds.h;
+
+    if (!m_backgroundDirty && sizeMatches)
+        return;
+
+    // 缩放动画期间尺寸每帧都变，先复用旧缓存，动画结束再按最终尺寸重建
+    if (!m_backgroundDirty && !sizeMatches && !isAnimeFinished())
+        return;
+
+    RoundedRect::Style style;
+    style.fill        = m_backgroundColor;
+    style.border      = m_borderColor;
+    style.borderWidth = borderPx;
+    style.radius      = radiusPx;
+
+    m_backgroundCache = RoundedRect::Build(bounds, style);
+    if (m_backgroundCache && m_backgroundCache->get())
+        m_backgroundDirty = false;
+}
+
+} // namespace OpenUI

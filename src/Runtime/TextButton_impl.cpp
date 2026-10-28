@@ -3,13 +3,33 @@
 #include "Core/Math/OpenCore_Rect.hpp"
 #include "OpenCore.hpp"
 #include "Runtime/Graphics/IDrawableObject/Text.hpp"
+#include "Runtime/Graphics/Manager/GraphicsManager.hpp"
 
 #include <SDL3/SDL_render.h>
 #include <memory>
 
+namespace OpenUI
+{
+
 TextButton::TextButton(std::string_view id, uint8_t layer, string_view text)
     : UIElement(id, layer, nullptr), m_textContent(text)
 {
+}
+
+void TextButton::setFontSize(short designFontSize)
+{
+    m_designFontSize      = designFontSize;
+    m_useExplicitFontSize = designFontSize > 0;
+    m_textureDirty        = true;
+}
+
+void TextButton::setStateBackgroundColors(Color normal, Color hovered,
+                                          Color pressed)
+{
+    m_stateBackgrounds[0] = normal;
+    m_stateBackgrounds[1] = hovered;
+    m_stateBackgrounds[2] = pressed;
+    m_hasStateBackgrounds = true;
 }
 
 void TextButton::onClick(Event *event, const SDL_Point &mousePos)
@@ -63,6 +83,13 @@ void TextButton::rebuildTexture()
 
 void TextButton::Draw()
 {
+    if (m_hasStateBackgrounds)
+    {
+        const int state = static_cast<int>(m_interactionState);
+        if (state >= 0 && state < 3)
+            setBackgroundColor(m_stateBackgrounds[state]);
+    }
+
     UIElement::Draw();
 
     if (m_textContent.empty())
@@ -117,7 +144,10 @@ bool TextButton::generateTexture()
     // 其余属性以 normal 属性为基准，悬停/按下仅覆盖颜色相关字段。
     TextAttribute baseAttr = m_normalAttribute;
     baseAttr.fontName      = m_normalAttribute.fontName;
-    baseAttr.fontSize      = bounds.h * 0.9f;
+    baseAttr.fontSize =
+        m_useExplicitFontSize
+            ? GraphicsManager::getInstance().designFontSize(m_designFontSize)
+            : static_cast<int>(bounds.h * 0.9f);
     // 渲染选项、描边宽度、阴影偏移等均以 normal 属性为准，
     // 允许调用方通过 setNormalAttribute 自定义（不再硬编码覆盖）
 
@@ -265,3 +295,5 @@ bool TextButton::generateTexture()
 
     return true;
 }
+
+} // namespace OpenUI

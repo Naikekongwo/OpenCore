@@ -13,6 +13,6 @@
 
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 
-class MessagePanel : public UIElement
+class MessagePanel : public OpenUI::UIElement
 {
 };

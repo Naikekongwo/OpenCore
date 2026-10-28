@@ -21,6 +21,9 @@
 #include <functional>
 #include <memory>
 
+namespace OpenUI
+{
+
 /**
  * @class Button
  * @brief 可点击的图片按钮控件。
@@ -62,5 +65,7 @@ class Button : public UIElement
 
     std::function<void()> m_onClickCallback; ///< 点击回调函数
 };
+
+} // namespace OpenUI
 
 #endif //_BUTTON_H_

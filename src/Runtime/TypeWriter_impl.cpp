@@ -12,6 +12,9 @@
 #include <memory>
 #include <string>
 
+namespace OpenUI
+{
+
 TypeWriter::TypeWriter(string_view id, uint8_t layer, std::string_view fontName)
     : UIElement(id.data(), layer, nullptr)
 {
@@ -263,3 +266,5 @@ bool TypeWriter::generateTexture()
 
     return true;
 }
+
+} // namespace OpenUI

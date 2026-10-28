@@ -6,6 +6,9 @@
 #include "Runtime/Graphics/IDrawableObject/UIElement.hpp"
 #include <SDL3/SDL_render.h>
 
+namespace OpenUI
+{
+
 Symbol::Symbol(std::string_view id, short layer, std::string_view textureName)
     : UIElement(id.data(), layer, nullptr)
 {
@@ -46,3 +49,5 @@ void Symbol::Draw()
     texture->Draw(&srcRect, &dstRect, VState->angle, nullptr,
                   static_cast<uint8_t>(VState->getAlpha()));
 }
+
+} // namespace OpenUI
